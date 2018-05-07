@@ -1,10 +1,6 @@
-# miniMDS
+# MultiMDS
 
-miniMDS is a tool for inferring and plotting 3D structures from normalized Hi-C data, using a novel approximation to multidimensional scaling (MDS). It produces a single 3D structure from a Hi-C BED file, representing an ensemble average of chromosome conformations within the population of cells. Using parallelization, it is able to process high-resolution data quickly with limited memory requirements. The human genome can be inferred at kilobase-resolution within several hours on a desktop computer. Standard MDS results in inaccuracies for sparse high-resolution data, but miniMDS focuses on local substructures to achieve greater accuracy. miniMDS also supports interchromosomal structural inference. Together with Mayavi, miniMDS produces publication-quality images and gifs. 
-
-## Citation
-
-Rieber, L., & Mahony, S. (2017). miniMDS: 3D structural inference from high-resolution Hi-C data. Bioinformatics, 33(14), i261-i266.
+MultiMDS is a tool for locus-specific structural comparisons of two Hi-C datasets. It jointly infers and aligns 3D structures from two datasets, such as different cell types. The output is aligned 3D structure files (which can be plotted, see below) and a list of loci that significantly relocalize between the datasets (measured using Euclidean distance). These may represent A/B compartment changes, changes in enhancer localization, or other structural changes. 
 
 ## Installation
 
@@ -16,51 +12,70 @@ Requirements:
     * [mayavi](http://docs.enthought.com/mayavi/mayavi/) (for plotting)
     * [ImageMagick](https://www.imagemagick.org/script/index.php) (for creating gifs)
 
-## Testing
-
-On Linux, please run test.sh (in the scripts directory) and report any issues. (miniMDS is compatible with Mac, but the shell scripts only run on Linux.) 
-
 ## TLDR
 
-``python minimds.py [Hi-C BED path]``
+``python relocalization_peaks.py [Hi-C BED path 1] [Hi-C BED path 2]``
 
 ## Usage
 
-### Input file format
+### Input files
 
-miniMDS uses intra- or inter-chromosomal BED files as input. Data must be normalized prior to use (for example, using [HiC-Pro](http://nservant.github.io/HiC-Pro/)). 
+MultiMDS uses intrachromosomal BED files as input. Data must be normalized prior to use (for example, using [HiC-Pro](http://nservant.github.io/HiC-Pro/)). 
 
 Format:
 
->chrA	bin1\_start	bin1\_end	chrB	bin2\_start	bin2\_end	normalized\_contact\_frequency
+>chrom	bin1\_start	bin1\_end	chrom	bin2\_start	bin2\_end	normalized\_contact\_frequency
 
-Example - chr22 intra-chromosomal data at 10-Kbp resolution:
+Example - chr22 data at 10-Kbp resolution:
 
 >chr22	16050000	16060000	chr22	16050000	16060000	12441.5189291
 > 
 >...
 
-### Intra-chromosomal miniMDS
+Important: BED file 1 and BED file 2 must be the same species, chromosome, and resolution!
 
-Intra-chromosomal analysis is performed using minimds.py.
+### Running the program
 
 To view help:
 
-``python minimds.py -h``
+``python relocalization_peaks.py -h``
 
-By default, partitioned MDS is used:
+To run with default parameters:
 
-``python minimds.py GM12878_combined_22_100kb.bed``
+``python relocalization_peaks.py [BED path 1] [BED path 2]``
 
-Full MDS is recommended for low-resolution high-quality (not sparse) files:
+For example:
 
-``python minimds.py --full GM12878_combined_22_100kb.bed``
+``python relocalization_peaks.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
 
-By default structures are saved to [PREFIX]_structure.tsv, e.g. GM12878_combined_22_100kb.bed would output GM12878_combined_22_100kb_structure.tsv. You can use the -o option with a custom path where you want to save the structure.
+#### Parameters (optional)
 
-``python minimds.py -o GM12878_combined_22_100kb_structure.tsv GM12878_combined_22_100kb.bed``
+##### Number of partitions
 
-Structures are saved to tsv files. The header contains the name of the chromosome, the resolution, and the starting genomic coordinate. Each line in the file contains the genomic bin number followed by the 3D coordinates (with "nan" for missing data). 
+Partitioning is used in the structural inference step for greater efficiency and accuracy. By default 4 partitions are used. This can be controlled with the -N parameter: 
+
+``python relocalization_peaks.py -N 2 GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+
+##### Centromere
+
+Better results are achieved if the chromosome is partitioned at the centromere in the partitioning step. The genomic coordinate of the centromere can be entered with the -m parameter
+
+``python relocalization_peaks.py -m 28000000 GM12878_combined_20_100kb.bed K562_220_100kb.bed``
+
+### Output files
+
+### Relocalization peaks
+
+Genomic regions that significantly relocalize between the cell types are saved to a BED file, with the format [PREFIX1]_[PREFIX2]_peaks.bed
+
+For example the output of
+
+``python relocalization_peaks.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+
+is GM12878_combined_22_100kb_K562_22_100kb_peaks.bed
+
+#### Structure files
+Aligned structures are saved to tsv files, which can be used for plotting (see below). The header contains the name of the chromosome, the resolution, and the starting genomic coordinate. Each line in the file contains the genomic bin number followed by the 3D coordinates (with "nan" for missing data). 
 
 Example - chr22 at 10-Kbp resolution:
 
@@ -79,114 +94,6 @@ Example - chr22 at 10-Kbp resolution:
 >...
 
 0 corresponds to the bin 16050000-16060000, 1 corresponds to the bin 16060000-16070000, etc. 
-
-#### Parameters (optional)
-
-#### Resolution ratio
-
-miniMDS first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
-
-``python minimds.py -l 20 GM12878_combined_22_10kb.bed``
-
-The value you choose depends on your tradeoff between speed and accuracy (but must be an integer). Lower resolutions (i.e. higher ratios) are faster but less accurate.
-
-##### Controlling the number of partitions
-
-The miniMDS algorithm creates partitions in the high-resolution data and performs MDS on each partition individually. A greater number of partitions can increase speed but also reduce accuracy. On the other hand, for very sparse data a greater number of partitions can actually increase accuracy. If your output appears "clumpy", increase the number of partitions.
-
-The number of partitions cannot be set directly because partitions are created empirically to maximize clustering of the data. However, the degree of clustering of the data can be tweaked with the following parameters:
-
->-m: minimum partition size (as a fraction of the data). Default = 0.05
->
->-p: smoothing parameter (between 0 and 1). Default = 0.1
-
-Make these parameters smaller to increase the number of partitions. For very high resolution data (such as 5-Kbp), m=0.01 and p=0.01 is recommended:
-
-``python minimds.py -m 0.01 -p 0.01 GM12878_combined_22_5kb.bed``
-
-You can limit the maximum RAM (in Kb) used by any given partition using -R (default = 32000):
-
-``python minimds.py -R 50000 GM12878_combined_22_5kb.bed``
-
-##### Number of threads
-
-miniMDS uses multithreading to achieve greater speed. By default, 3 threads are requested, because this is safe for standard 4-core desktop computers. However, the number of threads used will never exceed the number of processors or the number of partitions, regardless of what is requested. You can change the number of requested threads using -n.
-
-For example, to run miniMDS with four threads:
-
-``python minimds.py -n 4 GM12878_combined_22_10kb.bed``
-
-##### Scaling factor
-
-The scaling factor a describes the assumed relationship between contact frequencies and physical distances: distance = contact_frequency^(-1/a). The default value is 4, based on Wang et al 2016. You can change the scaling factor using -a. 
-
-``python minimds.py -a 3 GM12878_combined_22_10kb.bed``
-
-a can be any value >1, including non-integer.
-
-##### Classical MDS
-
-Classical MDS (cMDS), also called principal coordinates analysis, is a variant of MDS that is faster under certain circumstances. The miniMDS tool supports cMDS but NOT with partitioned MDS. Use the --classical option. 
-
-``python minimds.py --classical GM12878_combined_22_10kb.bed``
-
-This mode is mainly used for testing. 
-
-### Inter-chromosomal miniMDS
-
-Inter-chromosomal analysis is performed using minimds_inter.py
-
-To view help:
-
-``python minimds_inter.py -h``
-
-The usage of minimds_inter.py is similar to minimds.py, however inter-chromosomal files are required in addition to intra-chromosomal. To avoid entering filenames separately for each chromosome, you must name your files using a standard format.
-
-Intra-chromosomal format:
-
->{prefix}\_{ChrA}\_{resolution}{kb or Mb}.bed
-
-Example:
-
->GM12878_combined_22_100kb.bed
-
-Inter-chromosomal format:
-
->{prefix}\_{ChrA}\_{ChrB}_{resolution}{kb or Mb}.bed
-
-where A is before B in:
-
->1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X
-
-Example:
-
->GM12878_combined_21_22_100kb.bed
-
-Enter the prefix, inter-chromosomal resolution, and intra-chromosomal resolution:
-
-``python minimds_inter.py [prefix] [inter-chromosomal resolution] [intra-chromosomal resolution]``
-
-For example, if your files are stored in the directory _data_:
-
-``python minimds_inter.py data/GM12878_combined 1000000 10000``
-
-Because of the challenges of inter-chromosomal inference, it is recommended that a resolution no greater than 1-Mbp be used for human inter-chromosomal data. 
-
-#### Other parameters (optional)
-
-All of the parameters from minimds.py are also available for minimds_inter.py
-
-###### Specifying chromosomes
-
-By default, minimds_inter.py uses all human chromosomes other than Y. You can specify any number of chromosomes (in order) using the option -c.
-
-To perform interchromosomal analysis on chromosomes 1 and 2:
-
-``python minimds_inter.py -c 1 -c 2 data/GM12878_combined 1000000 10000``
-
-You can specify a different number of autosomes using -C. To perform interchromosomal analysis on all yeast autosomes:
-
-``python minimds_inter.py -C 16 my_yeast_dir 100000 10000``
 
 ### Plotting
 
