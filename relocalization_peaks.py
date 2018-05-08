@@ -53,7 +53,7 @@ def main():
 
 	min_error = sys.float_info.max
 	for iteration in range(n):
-		os.system("python .minimds.py -m {} -N {} -o {}_ {} {}".format(args.centromere, args.num_partitions, iteration, args.path1, args.path2))
+		os.system("python minimds.py -m {} -N {} -o {}_ {} {}".format(args.centromere, args.num_partitions, iteration, args.path1, args.path2))
 		
 		#load structures
 		structure1 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix1, res_kb))	
