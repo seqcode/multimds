@@ -44,6 +44,7 @@ def main():
 	parser.add_argument("-N", default=4, help="number of partitions")
 	parser.add_argument("-m", default=0, help="genomic coordinate of centromere")
 	parser.add_argument("-s", default=3, help="smoothing parameter for calling relocalization peaks")
+	parser.add_argument("-x", default="", help="prefix to minimds.py")
 	args = parser.parse_args()
 
 	n = 5
@@ -53,7 +54,7 @@ def main():
 
 	min_error = sys.float_info.max
 	for iteration in range(n):
-		os.system("python minimds.py -m {} -N {} -o {}_ {} {}".format(args.m, args.N, iteration, args.path1, args.path2))
+		os.system("python {}minimds.py -m {} -N {} -o {}_ {} {}".format(args.x, args.m, args.N, iteration, args.path1, args.path2))
 		
 		#load structures
 		structure1 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix1))	

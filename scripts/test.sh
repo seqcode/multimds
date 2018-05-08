@@ -10,5 +10,5 @@ SMOOTHING_PARAMETERS=(6 6 6.5 6 5 5 3 3 3 3 4.5 3 2.5 3 5 4 2.5 3 3 2.5 1)
 
 for i in `seq 0 20`
 do
-	python ../relocalization_peaks.py GM12878_combined_${CHROMS[$i]}_100kb.bed K562_${CHROMS[$i]}_100kb.bed -m $((${MIDPOINTS[$i]} * 1000000)) -N ${PARTITION_NUMS[$i]} -s ${SMOOTHING_PARAMETERS[$i]}
+	python ../relocalization_peaks.py GM12878_combined_${CHROMS[$i]}_100kb.bed K562_${CHROMS[$i]}_100kb.bed -m $((${MIDPOINTS[$i]} * 1000000)) -N ${PARTITION_NUMS[$i]} -s ${SMOOTHING_PARAMETERS[$i]} -x ../
 done
