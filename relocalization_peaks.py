@@ -53,7 +53,7 @@ def main():
 
 	min_error = sys.float_info.max
 	for iteration in range(n):
-		os.system("python minimds.py -m {} -N {} -o {}_ {} {}".format(args.centromere, args.num_partitions, iteration, args.path1, args.path2))
+		os.system("python minimds.py -m {} -N {} -o {}_ {} {}".format(args.m, args.N, iteration, args.path1, args.path2))
 		
 		#load structures
 		structure1 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix1, res_kb))	
@@ -103,7 +103,7 @@ def main():
 	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
 	print np.mean(dists)
 
-	smoothed_dists = sg.cwt(dists, sg.ricker, [args.smoothing_parameter])[0]
+	smoothed_dists = sg.cwt(dists, sg.ricker, [args.s])[0]
 	dist_peaks = call_peaks(smoothed_dists)
 
 	with open("{}_{}_relocalization.bed".format(prefix1, prefix2), "w") as out:
