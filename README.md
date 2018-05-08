@@ -62,6 +62,12 @@ Better results are achieved if the chromosome is partitioned at the centromere i
 
 ``python relocalization_peaks.py -m 28000000 GM12878_combined_20_100kb.bed K562_220_100kb.bed``
 
+##### Smoothing parameter
+
+Relocalization peaks are identified using a wavelet transform and Gaussian hidden markov model. The wavelet function is controlled with a smoothing parameter. Lower values will lead to more peaks being called. By default a parameter of 3 is used. This can be used with the -s parameter:
+
+``python relocalization_peaks.py -s 4 GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+
 ### Output files
 
 ### Relocalization peaks
