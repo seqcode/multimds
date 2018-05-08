@@ -49,16 +49,18 @@ def main():
 
 	n = 5
 
-	prefix1 = args.path1.split(".")[0]
-	prefix2 = args.path2.split(".")[0]
+	dir1, name1 = args.path1.split("/")
+	dir2, name2 = args.path2.split("/")
+	prefix1 = name1.split(".")[0]
+	prefix2 = name2.split(".")[0]
 
 	min_error = sys.float_info.max
 	for iteration in range(n):
 		os.system("python {}minimds.py -m {} -N {} -o {}_ {} {}".format(args.x, args.m, args.N, iteration, args.path1, args.path2))
 		
 		#load structures
-		structure1 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix1))	
-		structure2 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix2))
+		structure1 = dt.structure_from_file("{}/{}_{}_structure.tsv".format(dir1, iteration, prefix1))	
+		structure2 = dt.structure_from_file("{}/{}_{}_structure.tsv".format(dir2, iteration, prefix2))
 
 		#rescale
 		structure1.rescale()
