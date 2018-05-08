@@ -16,6 +16,10 @@ Requirements:
 
 ``python relocalization_peaks.py [Hi-C BED path 1] [Hi-C BED path 2]``
 
+## Testing
+
+On Linux, please run test.sh (in the scripts directory) and report any issues. (miniMDS is compatible with Mac, but the shell scripts only run on Linux.) 
+
 ## Usage
 
 ### Input files
