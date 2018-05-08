@@ -84,11 +84,11 @@ def main():
 	for iteration in range(n):
 		if iteration == best_iteration:
 			#load structures
-			structure1 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix1))	
-			structure2 = dt.structure_from_file("{}_{}_structure.tsv".format(iteration, prefix2))
+			structure1 = dt.structure_from_file("{}/{}_{}_structure.tsv".format(dir1, iteration, prefix1))	
+			structure2 = dt.structure_from_file("{}/{}_{}_structure.tsv".format(dir2, iteration, prefix2))
 		else:
-			os.system("rm {}_{}_structure.tsv".format(iteration, prefix1))	
-			os.system("rm {}_{}_structure.tsv".format(iteration, prefix2))		
+			os.system("rm {}/{}_{}_structure.tsv".format(dir1, iteration, prefix1))	
+			os.system("rm {}/{}_{}_structure.tsv".format(dir2, iteration, prefix2))		
 
 	#rescale
 	structure1.rescale()
