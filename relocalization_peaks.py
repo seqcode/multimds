@@ -116,7 +116,7 @@ def main():
 			start, end = peak
 			peak_dists = dists[start:end]
 			max_dist_index = np.argmax(peak_dists) + start
-			out.write("\t".join(("chr{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index])))
+			out.write("\t".join(("chr{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
 			out.write("\n")
 		out.close()
 
