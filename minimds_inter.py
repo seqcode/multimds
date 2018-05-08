@@ -6,26 +6,6 @@ from sklearn import manifold
 import tools
 import argparse
 import minimds as mm
-import array_tools as at
-
-def infer_structures(contactMat, structures, offsets, alpha, num_threads, classical=False):
-	"""Infers 3D coordinates for multiple structures with same contact matrix"""
-	assert sum([len(structure.getPointNums()) for structure in structures]) == len(contactMat)
-
-	at.makeSymmetric(contactMat)
-	rowsums = np.array([sum(row) for row in contactMat])
-	assert len(np.where(rowsums == 0)[0]) == 0 
-
-	distMat = at.contactToDist(contactMat, alpha)
-	at.makeSymmetric(distMat)
-
-	if classical:	#classical MDS
-		coords = la.cmds(distMat)
-	else:
-		coords = manifold.MDS(n_components=3, metric=True, random_state=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat)
-
-	for offset, structure in zip(offsets, structures):
-		structure.setCoords(coords[offset:offset+len(structure.getPoints())])
 
 def get_inter_mat(prefix, inter_res_string, intra_res_string, structures, offsets):
 	names = [structure.chrom.name for structure in structures]
@@ -70,7 +50,7 @@ def interMDS(names, prefix, inter_res, intra_res, full, args):
 		chrom.res = inter_res
 		chrom.minPos = int(np.floor(float(chrom.minPos)/chrom.res)) * chrom.res	#round
 		chrom.maxPos = int(np.ceil(float(chrom.maxPos)/chrom.res)) * chrom.res
-		low_structures.append(dt.structureFromBed(path, chrom))
+		low_structures.append(dt.structureFromBed(path, chrom, None))
 
 	#for correct indexing
 	n = len(names)
@@ -81,7 +61,7 @@ def interMDS(names, prefix, inter_res, intra_res, full, args):
 	inter_mat = get_inter_mat(prefix, inter_res_string, intra_res_string, low_structures, offsets)
 
 	#perform MDS at low resolution on all chroms
-	infer_structures(inter_mat, low_structures, offsets, args[3], args[4])
+	mm.infer_structures(inter_mat, low_structures, offsets, args[4])
 
 	#perform MDS at high resolution on each chrom
 	high_structures = []
@@ -90,7 +70,7 @@ def interMDS(names, prefix, inter_res, intra_res, full, args):
 	for true_low, name in zip(low_structures, names):
 		path = "{}_{}_{}.bed".format(prefix, name, intra_res_string)
 		if full:
-			high_structure = mm.fullMDS(path, False, args[4], args[3])
+			high_structure = mm.fullMDS(path, False, args[4])
 		else:
 			high_structure = mm.partitionedMDS(path, args)
 		high_structures.append(high_structure)

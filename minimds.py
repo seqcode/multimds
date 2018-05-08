@@ -1,17 +1,16 @@
 import sys
 import numpy as np
-from sklearn import manifold
+from joint_mds import Joint_MDS
 import argparse
 import pymp
 import multiprocessing as mp
 import data_tools as dt
 import array_tools as at
-import tad
 import linear_algebra as la
 import tools
+import tad
 
-def infer_structure(contactMat, structure, alpha, num_threads, classical=False):
-	"""Infers 3D coordinates for one structure"""
+def distmat(contactMat, structure, alpha):
 	assert len(structure.getPointNums()) == len(contactMat)
 
 	at.makeSymmetric(contactMat)
@@ -21,122 +20,186 @@ def infer_structure(contactMat, structure, alpha, num_threads, classical=False):
 	distMat = at.contactToDist(contactMat, alpha)
 	at.makeSymmetric(distMat)
 
-	if classical:	#classical MDS
-		coords = la.cmds(distMat)
-	else:
-		coords = manifold.MDS(n_components=3, metric=True, random_state=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat)
-
-	structure.setCoords(coords)
-
-def fullMDS(path, classical, alpha, num_threads):
-	"""MDS without partitioning"""
-	structure = dt.structureFromBed(path)
-	contactMat = dt.matFromBed(path, structure)
-	infer_structure(contactMat, structure, alpha, num_threads, classical)
-	return structure
+	distMat = distMat/np.mean(distMat)	#normalize
 	
-def partitionedMDS(path, args):
+	return distMat
+
+def infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads):
+	"""Infers 3D coordinates for one structure"""
+	distMat1 = distmat(contactMat1, structure1, alpha)	
+	distMat2 = distmat(contactMat2, structure2, alpha)
+
+	coords1, coords2 = Joint_MDS(p=penalty, n_components=3, metric=True, random_state1=np.random.RandomState(), random_state2=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat1, distMat2)
+
+	structure1.setCoords(coords1)
+	structure2.setCoords(coords2)
+
+def fullMDS(path1, path2, alpha, penalty, num_threads):
+	"""MDS without partitioning"""
+	structure1 = dt.structureFromBed(path1)
+	structure2 = dt.structureFromBed(path2)
+	dt.make_compatible((structure1, structure2))
+	contactMat1 = dt.matFromBed(path1, structure1)
+	contactMat2 = dt.matFromBed(path2, structure2)
+	infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads)
+	return structure1, structure2
+
+def create_low_res_structure(path, res_ratio):
+	low_chrom = dt.chromFromBed(path)
+	low_chrom.res *= res_ratio
+	low_chrom.minPos = int(np.floor(float(low_chrom.minPos)/low_chrom.res)) * low_chrom.res	#round
+	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
+	return dt.structureFromBed(path, low_chrom)
+
+def create_high_res_structure(path, lowstructure, highpartitions):
+	size, res = dt.basicParamsFromBed(path)
+	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
+	return dt.structureFromBed(path, highChrom, highpartitions)
+	
+def transform(trueLow, highSubstructure, res_ratio):
+	#approximate as low resolution
+	inferredLow = dt.highToLow(highSubstructure, res_ratio)
+
+	scaling_factor = la.radius_of_gyration(trueLow)/la.radius_of_gyration(inferredLow)
+	for i, point in enumerate(inferredLow.points):
+		if point != 0:
+			x, y, z = point.pos
+			inferredLow.points[i].pos = (x*scaling_factor, y*scaling_factor, z*scaling_factor)
+	
+	#recover the transformation for inferred from true low structure
+	r, t = la.getTransformation(inferredLow, trueLow)
+	t /= scaling_factor
+
+	#transform high structure
+	highSubstructure.transform(r, t)
+
+def partitionedMDS(path1, path2, args):
 	"""Partitions structure into substructures and performs MDS"""
-	domainSmoothingParameter = args[0]
-	minSizeFraction = args[1]
+	centromere = args[0]
+	num_partitions = args[1]
 	maxmemory = args[2]
 	num_threads = args[3]
 	alpha = args[4]
 	res_ratio = args[5]
+	penalty = args[6]
 
-	#create low-res structure
-	low_chrom = dt.chromFromBed(path)
-	low_chrom.res *= res_ratio
-	lowstructure = dt.structureFromBed(path, low_chrom)
+	#create low-res structures
+	lowstructure1 = create_low_res_structure(path1, res_ratio)
+	lowstructure2 = create_low_res_structure(path2, res_ratio)
+	dt.make_compatible((lowstructure1, lowstructure2))
 
-	#get TADs
-	low_contactMat = dt.matFromBed(path, lowstructure)
-	lowTads = tad.getDomains(low_contactMat, lowstructure, domainSmoothingParameter, minSizeFraction)		#low substructures
+	#get partitions
+	low_contactMat1 = dt.matFromBed(path1, lowstructure1)
+	low_contactMat2 = dt.matFromBed(path2, lowstructure2)
 
-	#create high-res chrom
-	size, res = dt.basicParamsFromBed(path)
-	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
+	n = len(lowstructure1.getPoints())
+	if centromere == 0:
+		midpoint = n/2
+	else:	
+		midpoint = lowstructure1.chrom.getPointNum(centromere)
+	
+	assert num_partitions%2 == 0
 
-	#create high-res structure
-	res_ratio = lowstructure.chrom.res/highChrom.res
-	highTads = lowTads * res_ratio
-	highstructure = dt.structureFromBed(path, highChrom, highTads)
+	partition_size1 = int(np.ceil(float(midpoint)/(num_partitions/2)))
+	partition_size2 = int(np.ceil(float(n-midpoint)/(num_partitions/2)))
 
-	#create compatible substructures
-	tad.substructuresFromTads(highstructure, lowstructure, lowTads)
+	lowpartitions = []
 
-	infer_structure(low_contactMat, lowstructure, alpha, num_threads)
+	for i in range(num_partitions/2):
+		lowpartitions.append((i*partition_size1, min(((i+1)*partition_size1), midpoint)))
+
+	for i in range(num_partitions/2):
+		lowpartitions.append((midpoint + i*partition_size2, min((midpoint + (i+1)*partition_size2), n)))
+
+	lowpartitions = np.array(lowpartitions)
+
+	for lowpartition in lowpartitions:
+		start = lowpartition[0]
+		print lowstructure1.chrom.minPos + lowstructure1.chrom.res * start
+		end = lowpartition[1]
+		print lowstructure1.chrom.minPos + lowstructure1.chrom.res * end
+
+	#create high-res structures
+	highstructure1 = create_high_res_structure(path1, lowstructure1, lowpartitions)
+	highstructure2 = create_high_res_structure(path2, lowstructure2, lowpartitions)
+	dt.make_compatible((highstructure1, highstructure2))
+
+	res_ratio = lowstructure1.chrom.res/highstructure1.chrom.res
+	highpartitions = lowpartitions * res_ratio
+	
+	tad.substructuresFromTads(highstructure1, lowstructure1, lowpartitions)	#create compatible substructures
+	tad.substructuresFromTads(highstructure2, lowstructure2, lowpartitions)	#create compatible substructures
+
+	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads)
 	print "Low-resolution MDS complete"
 
-	highSubstructures = pymp.shared.list(highstructure.structures)
-	lowSubstructures = pymp.shared.list(lowstructure.structures)
+	highSubstructures1 = pymp.shared.list(highstructure1.structures)
+	highSubstructures2 = pymp.shared.list(highstructure2.structures)
+	lowSubstructures1 = pymp.shared.list(lowstructure1.structures)
+	lowSubstructures2 = pymp.shared.list(lowstructure2.structures)
 
-	numSubstructures = len(highstructure.structures)
+	numSubstructures = len(lowpartitions)
 	num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
 	with pymp.Parallel(num_threads) as p:
 		for substructurenum in p.range(numSubstructures):
-			highSubstructure = highSubstructures[substructurenum]
-			trueLow = lowSubstructures[substructurenum]
+			highSubstructure1 = highSubstructures1[substructurenum]
+			highSubstructure2 = highSubstructures2[substructurenum]
+			trueLow1 = lowSubstructures1[substructurenum]
+			trueLow2 = lowSubstructures2[substructurenum]
 
-			#perform MDS individually
-			structure_contactMat = dt.matFromBed(path, highSubstructure)	#contact matrix for this structure only
-			infer_structure(structure_contactMat, highSubstructure, 2.5, num_threads)
+			#joint MDS
+			structure_contactMat1 = dt.matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
+			structure_contactMat2 = dt.matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
 
-			#approximate as low resolution
-			inferredLow = dt.highToLow(highSubstructure, res_ratio)
+			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads)
 
-			#rescale
-			scaling_factor = la.radius_of_gyration(trueLow)/la.radius_of_gyration(inferredLow)
-			for i, point in enumerate(inferredLow.points):
-				if point != 0:
-					x, y, z = point.pos
-					inferredLow.points[i].pos = (x*scaling_factor, y*scaling_factor, z*scaling_factor)
-
-			#recover the transformation for inferred from true low structure
-			r, t = la.getTransformation(inferredLow, trueLow)
-			t /= scaling_factor
-
-			#transform high structure
-			highSubstructure.transform(r, t)
-			highSubstructures[substructurenum] = highSubstructure
+			transform(trueLow1, highSubstructure1, res_ratio)
+			transform(trueLow2, highSubstructure2, res_ratio)
+	
+			highSubstructures1[substructurenum] = highSubstructure1
+			highSubstructures2[substructurenum] = highSubstructure2
 
 			print "MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures)
+		
+	highstructure1.setstructures(highSubstructures1)
+	highstructure2.setstructures(highSubstructures2)
 
-	highstructure.setstructures(highSubstructures)
-
-	return highstructure
+	return highstructure1, highstructure2
 
 def main():
-	parser = argparse.ArgumentParser(description="Reconstruct 3D coordinates from normalized intrachromosomal Hi-C BED files.")
-	parser.add_argument("path", help="path to intrachromosomal Hi-C BED file")
-	parser.add_argument("--classical", action="store_true", help="use classical MDS (default: metric MDS)")
+	parser = argparse.ArgumentParser(description="Jointly reconstruct 3D coordinates from two normalized intrachromosomal Hi-C BED files.")
+	parser.add_argument("path1", help="path to first intrachromosomal Hi-C BED file")
+	parser.add_argument("path2", help="path to second intrachromosomal Hi-C BED file")
 	parser.add_argument("--full", action="store_true", help="use full MDS (default: partitioned MDS)")
 	parser.add_argument("-l", type=int, help="low resolution/high resolution", default=10)
-	parser.add_argument("-p", type=float, default=0.1, help="domain size parameter: larger value means fewer structures created (for partitioned MDS only)")
-	parser.add_argument("-m", type=float, default=0.05, help="minimum domain size parameter: prevents structures from being too small (for partitioned MDS only)")
-	parser.add_argument("-o", help="path to output file")
+	parser.add_argument("-o", help="output file prefix")
 	parser.add_argument("-r", default=32000000, help="maximum RAM to use (in kb)")
 	parser.add_argument("-n", default=3, help="number of threads")
 	parser.add_argument("-a", type=float, default=4, help="alpha factor for converting contact frequencies to physical distances")
+	parser.add_argument("-P", type=float, default=0.05, help="joint MDS penalty")
+	parser.add_argument("-m", type=int, default=0, help="midpoint (usually centromere) for partitioning")
+	parser.add_argument("-N", type=int, default=2, help="number of partitions")
 	args = parser.parse_args()
 
 	if args.full:	#not partitioned
-		structure = fullMDS(args.path, args.classical, args.a, args.n)
-
+		structure1, structure2 = fullMDS(args.path1, args.path2, args.a, args.P, args.n)
 	else:	#partitioned
-		params = (args.p, args.m, args.r, args.n, args.a, args.l)
-		names = ("Domain size parameter", "Minimum domain size", "Maximum memory", "Number of threads", "Alpha", "Resolution ratio")
-		intervals = ((0, 1), (0, 1), (0, None), (0, None), (1, None), (1, None))
+		params = (args.m, args.N, args.r, args.n, args.a, args.l, args.P)
+		names = ("Midpoint", "Number of partitions", "Maximum memory", "Number of threads", "Alpha", "Resolution ratio", "Penalty")
+		intervals = ((None, None), (1, None), (0, None), (0, None), (1, None), (1, None), (0, None))
 		if not tools.args_are_valid(params, names, intervals):
 			sys.exit(0)
 
-		structure = partitionedMDS(args.path, params)
+		structure1, structure2 = partitionedMDS(args.path1, args.path2, params)
 	
 	if args.o:
-		structure.write(args.o)
+		prefix = args.o
 	else:
-		prefix = args.path.split(".bed")[0]
-		structure.write(prefix + "_structure.tsv")
+		prefix = ""
+	prefix1 = args.path1.split("/")[-1].split(".bed")[0]
+	structure1.write(prefix + prefix1 + "_structure.tsv")
+	prefix2 = args.path2.split("/")[-1].split(".bed")[0]
+	structure2.write(prefix + prefix2 + "_structure.tsv")
 
 if __name__ == "__main__":
 	main()
