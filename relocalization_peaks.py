@@ -109,6 +109,8 @@ def main():
 	smoothed_dists = sg.cwt(dists, sg.ricker, [float(args.s)])[0]
 	dist_peaks = call_peaks(smoothed_dists)
 
+	gen_coords = structure1.getGenCoords()
+
 	with open("{}_{}_relocalization.bed".format(prefix1, prefix2), "w") as out:
 		for peak in dist_peaks:
 			start, end = peak
