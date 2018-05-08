@@ -106,7 +106,7 @@ def main():
 	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
 	print np.mean(dists)
 
-	smoothed_dists = sg.cwt(dists, sg.ricker, [args.s])[0]
+	smoothed_dists = sg.cwt(dists, sg.ricker, [float(args.s)])[0]
 	dist_peaks = call_peaks(smoothed_dists)
 
 	with open("{}_{}_relocalization.bed".format(prefix1, prefix2), "w") as out:
@@ -114,7 +114,7 @@ def main():
 			start, end = peak
 			peak_dists = dists[start:end]
 			max_dist_index = np.argmax(peak_dists) + start
-			out.write("\t".join(("chr{}".format(chrom), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]), str(compartments1[max_dist_index]), str(compartments2[max_dist_index]))))
+			out.write("\t".join(("chr{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]), str(compartments1[max_dist_index]), str(compartments2[max_dist_index]))))
 			out.write("\n")
 		out.close()
 
