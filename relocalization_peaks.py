@@ -106,8 +106,9 @@ def main():
 	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
 	print np.mean(dists)
 
-	smoothed_dists = sg.cwt(dists, sg.ricker, [float(args.s)])[0]
-	dist_peaks = call_peaks(smoothed_dists)
+	#smoothed_dists = sg.cwt(dists, sg.ricker, [float(args.s)])[0]
+	#dist_peaks = call_peaks(smoothed_dists)
+	dist_peaks = sg.find_peaks_cwt(dists, np.arange(1, 20))
 
 	gen_coords = structure1.getGenCoords()
 
@@ -116,7 +117,7 @@ def main():
 			start, end = peak
 			peak_dists = dists[start:end]
 			max_dist_index = np.argmax(peak_dists) + start
-			out.write("\t".join(("chr{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
+			out.write("\t".join(("{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
 			out.write("\n")
 		out.close()
 
