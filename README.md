@@ -14,11 +14,11 @@ Requirements:
 
 ## TLDR
 
-``python relocalization_peaks.py [Hi-C BED path 1] [Hi-C BED path 2]``
+``python multimds.py [Hi-C BED path 1] [Hi-C BED path 2]``
 
 ## Testing
 
-On Linux, please run test.sh (in the scripts directory) and report any issues. (miniMDS is compatible with Mac, but the shell scripts only run on Linux.) 
+On Linux, please run test.sh (in the scripts directory) and report any issues. (multimds is compatible with Mac, but the shell scripts only run on Linux.) 
 
 ## Usage
 
@@ -42,15 +42,15 @@ Important: BED file 1 and BED file 2 must be the same species, chromosome, and r
 
 To view help:
 
-``python relocalization_peaks.py -h``
+``python multimds.py -h``
 
 To run with default parameters:
 
-``python relocalization_peaks.py [BED path 1] [BED path 2]``
+``python multimds.py [BED path 1] [BED path 2]``
 
 For example:
 
-``python relocalization_peaks.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+``python multimds.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
 
 #### Parameters (optional)
 
@@ -58,19 +58,37 @@ For example:
 
 Partitioning is used in the structural inference step for greater efficiency and accuracy. By default 4 partitions are used. This can be controlled with the -N parameter: 
 
-``python relocalization_peaks.py -N 2 GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+``python multimds.py -N 2 GM12878_combined_22_100kb.bed K562_22_100kb.bed``
 
 ##### Centromere
 
 Better results are achieved if the chromosome is partitioned at the centromere in the partitioning step. The genomic coordinate of the centromere can be entered with the -m parameter
 
-``python relocalization_peaks.py -m 28000000 GM12878_combined_20_100kb.bed K562_220_100kb.bed``
+``python multimds.py -m 28000000 GM12878_combined_20_100kb.bed K562_220_100kb.bed``
 
-##### Smoothing parameter
+#### Resolution ratio
 
-Relocalization peaks are identified using a wavelet transform and Gaussian hidden markov model. The wavelet function is controlled with a smoothing parameter. Lower values will lead to more peaks being called. By default a parameter of 3 is used. This can be used with the -s parameter:
+Multimds first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
 
-``python relocalization_peaks.py -s 4 GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+``python multimds.py -l 20 GM12878_combined_22_10kb.bed``
+
+The value you choose depends on your tradeoff between speed and accuracy (but must be an integer). Lower resolutions (i.e. higher ratios) are faster but less accurate.
+
+##### Number of threads
+
+Multimds uses multithreading to achieve greater speed. By default, 3 threads are requested, because this is safe for standard 4-core desktop computers. However, the number of threads used will never exceed the number of processors or the number of partitions, regardless of what is requested. You can change the number of requested threads using -n.
+
+For example, to run multimds with four threads:
+
+``python multimds.py -n 4 GM12878_combined_22_10kb.bed``
+
+##### Scaling factor
+
+The scaling factor a describes the assumed relationship between contact frequencies and physical distances: distance = contact_frequency^(-1/a). The default value is 4, based on Wang et al 2016. You can change the scaling factor using -a. 
+
+``python multimds.py -a 3 GM12878_combined_22_10kb.bed``
+
+a can be any value >1, including non-integer.
 
 ### Output files
 
@@ -80,7 +98,7 @@ Genomic regions that significantly relocalize between the cell types are saved t
 
 For example the output of
 
-``python relocalization_peaks.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+``python multimds.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
 
 is GM12878_combined_22_100kb_K562_22_100kb_peaks.bed
 
