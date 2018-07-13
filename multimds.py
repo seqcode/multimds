@@ -117,9 +117,7 @@ def partitionedMDS(path1, path2, args):
 
 	for lowpartition in lowpartitions:
 		start = lowpartition[0]
-		print lowstructure1.chrom.minPos + lowstructure1.chrom.res * start
 		end = lowpartition[1]
-		print lowstructure1.chrom.minPos + lowstructure1.chrom.res * end
 
 	#create high-res structures
 	highstructure1 = create_high_res_structure(path1, lowstructure1, lowpartitions)
@@ -176,7 +174,7 @@ def main():
 	parser.add_argument("-l", type=int, help="low resolution/high resolution", default=10)
 	parser.add_argument("-o", help="output file prefix")
 	parser.add_argument("-r", default=32000000, help="maximum RAM to use (in kb)")
-	parser.add_argument("-n", default=3, help="number of threads")
+	parser.add_argument("-n", type=int, default=3, help="number of threads")
 	parser.add_argument("-a", type=float, default=4, help="alpha factor for converting contact frequencies to physical distances")
 	parser.add_argument("-P", type=float, default=0.05, help="joint MDS penalty")
 	parser.add_argument("-m", type=int, default=0, help="midpoint (usually centromere) for partitioning")

@@ -30,9 +30,9 @@ Format:
 
 >chrom	bin1\_start	bin1\_end	chrom	bin2\_start	bin2\_end	normalized\_contact\_frequency
 
-Example - chr22 data at 10-Kbp resolution:
+Example - chr21 data at 10-Kbp resolution:
 
->chr22	16050000	16060000	chr22	16050000	16060000	12441.5189291
+>chr21	16050000	16060000	chr21	16050000	16060000	12441.5189291
 > 
 >...
 
@@ -50,45 +50,9 @@ To run with default parameters:
 
 For example:
 
-``python multimds.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+``python multimds.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
-#### Parameters (optional)
-
-##### Number of partitions
-
-Partitioning is used in the structural inference step for greater efficiency and accuracy. By default 4 partitions are used. This can be controlled with the -N parameter: 
-
-``python multimds.py -N 2 GM12878_combined_22_100kb.bed K562_22_100kb.bed``
-
-##### Centromere
-
-Better results are achieved if the chromosome is partitioned at the centromere in the partitioning step. The genomic coordinate of the centromere can be entered with the -m parameter
-
-``python multimds.py -m 28000000 GM12878_combined_20_100kb.bed K562_220_100kb.bed``
-
-#### Resolution ratio
-
-Multimds first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
-
-``python multimds.py -l 20 GM12878_combined_22_10kb.bed``
-
-The value you choose depends on your tradeoff between speed and accuracy (but must be an integer). Lower resolutions (i.e. higher ratios) are faster but less accurate.
-
-##### Number of threads
-
-Multimds uses multithreading to achieve greater speed. By default, 3 threads are requested, because this is safe for standard 4-core desktop computers. However, the number of threads used will never exceed the number of processors or the number of partitions, regardless of what is requested. You can change the number of requested threads using -n.
-
-For example, to run multimds with four threads:
-
-``python multimds.py -n 4 GM12878_combined_22_10kb.bed``
-
-##### Scaling factor
-
-The scaling factor a describes the assumed relationship between contact frequencies and physical distances: distance = contact_frequency^(-1/a). The default value is 4, based on Wang et al 2016. You can change the scaling factor using -a. 
-
-``python multimds.py -a 3 GM12878_combined_22_10kb.bed``
-
-a can be any value >1, including non-integer.
+MultiMDS prints the RMSD between the aligned structures for QC purposes. A "good" RMSD depends on the individual datasets and on whether you want to highlight similarities or differences between structures. However, a typical RMSD would be about 0.2. RMSD > ~0.5 may indicate that your structures did not properly align. Visual inspection using 3D plotting (see below) may be useful. 
 
 ### Output files
 
@@ -98,22 +62,22 @@ Genomic regions that significantly relocalize between the cell types are saved t
 
 For example the output of
 
-``python multimds.py GM12878_combined_22_100kb.bed K562_22_100kb.bed``
+``python multimds.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
-is GM12878_combined_22_100kb_K562_22_100kb_peaks.bed
+is GM12878_combined_21_100kb_K562_21_100kb_peaks.bed
 
 #### Structure files
 Aligned structures are saved to tsv files, which can be used for plotting (see below). The header contains the name of the chromosome, the resolution, and the starting genomic coordinate. Each line in the file contains the genomic bin number followed by the 3D coordinates (with "nan" for missing data). 
 
-Example - chr22 at 10-Kbp resolution:
+Example - chr21 at 10-Kbp resolution:
 
->chr22
+>chr21
 > 
 >10000
 > 
 >16050000
 > 
->0	0.589878298045	0.200029092422	0.182515056542
+>0	0.589878298045	0.200029092421	0.182515056542
 > 
 >1	0.592088232028	0.213915817254	0.186657230841
 > 
@@ -128,7 +92,7 @@ Example - chr22 at 10-Kbp resolution:
 Read a structure:
 
     import data_tools
-    structure = data_tools.structure_from_file("GM12878_combined_22_100kb_structure.tsv")``
+    structure = data_tools.structure_from_file("GM12878_combined_21_100kb_structure.tsv")``
 
 Create an interactive 3D plot in Mayavi. (Mayavi allows you to rotate the image and save a view.)
 
@@ -141,7 +105,7 @@ _enrichments_ is a vector with a numerical value for each bin in the structure (
 
 Multiple structures can be plotted simultaneously:
 
-    chroms = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, X)
+    chroms = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21, X)
     structures = [data_tools.structure_from_file("GM12878_combined_{}_100kb_structure.tsv".format(chrom) for chrom in chroms)]
     plotting.plot_structures_interactive(structures)
 
@@ -159,7 +123,7 @@ The radius can also be specified, as above.
 
 The option _cut_ creates a cross-section of the plot. For example, this is useful for viewing the interior of the nucleus.
 
-    chroms = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, X)
+    chroms = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21, X)
     structures = [data_tools.structure_from_file("GM12878_combined_{}_100kb_structure.tsv".format(chrom) for chrom in chroms)]
     plotting.plot_structures_interactive(structures, cut=True)
 
@@ -174,3 +138,47 @@ A smaller value of _increment_ will lead to a smoother gif. Increments must be a
 Multiple structures can also be plotted in a single gif:
 
 ``plotting.plot_structures_gif(structures, struct, colors=default_colors, radius=None, increment=10)``
+
+#### Parameters (optional)
+
+#### Full MDS
+
+By default, partitioned MDS is used. Full MDS is recommended for low-resolution high-quality (not sparse) files:
+
+``python multimds.py --full GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+
+##### Number of partitions
+
+Partitioning is used in the structural inference step for greater efficiency and accuracy. By default 4 partitions are used. This can be controlled with the -N parameter: 
+
+``python multimds.py -N 2 GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+
+##### Centromere
+
+Better results are achieved if the chromosome is partitioned at the centromere in the partitioning step. The genomic coordinate of the centromere can be entered with the -m parameter
+
+``python multimds.py -m 28000000 GM12878_combined_20_100kb.bed K562_20_100kb.bed``
+
+#### Resolution ratio
+
+Multimds first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
+
+``python multimds.py -l 20 GM12878_combined_21_10kb.bed K562_21_10kb.bed``
+
+The value you choose depends on your tradeoff between speed and accuracy (but must be an integer). Lower resolutions (i.e. higher ratios) are faster but less accurate.
+
+##### Number of threads
+
+Multimds uses multithreading to achieve greater speed. By default, 3 threads are requested, because this is safe for standard 4-core desktop computers. However, the number of threads used will never exceed the number of processors or the number of partitions, regardless of what is requested. You can change the number of requested threads using -n.
+
+For example, to run multimds with four threads:
+
+``python multimds.py -n 4 GM12878_combined_21_10kb.bed K562_21_10kb.bed``
+
+##### Scaling factor
+
+The scaling factor a describes the assumed relationship between contact frequencies and physical distances: distance = contact_frequency^(-1/a). The default value is 4, based on Wang et al 2016. You can change the scaling factor using -a. 
+
+``python multimds.py -a 3 GM12878_combined_21_10kb.bed K562_21_10kb.bed``
+
+a can be any value >1, including non-integer.
