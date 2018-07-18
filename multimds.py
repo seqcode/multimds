@@ -9,11 +9,9 @@ import array_tools as at
 import linear_algebra as la
 import tools
 import tad
-import os
-from scipy import signal as sg
 
 def distmat(contactMat, structure, alpha):
-	assert len(structure.getPointNums()) == len(contactMat)
+	assert len(structure.nonzero_abs_indices()) == len(contactMat)
 
 	at.makeSymmetric(contactMat)
 	rowsums = np.array([sum(row) for row in contactMat])
@@ -53,10 +51,11 @@ def create_low_res_structure(path, res_ratio):
 	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
 	return dt.structureFromBed(path, low_chrom)
 
-def create_high_res_structure(path, lowstructure, highpartitions):
+def create_high_res_structure(path, lowstructure):
 	size, res = dt.basicParamsFromBed(path)
 	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
-	return dt.structureFromBed(path, highChrom, highpartitions)
+	#return dt.structureFromBed(path, highChrom, tads=highpartitions)
+	return dt.Structure([], [], highChrom, 0)
 	
 def transform(trueLow, highSubstructure, res_ratio):
 	#approximate as low resolution
@@ -91,44 +90,60 @@ def partitionedMDS(path1, path2, args):
 	dt.make_compatible((lowstructure1, lowstructure2))
 
 	#get partitions
-	low_contactMat1 = dt.matFromBed(path1, lowstructure1)
-	low_contactMat2 = dt.matFromBed(path2, lowstructure2)
-
 	n = len(lowstructure1.getPoints())
 	if centromere == 0:
 		midpoint = n/2
 	else:	
-		midpoint = lowstructure1.chrom.getPointNum(centromere)
+		midpoint = lowstructure1.chrom.getAbsoluteIndex(centromere)
 	
 	assert num_partitions%2 == 0
 
 	partition_size1 = int(np.ceil(float(midpoint)/(num_partitions/2)))
 	partition_size2 = int(np.ceil(float(n-midpoint)/(num_partitions/2)))
 
-	lowpartitions = []
+	lowpartitions = []	#low substructures, defined on absolute indices not relative indices
 
 	for i in range(num_partitions/2):
 		lowpartitions.append((i*partition_size1, min(((i+1)*partition_size1), midpoint)))
 
 	for i in range(num_partitions/2):
-		lowpartitions.append((midpoint + i*partition_size2, min((midpoint + (i+1)*partition_size2), n)))
+		lowpartitions.append((midpoint + i*partition_size2, min((midpoint + (i+1)*partition_size2), n-1)))
 
 	lowpartitions = np.array(lowpartitions)
 
-	for lowpartition in lowpartitions:
-		start = lowpartition[0]
-		end = lowpartition[1]
+	low_contactMat1 = dt.matFromBed(path1, lowstructure1)
+	low_contactMat2 = dt.matFromBed(path2, lowstructure2)
 
-	#create high-res structures
-	highstructure1 = create_high_res_structure(path1, lowstructure1, lowpartitions)
-	highstructure2 = create_high_res_structure(path2, lowstructure2, lowpartitions)
-	dt.make_compatible((highstructure1, highstructure2))
+	tad.substructuresFromAbsoluteTads(lowstructure1, lowpartitions)
+	tad.substructuresFromAbsoluteTads(lowstructure2, lowpartitions)
 
-	res_ratio = lowstructure1.chrom.res/highstructure1.chrom.res
-	highpartitions = lowpartitions * res_ratio
+	#create high-res chroms
+	size1, res1 = dt.basicParamsFromBed(path1)
+	highChrom1 = dt.ChromParameters(lowstructure1.chrom.minPos, lowstructure1.chrom.maxPos, res1, lowstructure1.chrom.name, size1)
+	size2, res2 = dt.basicParamsFromBed(path2)
+	highChrom2 = dt.ChromParameters(lowstructure2.chrom.minPos, lowstructure2.chrom.maxPos, res2, lowstructure2.chrom.name, size2)
+
+	#initialize high-res substructures
+	high_substructures1 = []
+	high_substructures2 = []
+	low_gen_coords = lowstructure1.getGenCoords()
+	offset1 = 0 #initialize
+	offset2 = 0
+	for partition in lowpartitions:
+		start_gen_coord = low_gen_coords[partition[0]]
+		end_gen_coord = low_gen_coords[partition[1]]
+		high_substructure1 = dt.structureFromBed(path1, highChrom1, start_gen_coord, end_gen_coord, offset1)
+		high_substructure2 = dt.structureFromBed(path2, highChrom2, start_gen_coord, end_gen_coord, offset2)
+		high_substructures1.append(high_substructure1)
+		high_substructures2.append(high_substructure2)
+		offset1 += (len(high_substructure1.points) - 1)	#update
+		offset2 += (len(high_substructure2.points) - 1)	#update
 	
-	tad.substructuresFromTads(highstructure1, lowstructure1, lowpartitions)	#create compatible substructures
-	tad.substructuresFromTads(highstructure2, lowstructure2, lowpartitions)	#create compatible substructures
+	for high_substructure1, high_substructure2 in zip(high_substructures1, high_substructures2):
+		dt.make_points_compatible((high_substructure1, high_substructure2))
+
+	highstructure1 = dt.Structure([], high_substructures1, highChrom1, 0)
+	highstructure2 = dt.Structure([], high_substructures2, highChrom2, 0)
 
 	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads)
 	print "Low-resolution MDS complete"
@@ -138,7 +153,7 @@ def partitionedMDS(path1, path2, args):
 	lowSubstructures1 = pymp.shared.list(lowstructure1.structures)
 	lowSubstructures2 = pymp.shared.list(lowstructure2.structures)
 
-	numSubstructures = len(lowpartitions)
+	numSubstructures = len(highstructure1.structures)
 	num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
 	with pymp.Parallel(num_threads) as p:
 		for substructurenum in p.range(numSubstructures):
@@ -174,7 +189,7 @@ def main():
 	parser.add_argument("-l", type=int, help="low resolution/high resolution", default=10)
 	parser.add_argument("-o", help="output file prefix")
 	parser.add_argument("-r", default=32000000, help="maximum RAM to use (in kb)")
-	parser.add_argument("-n", type=int, default=3, help="number of threads")
+	parser.add_argument("-n", default=3, help="number of threads")
 	parser.add_argument("-a", type=float, default=4, help="alpha factor for converting contact frequencies to physical distances")
 	parser.add_argument("-P", type=float, default=0.05, help="joint MDS penalty")
 	parser.add_argument("-m", type=int, default=0, help="midpoint (usually centromere) for partitioning")
@@ -196,27 +211,10 @@ def main():
 		prefix = args.o
 	else:
 		prefix = ""
-
-	prefix1 = os.path.basename(args.path1).split(".")[0]
-	prefix2 = os.path.basename(args.path2).split(".")[0]
-
-	structure1.write(os.path.join(os.path.dirname(args.path1), "{}{}_structure.tsv".format(prefix, prefix1)))
-	structure2.write(os.path.join(os.path.dirname(args.path2), "{}{}_structure.tsv".format(prefix, prefix2)))
-
-	coords1 = np.array(structure1.getCoords())
-	coords2 = np.array(structure2.getCoords())
-	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-	print np.mean(dists)
-
-	dist_peaks = sg.find_peaks_cwt(dists, np.arange(1, 20))
-
-	gen_coords = structure1.getGenCoords()
-
-	with open("{}_{}_relocalization.bed".format(prefix1, prefix2), "w") as out:
-		for peak in dist_peaks:
-			out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
-			out.write("\n")
-		out.close()
+	prefix1 = args.path1.split("/")[-1].split(".bed")[0]
+	structure1.write("{}/{}{}_structure.tsv".format("/".join(args.path1.split("/")[0:-1]), prefix, prefix1))
+	prefix2 = args.path2.split("/")[-1].split(".bed")[0]
+	structure2.write("{}/{}{}_structure.tsv".format("/".join(args.path2.split("/")[0:-1]), prefix, prefix2))
 
 if __name__ == "__main__":
 	main()
