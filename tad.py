@@ -102,25 +102,21 @@ def smoothWithMovingAverage(signal, size_of_window):
 		smoothed_remainder[i] = movingAverage(remainder[i:remainder_size], remainder_size-i)
 	return np.concatenate((smoothed, smoothed_remainder))
 
-def substructuresFromTads(high_structure, low_structure, low_tads):
-	"""Create compatible substructures from TADs in high-res structure and low-res structure"""
-	res_ratio = low_structure.chrom.res/high_structure.chrom.res
-	high_tads = low_tads * res_ratio
-        high_offset = 0
-	low_offset = 0
-        for high_tad, low_tad in zip(high_tads, low_tads):
-		high_start = high_tad[0]
-		high_end = high_tad[1]
-		low_start = low_tad[0]
-		low_end = low_tad[1]
-                high_points = high_structure.points[(high_start-high_structure.offset):(high_end-high_structure.offset)]
-		low_points = low_structure.points[(low_start-low_structure.offset):(low_end-low_structure.offset)]
-		high_nums = [high_point.num for high_point in high_points if high_point != 0]
-		inferred_low_nums = np.array(high_nums)/res_ratio
-		true_low_nums = [low_point.num for low_point in low_points if low_point != 0]
-		intersection = [num for num in true_low_nums if num in inferred_low_nums]
-		if len(intersection) > 0:	#compatible
-                	high_structure.createSubstructure(high_points, high_offset)
-			low_structure.createSubstructure(low_points, low_offset)
-                high_offset = high_end
-		low_offset = low_end
+def substructuresFromTads(structure, tads):
+	abs_indices = structure.nonzero_abs_indices()
+	offset = 0	#initialize
+	for td in tads:
+		start = abs_indices[td[0]]	#convert from relative index to absolute index
+		end = abs_indices[td[1]]
+		points = structure.points[start-structure.offset:end-structure.offset]
+		structure.createSubstructure(points, offset)
+		offset = end	#update
+
+def substructuresFromAbsoluteTads(structure, tads):
+	offset = 0	#initialize
+	for td in tads:
+		start = td[0]
+		end = td[1]
+		points = structure.points[start-structure.offset:end-structure.offset]
+		structure.createSubstructure(points, offset)
+		offset = end	#update
