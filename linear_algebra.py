@@ -2,8 +2,8 @@ import numpy as np
 
 def getTransformation(structure1, structure2):
 	"""Recovers transformation needed to align structure1 with structure2. Modified from http://nghiaho.com/?page_id=671"""
-	pointNums1 = structure1.getPointNums()
-	pointNums2 = structure2.getPointNums()
+	pointNums1 = structure1.nonzero_abs_indices()
+	pointNums2 = structure2.nonzero_abs_indices()
 
 	intersection = [num for num in pointNums1 if num in pointNums2]
 
