@@ -55,7 +55,7 @@ def get_compartments(mat, structure, path, active):
 
 	#enforce positive score = active chromatin
 	enrichments = np.array(np.loadtxt(path, dtype=object)[:,6], dtype=float)
-	bin_nums = structure.getPointNums() + structure.chrom.minPos/structure.chrom.res
+	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
 	enrichments = enrichments[bin_nums]
 	r, p = st.pearsonr(scores, enrichments)
 	if active and r < 0:
