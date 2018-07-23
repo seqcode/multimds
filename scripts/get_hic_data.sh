@@ -18,7 +18,7 @@ if [ ! -e $CELL_TYPE"_"*_100kb.bed ]
 		for CHROM in 1 2 3 4 5 6 7 8 10 11 12 13 14 15 16 17 18 19 20 21 22	#skip chr9
 		do
 			echo $CHROM
-			python normalize.py $CELL_TYPE 100000 $CHROM
+			python ../normalize.py $CELL_TYPE 100000 $CHROM
 		done
 			
 		rm GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz
