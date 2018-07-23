@@ -11,7 +11,7 @@ import tools
 import tad
 
 def distmat(contactMat, structure, alpha):
-	assert len(structure.getPointNums()) == len(contactMat)
+	assert len(structure.nonzero_abs_indices()) == len(contactMat)
 
 	at.makeSymmetric(contactMat)
 	rowsums = np.array([sum(row) for row in contactMat])
@@ -96,7 +96,7 @@ def partitionedMDS(path1, path2, args):
 	if centromere == 0:
 		midpoint = n/2
 	else:	
-		midpoint = lowstructure1.chrom.getPointNum(centromere)
+		midpoint = lowstructure1.chrom.getAbsoluteIndex(centromere)
 	
 	assert num_partitions%2 == 0
 
