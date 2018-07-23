@@ -7,7 +7,7 @@ import os
 import linear_algebra as la
 import array_tools as at
 from scipy import signal as sg
-from hmmlearn import hmm
+#from hmmlearn import hmm
 
 def normalize(values):
 	return np.array(values)/max(values)
@@ -19,34 +19,34 @@ def format_celltype(cell_type):
 		formatted = cell_type.split("_")[0]
 		return formatted[0].upper() + formatted[1:len(formatted)].lower()
 
-def call_peaks(data):
-	"""Calls peaks using Gaussian hidden markov model"""
-	reshaped_data = data.reshape(-1,1)
-	model = hmm.GaussianHMM(n_components=2).fit(reshaped_data)
-	scores = model.predict(reshaped_data)
+#def call_peaks(data):
+#	"""Calls peaks using Gaussian hidden markov model"""
+#	reshaped_data = data.reshape(-1,1)
+#	model = hmm.GaussianHMM(n_components=2).fit(reshaped_data)
+#	scores = model.predict(reshaped_data)
 
 	#determine if peaks are 0 or 1
-	zero_indices = np.where(scores == 0)
-	one_indices = np.where(scores == 1)
-	zero_data = data[zero_indices]
-	one_data = data[one_indices]
-	if np.mean(zero_data) > np.mean(one_data):
-		scores[zero_indices] = 1
-		scores[one_indices] = 0
+#	zero_indices = np.where(scores == 0)
+#	one_indices = np.where(scores == 1)
+#	zero_data = data[zero_indices]
+#	one_data = data[one_indices]
+#	if np.mean(zero_data) > np.mean(one_data):
+#		scores[zero_indices] = 1
+#		scores[one_indices] = 0
 
 	#find boundaries of peaks
-	peaks = []
-	in_peak = False
-	for i, score in enumerate(scores):
-		if in_peak and score == 0:	#end of peak
-			in_peak = False
-			peak.append(i)
-			peaks.append(peak)
-		elif not in_peak and score == 1:	#start of peak
-			in_peak = True
-			peak = [i]
+#	peaks = []
+#	in_peak = False
+#	for i, score in enumerate(scores):
+#		if in_peak and score == 0:	#end of peak
+#			in_peak = False
+#			peak.append(i)
+#			peaks.append(peak)
+#		elif not in_peak and score == 1:	#start of peak
+#			in_peak = True
+#			peak = [i]
 
-	return peaks
+#	return peaks
 
 res_kb = 100
 cell_type1 = sys.argv[1]
@@ -57,8 +57,10 @@ num_partitions = sys.argv[5]
 smoothing_parameter = float(sys.argv[6])
 n = 1
 
-path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
-path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
+#path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
+#path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
+path1 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
+path2 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
 
 min_error = sys.float_info.max
 for iteration in range(n):
@@ -120,7 +122,7 @@ at.makeSymmetric(contacts1)
 at.makeSymmetric(contacts2)
 
 compartments1 = ca.get_compartments(contacts1, structure1, "binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type1), chrom, res_kb), True)
-compartments2 = ca.get_compartments(contacts2, structure2, "binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype("K562"), chrom, res_kb), True)	
+compartments2 = ca.get_compartments(contacts2, structure2, "binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type2), chrom, res_kb), True)	
 
 gen_coords = structure1.getGenCoords()
 
