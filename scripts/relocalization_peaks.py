@@ -57,10 +57,10 @@ num_partitions = sys.argv[5]
 smoothing_parameter = float(sys.argv[6])
 n = 1
 
-#path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
-#path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
-path1 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
-path2 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
+path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
+path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
+#path1 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
+#path2 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
 
 min_error = sys.float_info.max
 for iteration in range(n):
