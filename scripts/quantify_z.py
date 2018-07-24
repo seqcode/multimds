@@ -1,14 +1,20 @@
 from sklearn import svm
 import numpy as np
-import data_tools as dt
 import sys
 sys.path.append("..")
+import data_tools as dt
 import compartment_analysis as ca
 from matplotlib import pyplot as plt
 import os
 import linear_algebra as la
 import array_tools as at
-from scipy import stats as st
+
+def format_celltype(cell_type):
+	if cell_type == "KBM7":
+		return "K562"	#substitute
+	else:
+		formatted = cell_type.split("_")[0]
+		return formatted[0].upper() + formatted[1:len(formatted)].lower()
 
 res_kb = 100
 chroms = (22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 8, 7, 6, 5, 4, 3, 2, 1)
@@ -16,9 +22,6 @@ cell_type1 = "GM12878_combined"
 cell_type2 = "K562"
 n = 5
 
-x_corrs = np.zeros_like(chroms, dtype=float)
-y_corrs = np.zeros_like(chroms, dtype=float)
-z_corrs = np.zeros_like(chroms, dtype=float)
 x_means = np.zeros_like(chroms, dtype=float)
 y_means = np.zeros_like(chroms, dtype=float)
 z_means = np.zeros_like(chroms, dtype=float)
@@ -89,8 +92,8 @@ for i, chrom in enumerate(chroms):
 	at.makeSymmetric(contacts1)
 	at.makeSymmetric(contacts2)
 
-	compartments1 = ca.infer_compartments(contacts1, structure1, cell_type1, chrom, res_kb)
-	compartments2 = ca.infer_compartments(contacts2, structure2, cell_type2, chrom, res_kb)
+	compartments1 = ca.get_compartments(contacts1, structure1, "/data/drive1/joint_mds/binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type1), chrom, res_kb), True)
+	compartments2 = ca.get_compartments(contacts1, structure1, "/data/drive1/joint_mds/binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type2), chrom, res_kb), True)
 
 	#SVR
 	coords = np.concatenate((coords1, coords2))
@@ -124,16 +127,6 @@ for i, chrom in enumerate(chroms):
 	y_lengths[i] = np.mean((y_length1, y_length2))
 	z_lengths[i] = np.mean((z_length1, z_length2))
 
-	#correlations
-	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-
-	r, p = st.pearsonr(np.abs(x_diffs), dists)
-	x_corrs[i] = r
-	r, p = st.pearsonr(np.abs(y_diffs), dists)
-	y_corrs[i] = r
-	r, p = st.pearsonr(np.abs(z_diffs), dists)
-	z_corrs[i] = r
-
 z_fractions = np.zeros_like(z_means)
 for i, (x_mean, y_mean, z_mean) in enumerate(zip(x_means, y_means, z_means)):
 	z_fractions[i] = z_mean/(x_mean + y_mean + z_mean)
@@ -162,14 +155,3 @@ ax.set_xticks(ind + width / 3)
 ax.set_xticklabels(chroms)
 ax.legend((rects1[0], rects2[0], rects3[0]), ("x", "y", "z"))
 plt.savefig("axis_length")
-
-fig, ax = plt.subplots()
-rects1 = ax.bar(ind, x_corrs, width, color="r")
-rects2 = ax.bar(ind + width, y_corrs, width, color="y")
-rects3 = ax.bar(ind + 2*width, z_corrs, width, color="b")
-ax.set_ylabel("Pearson r")
-ax.set_xticks(ind + width / 3)
-ax.set_xticklabels(chroms)
-ax.legend((rects1[0], rects2[0], rects3[0]), ("x", "y", "z"))
-plt.savefig("correlation_by_axis")
-plt.show()
