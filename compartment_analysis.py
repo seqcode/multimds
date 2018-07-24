@@ -43,7 +43,7 @@ def cor(mat):
 			cor_mat[i,j] = r
 	return cor_mat
 
-def get_compartments(mat, structure, path, active):
+def get_compartments(mat, structure, path=None, active=True):
 	"""From Lieberman-Aiden et al (2009)"""
 	oe_mat = oe(mat)
 	at.makeSymmetric(oe_mat)
@@ -54,14 +54,15 @@ def get_compartments(mat, structure, path, active):
 	scores = pca.fit_transform(cor_mat)[:,0]
 
 	#enforce positive score = active chromatin
-	enrichments = np.array(np.loadtxt(path, dtype=object)[:,6], dtype=float)
-	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
-	enrichments = enrichments[bin_nums]
-	r, p = st.pearsonr(scores, enrichments)
-	if active and r < 0:
-		scores = -scores
-	elif not active and r > 0:
-		scores = -scores
+	if path is not None:
+		enrichments = np.array(np.loadtxt(path, dtype=object)[:,6], dtype=float)
+		bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+		enrichments = enrichments[bin_nums]
+		r, p = st.pearsonr(scores, enrichments)
+		if active and r < 0:
+			scores = -scores
+		elif not active and r > 0:
+			scores = -scores
 	
 	#normalize
 	max_val = max(scores)
