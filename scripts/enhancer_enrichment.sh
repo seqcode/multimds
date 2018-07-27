@@ -1,9 +1,11 @@
 set -e
 
-#./get_hic_data.sh GM12878_combined
-#./get_hic_data.sh K562
+MINIMDS_DIR=$1
+
+#./get_hic_data.sh $MINIMDS_DIR GM12878_combined
+#./get_hic_data.sh $MINIMDS_DIR K562
 #./get_activity_data.sh
-./relocalization_peaks.sh
+#./relocalization_peaks.sh $MINIMDS_DIR
 
 #enhancers
 if [ ! -e GM12878_enhancers.bed ] 
@@ -22,10 +24,10 @@ fi
 #fi
 
 #negative control
-if [ ! -e A_compartment.bed ]
-	then
+#if [ ! -e A_compartment.bed ]
+#	then
 		python get_a_compartment.py
-fi
+#fi
 
 #if [ ! -e A_background.bed ]
 #	then
@@ -42,6 +44,6 @@ fi
 		bedtools coverage -a A_background_filtered.bed -b GM12878_enhancers.bed > A_background_filtered_GM12878_enhancer_coverage.bed 
 #fi
 
-#python enhancer_pie.py $(cat peaks_filtered_GM12878_enhancer_coverage.bed | awk '$7 > 0 {print 1}' | wc -l) $(cat peaks_filtered_GM12878_enhancer_coverage.bed | awk '$7 == 0 {print 1}' | wc -l) $(cat A_background_filtered_GM12878_enhancer_coverage.bed | awk '$7 > 0 {print 1}' | wc -l) $(cat A_background_filtered_GM12878_enhancer_coverage.bed | awk '$7 == 0 {print 1}' | wc -l)
+python enhancer_pie.py $(cat peaks_filtered_GM12878_enhancer_coverage.bed | awk '$7 > 0.05 {print 1}' | wc -l) $(cat peaks_filtered_GM12878_enhancer_coverage.bed | awk '$7 <= 0.05 {print 1}' | wc -l) $(cat A_background_filtered_GM12878_enhancer_coverage.bed | awk '$7 > 0.05 {print 1}' | wc -l) $(cat A_background_filtered_GM12878_enhancer_coverage.bed | awk '$7 <= 0.05 {print 1}' | wc -l)
 
 python ttest.py peaks_filtered_GM12878_enhancer_coverage.bed A_background_filtered_GM12878_enhancer_coverage.bed

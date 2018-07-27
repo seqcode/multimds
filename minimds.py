@@ -197,9 +197,9 @@ def main():
 	else:
 		prefix = ""
 	prefix1 = args.path1.split("/")[-1].split(".bed")[0]
-	structure1.write("{}/{}{}_structure.tsv".format("/".join(args.path1.split("/")[0:-1]), prefix, prefix1))
+	structure1.write(prefix + prefix1 + "_structure.tsv")
 	prefix2 = args.path2.split("/")[-1].split(".bed")[0]
-	structure2.write("{}/{}{}_structure.tsv".format("/".join(args.path2.split("/")[0:-1]), prefix, prefix2))
+	structure2.write(prefix + prefix2 + "_structure.tsv")
 
 if __name__ == "__main__":
 	main()

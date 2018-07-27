@@ -1,6 +1,7 @@
 import sys
 sys.path.append("..")
 import data_tools as dt
+import array_tools as at
 import numpy as np
 from sklearn.manifold import MDS
 import linear_algebra as la
@@ -78,7 +79,8 @@ labels.append("Kabsch")
 
 all_r_sq.append(kabsch_r_sq)
 
-fig, ax = plt.subplots()
+fig = plt.figure(figsize=(4,4))  # define the figure window
+ax  = fig.add_subplot(111)   # define the axis
 ax.boxplot(all_r_sq)
 ax.set_ylabel("Reproducibility", fontsize=20)
 ax.set_xticklabels(labels, fontsize=15)
