@@ -2,7 +2,6 @@ import sys
 sys.path.append("..")
 from matplotlib import pyplot as plt	
 import data_tools as dt
-import array_tools as at
 import numpy as np
 import compartment_analysis as ca
 from scipy import stats as st
@@ -26,7 +25,7 @@ for j, chrom in enumerate(chroms):
 	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
 	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-	os.system("python ../minimds.py -m {} -N {} -o hic_data/ {} {}".format(midpoints[j]*10**6, partition_nums[j], path1, path2))
+	os.system("python ../multimds.py -m {} -N {} -o hic_data/ {} {}".format(midpoints[j]*10**6, partition_nums[j], path1, path2))
 
 	#load structures
 	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
@@ -67,12 +66,6 @@ for j, chrom in enumerate(chroms):
 	contacts1 = dt.matFromBed(path1, structure1)
 	contacts2 = dt.matFromBed(path2, structure2)
 
-	#dists1 = at.contactToDist(contacts1, 4)
-	#dists2 = at.contactToDist(contacts2, 4)
-
-	#at.makeSymmetric(dists1)
-	#at.makeSymmetric(dists2)
-
 	#contacts Pearson
 	rs = np.zeros(len(contacts1))
 	for i, (row1, row2) in enumerate(zip(contacts1, contacts2)):
@@ -80,14 +73,6 @@ for j, chrom in enumerate(chroms):
 
 	r, p = st.pearsonr(1-rs, np.abs(compartment_diffs))
 	contacts_pearson_rs[j] = r
-
-	#dists Pearson
-	#rs = np.zeros(len(dists1))
-	#for i, (row1, row2) in enumerate(zip(dists1, dists2)):
-	#	rs[i], p = st.pearsonr(row1, row2)
-
-	#r, p = st.pearsonr(1-rs, np.abs(compartment_diffs))
-	#dists_pearson_rs[j] = r
 
 	#contacts Spearman
 	rs = np.zeros(len(contacts1))
@@ -97,28 +82,17 @@ for j, chrom in enumerate(chroms):
 	r, p = st.pearsonr(1-rs, np.abs(compartment_diffs))
 	contacts_spearman_rs[j] = r
 
-	#dists Spearman
-	#rs = np.zeros(len(dists1))
-	#for i, (row1, row2) in enumerate(zip(dists1, dists2)):
-	#	rs[i], p = st.spearmanr(row1, row2)
-
-	#r, p = st.pearsonr(1-rs, np.abs(compartment_diffs))
-	#dists_spearman_rs[j] = r
-
 ind = np.arange(len(chroms)) 
 width = 0.3       
 
 fig, ax = plt.subplots()
 rects1 = ax.bar(ind, contacts_pearson_rs, width, color="r")
 rects2 = ax.bar(ind + width, contacts_spearman_rs, width, color="c")
-#rects3 = ax.bar(ind + 2*width, dists_pearson_rs, width, color="m")
-#rects4 = ax.bar(ind + 3*width, dists_spearman_rs, width, color="y")
 rects3 = ax.bar(ind + 2*width, multimds_z_rs, width, color="orange")
 
 ax.set_xlabel("Chromosome")
 ax.set_ylabel("Correlation with compartment changes")
-ax.set_xticks(ind + width / 5)
+ax.set_xticks(ind + width / 3)
 ax.set_xticklabels(chroms)
-#ax.legend((rects1[0], rects2[0], rects3[0], rects4[0], rects5[0]), ("Contacts pearson", "Contacts spearman", "Distances pearson", "Distances spearman", "MultiMDS z"))
 ax.legend((rects1[0], rects2[0], rects3[0]), ("Pearson", "Spearman", "MultiMDS z"))
 plt.savefig("dist_vs_compartment")
