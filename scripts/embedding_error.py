@@ -1,7 +1,6 @@
 import sys
 sys.path.append("..")
 import data_tools as dt
-import array_tools as at
 import numpy as np
 import linear_algebra as la
 from joint_mds import Joint_MDS

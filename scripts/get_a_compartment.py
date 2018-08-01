@@ -9,11 +9,14 @@ import numpy as np
 os.system("rm A_compartment.bed")
 
 for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22):
-	path = "/data/drive1/hic_data/GM12878_combined_{}_100kb.bed".format(chrom)
+	path = "hic_data/GM12878_combined_{}_100kb.bed".format(chrom)
 	structure = dt.structureFromBed(path)
 	contacts = dt.matFromBed(path, structure)
 	at.makeSymmetric(contacts)
-	compartments = np.array(ca.infer_compartments(contacts, structure, "GM12878_combined", chrom, 100))
+	enrichments = np.array(np.loadtxt("binding_data/Gm12878_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
+	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+	enrichments = enrichments[bin_nums]
+	compartments = np.array(ca.get_compartments(contacts, structure, enrichments))
 	gen_coords = np.array(structure.getGenCoords())
 	a_gen_coords = gen_coords[np.where(compartments > 0)]
 	with open("A_compartment.bed", "a") as out:

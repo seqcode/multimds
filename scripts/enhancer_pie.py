@@ -1,9 +1,5 @@
-#from matplotlib import pyplot as plt
-import matplotlib as mpl
-mpl.use("Agg")
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 import sys
-from scipy import stats as st
 
 plt.pie((int(sys.argv[1]), int(sys.argv[2])), labels=("Enhancer", "No enhancer"))
 plt.title("Relocalization peaks")
