@@ -1,7 +1,6 @@
 import sys
 sys.path.append("..")
 import data_tools as dt
-import array_tools as at
 import numpy as np
 from sklearn.manifold import MDS
 import linear_algebra as la
@@ -14,8 +13,8 @@ res_kb = 100
 
 exp_names = ("GM12878_combined", "K562")
 
-path1 = "/data/drive1/hic_data/{}_{}_{}kb.bed".format(exp_names[0], chrom, res_kb)
-path2 = "/data/drive1/hic_data/{}_{}_{}kb.bed".format(exp_names[1], chrom, res_kb)
+path1 = "hic_data/{}_{}_{}kb.bed".format(exp_names[0], chrom, res_kb)
+path2 = "hic_data/{}_{}_{}kb.bed".format(exp_names[1], chrom, res_kb)
 
 structure1 = dt.structureFromBed(path1, None, None)
 structure2 = dt.structureFromBed(path2, None, None)
@@ -53,7 +52,6 @@ for p in ps:
 
 all_changes = []
 for i in range(n):
-	print i
 	#perform MDS
 	coords1 = MDS(n_components=3, random_state=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=-1).fit_transform(dists1)
 	coords2 = MDS(n_components=3, random_state=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=-1).fit_transform(dists2)

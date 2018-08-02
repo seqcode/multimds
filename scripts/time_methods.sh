@@ -1,12 +1,9 @@
 set -e
 
-MINIMDS_DIR=$1
+./get_hic_data.sh GM12878_combined
+./get_hic_data.sh K562
 
-./get_hic_data.sh $MINIMDS_DIR GM12878_combined
-./get_hic_data.sh $MINIMDS_DIR K562
-
-#for METHOD in multimds kabsch
-for METHOD in kabsch
+for METHOD in multimds kabsch
 do
 	OUTPUT=$METHOD"_times".txt
 

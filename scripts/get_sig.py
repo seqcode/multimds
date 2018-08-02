@@ -1,6 +1,5 @@
 from statsmodels.stats.multitest import multipletests
 import sys
-import numpy as np
 import os
 
 in_path = sys.argv[1]

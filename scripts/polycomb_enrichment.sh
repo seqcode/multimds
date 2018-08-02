@@ -1,14 +1,12 @@
 set -e
 
-MINIMDS_DIR=$1
-
-./get_hic_data.sh $MINIMDS_DIR GM12878_primary
-./get_hic_data.sh $MINIMDS_DIR GM12878_replicate
-./get_hic_data.sh $MINIMDS_DIR K562
+./get_hic_data.sh GM12878_primary
+./get_hic_data.sh GM12878_replicate
+./get_hic_data.sh K562
 
 if [ ! -e peaks_filtered.bed ]
 	then 
-		./relocalization_peaks.sh $MINIMDS_DIR
+		./relocalization_peaks.sh
 fi
 
 python edger_input.py
