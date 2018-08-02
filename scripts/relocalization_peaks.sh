@@ -2,9 +2,9 @@ set -e
 
 RES=100000
 
-#./get_hic_data.sh GM12878_combined
-#./get_hic_data.sh K562
-#./get_activity_data.sh
+./get_hic_data.sh GM12878_combined
+./get_hic_data.sh K562
+./get_activity_data.sh
 
 PARTITION_NUMS=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 2 2 2)
 MIDPOINTS=(135 93 92 51 48 60 60 45 41 53 36 0 0 0 40 24 17 26 28 0 0)

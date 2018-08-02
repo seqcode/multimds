@@ -43,7 +43,7 @@ def cor(mat):
 			cor_mat[i,j] = r
 	return cor_mat
 
-def get_compartments(mat, structure, path=None, active=True):
+def get_compartments(mat, enrichments=None, active=True):
 	"""From Lieberman-Aiden et al (2009)"""
 	oe_mat = oe(mat)
 	at.makeSymmetric(oe_mat)
@@ -54,10 +54,7 @@ def get_compartments(mat, structure, path=None, active=True):
 	scores = pca.fit_transform(cor_mat)[:,0]
 
 	#enforce positive score = active chromatin
-	if path is not None:
-		enrichments = np.array(np.loadtxt(path, dtype=object)[:,6], dtype=float)
-		bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
-		enrichments = enrichments[bin_nums]
+	if enrichments is not None:
 		r, p = st.pearsonr(scores, enrichments)
 		if active and r < 0:
 			scores = -scores
@@ -75,10 +72,7 @@ def get_compartments(mat, structure, path=None, active=True):
 	
 	return scores
 
-def infer_compartments(mat, structure, cell_type, chrom, res_kb):
-	"""Default method for my file paths"""
-	#re-format cell type
-	formatted = cell_type.split("_")[0]
-	formatted = formatted[0].upper() + formatted[1:len(formatted)].lower()
-
-	return get_compartments(mat, structure, "binding_data/{}_{}_{}kb_active_coverage.bed".format(formatted, chrom, res_kb), True)
+def load_enrichments(path, structure, column):
+	enrichments = np.array(np.loadtxt(path, dtype=object)[:,column], dtype=float)
+	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+	return enrichments[bin_nums]

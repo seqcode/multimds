@@ -54,7 +54,6 @@ def create_low_res_structure(path, res_ratio):
 def create_high_res_structure(path, lowstructure):
 	size, res = dt.basicParamsFromBed(path)
 	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
-	#return dt.structureFromBed(path, highChrom, tads=highpartitions)
 	return dt.Structure([], [], highChrom, 0)
 	
 def transform(trueLow, highSubstructure, res_ratio):

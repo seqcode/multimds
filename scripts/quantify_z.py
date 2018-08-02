@@ -9,13 +9,6 @@ import os
 import linear_algebra as la
 import array_tools as at
 
-def format_celltype(cell_type):
-	if cell_type == "KBM7":
-		return "K562"	#substitute
-	else:
-		formatted = cell_type.split("_")[0]
-		return formatted[0].upper() + formatted[1:len(formatted)].lower()
-
 res_kb = 100
 chroms = (22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 8, 7, 6, 5, 4, 3, 2, 1)
 cell_type1 = "GM12878_combined"
@@ -30,12 +23,12 @@ y_lengths = np.zeros_like(chroms, dtype=float)
 z_lengths = np.zeros_like(chroms, dtype=float)
 
 for i, chrom in enumerate(chroms):
-	path1 = "/data/drive1/hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
-	path2 = "/data/drive1/hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
+	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
+	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
 	min_error = sys.float_info.max
 	for iteration in range(n):
-		os.system("python ../minimds.py -o {}_ {} {}".format(iteration, path1, path2))
+		os.system("python ../multimds.py -o {}_ {} {}".format(iteration, path1, path2))
 
 		#load structures
 		structure1 = dt.structure_from_file("{}_{}_{}_{}kb_structure.tsv".format(iteration, cell_type1, chrom, res_kb))	
@@ -92,8 +85,15 @@ for i, chrom in enumerate(chroms):
 	at.makeSymmetric(contacts1)
 	at.makeSymmetric(contacts2)
 
-	compartments1 = ca.get_compartments(contacts1, structure1, "/data/drive1/joint_mds/binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type1), chrom, res_kb), True)
-	compartments2 = ca.get_compartments(contacts1, structure1, "/data/drive1/joint_mds/binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type2), chrom, res_kb), True)
+	enrichments = np.array(np.loadtxt("binding_data/Gm12878_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
+	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+	enrichments = enrichments[bin_nums]
+	compartments1 = np.array(ca.get_compartments(contacts1, structure1, enrichments))
+
+	enrichments = np.array(np.loadtxt("binding_data/K562_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
+	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+	enrichments = enrichments[bin_nums]
+	compartments2 = np.array(ca.get_compartments(contacts2, structure2, enrichments))
 
 	#SVR
 	coords = np.concatenate((coords1, coords2))

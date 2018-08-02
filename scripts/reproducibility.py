@@ -13,8 +13,8 @@ res_kb = 100
 
 exp_names = ("GM12878_combined", "K562")
 
-path1 = "/data/drive1/hic_data/{}_{}_{}kb.bed".format(exp_names[0], chrom, res_kb)
-path2 = "/data/drive1/hic_data/{}_{}_{}kb.bed".format(exp_names[1], chrom, res_kb)
+path1 = "hic_data/{}_{}_{}kb.bed".format(exp_names[0], chrom, res_kb)
+path2 = "hic_data/{}_{}_{}kb.bed".format(exp_names[1], chrom, res_kb)
 
 structure1 = dt.structureFromBed(path1, None, None)
 structure2 = dt.structureFromBed(path2, None, None)
@@ -52,7 +52,6 @@ for p in ps:
 
 all_changes = []
 for i in range(n):
-	print i
 	#perform MDS
 	coords1 = MDS(n_components=3, random_state=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=-1).fit_transform(dists1)
 	coords2 = MDS(n_components=3, random_state=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=-1).fit_transform(dists2)
@@ -78,7 +77,8 @@ labels.append("Kabsch")
 
 all_r_sq.append(kabsch_r_sq)
 
-fig, ax = plt.subplots()
+fig = plt.figure(figsize=(4,4))  # define the figure window
+ax  = fig.add_subplot(111)   # define the axis
 ax.boxplot(all_r_sq)
 ax.set_ylabel("Reproducibility", fontsize=20)
 ax.set_xticklabels(labels, fontsize=15)

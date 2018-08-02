@@ -7,7 +7,7 @@ import os
 import linear_algebra as la
 import array_tools as at
 from scipy import signal as sg
-#from hmmlearn import hmm
+from hmmlearn import hmm
 
 def normalize(values):
 	return np.array(values)/max(values)
@@ -57,10 +57,8 @@ num_partitions = sys.argv[5]
 smoothing_parameter = float(sys.argv[6])
 n = 1
 
-path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
-path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
-#path1 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
-#path2 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
+path1 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
+path2 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
 
 min_error = sys.float_info.max
 for iteration in range(n):
@@ -121,8 +119,15 @@ contacts2 = dt.matFromBed(path2, structure2)
 at.makeSymmetric(contacts1)
 at.makeSymmetric(contacts2)
 
-compartments1 = ca.get_compartments(contacts1, structure1, "binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type1), chrom, res_kb), True)
-compartments2 = ca.get_compartments(contacts2, structure2, "binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type2), chrom, res_kb), True)	
+enrichments = np.array(np.loadtxt("binding_data/Gm12878_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
+bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+enrichments = enrichments[bin_nums]
+compartments1 = np.array(ca.get_compartments(contacts1, structure1, enrichments))
+
+enrichments = np.array(np.loadtxt("binding_data/K562_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
+bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+enrichments = enrichments[bin_nums]
+compartments2 = np.array(ca.get_compartments(contacts2, structure2, enrichments))
 
 gen_coords = structure1.getGenCoords()
 
@@ -130,20 +135,29 @@ dists = normalize(dists)
 compartment_diffs = np.abs(compartments1 - compartments2)
 compartment_diffs = normalize(compartment_diffs)
 
-dist_peaks = sg.find_peaks_cwt(dists, np.arange(1, 20))
+smoothed_dists = sg.cwt(dists, sg.ricker, [smoothing_parameter])[0]
+dist_peaks = call_peaks(smoothed_dists)
+smoothed_diffs = sg.cwt(compartment_diffs, sg.ricker, [smoothing_parameter])[0]
+diff_peaks = call_peaks(smoothed_diffs)
 
 gen_coords = structure1.getGenCoords()
 
 with open("{}_dist_peaks.bed".format(chrom), "w") as out:
 	for peak in dist_peaks:
-		out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res), str(compartments1[peak]), str(compartments2[peak]))))
+		start, end = peak
+		peak_dists = dists[start:end]
+		max_dist_index = np.argmax(peak_dists) + start
+		#out.write("\t".join(("{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
+		out.write("\t".join((structure1.chrom.name, str(gen_coords[max_dist_index]), str(gen_coords[max_dist_index] + structure1.chrom.res), str(compartments1[max_dist_index]), str(compartments2[max_dist_index]))))
 		out.write("\n")
 	out.close()
 
-diff_peaks = sg.find_peaks_cwt(compartment_diffs, np.arange(1, 20))
-
 with open("{}_comp_peaks.bed".format(chrom), "w") as out:
 	for peak in diff_peaks:
-		out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
+		start, end = peak
+		peak_diffs = compartment_diffs[start:end]
+		max_diff_index = np.argmax(peak_diffs) + start
+		out.write("\t".join((structure1.chrom.name, str(gen_coords[max_diff_index]), str(gen_coords[max_diff_index] + structure1.chrom.res))))
+		#out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
 		out.write("\n")
 	out.close()
