@@ -45,12 +45,12 @@ cd ..
 
 if [ ! -e peaks_filtered_GM12878_enhancer_coverage.bed ]
 	then
-		bedtools coverage -a peaks_filtered.bed -b GM12878_enhancers.bed > peaks_filtered_GM12878_enhancer_coverage.bed 
+		bedtools coverage -a peaks_filtered.bed -b binding_data/GM12878_enhancers.bed > peaks_filtered_GM12878_enhancer_coverage.bed 
 fi
 
 if [ ! -e peaks_filtered_K562_enhancer_coverage.bed ]
 	then
-		bedtools coverage -a peaks_filtered.bed -b K562_enhancers.bed > peaks_filtered_K562_enhancer_coverage.bed 
+		bedtools coverage -a peaks_filtered.bed -b binding_data/K562_enhancers.bed > peaks_filtered_K562_enhancer_coverage.bed 
 fi
 
 paste peaks_filtered_GM12878_enhancer_coverage.bed peaks_filtered_K562_enhancer_coverage.bed | awk '$7 > 0.1 && $14 <= 0.1 {print $1"\t"$2"\t"$3}' > peaks_filtered_GM12878_only_enhancer.bed
