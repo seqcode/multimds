@@ -25,8 +25,8 @@ def fullMatFromBed(path, chrom):
 			line = line.strip().split()	#line as array of strings
 			loc1 = int(line[1])
 			loc2 = int(line[4])
-			index1 = chrom.getPointNum(loc1)
-			index2 = chrom.getPointNum(loc2)
+			index1 = chrom.getAbsoluteIndex(loc1)
+			index2 = chrom.getAbsoluteIndex(loc2)
 			if index1 > index2:
 				row = index1
 				col = index2
