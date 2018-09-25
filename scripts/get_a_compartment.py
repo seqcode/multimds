@@ -16,7 +16,7 @@ for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 	enrichments = np.array(np.loadtxt("binding_data/Gm12878_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
 	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
 	enrichments = enrichments[bin_nums]
-	compartments = np.array(ca.get_compartments(contacts, structure, enrichments))
+	compartments = np.array(ca.get_compartments(contacts, enrichments))
 	gen_coords = np.array(structure.getGenCoords())
 	a_gen_coords = gen_coords[np.where(compartments > 0)]
 	with open("A_compartment.bed", "a") as out:

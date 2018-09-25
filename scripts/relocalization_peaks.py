@@ -19,34 +19,34 @@ def format_celltype(cell_type):
 		formatted = cell_type.split("_")[0]
 		return formatted[0].upper() + formatted[1:len(formatted)].lower()
 
-#def call_peaks(data):
-#	"""Calls peaks using Gaussian hidden markov model"""
-#	reshaped_data = data.reshape(-1,1)
-#	model = hmm.GaussianHMM(n_components=2).fit(reshaped_data)
-#	scores = model.predict(reshaped_data)
+def call_peaks(data):
+	"""Calls peaks using Gaussian hidden markov model"""
+	reshaped_data = data.reshape(-1,1)
+	model = hmm.GaussianHMM(n_components=2).fit(reshaped_data)
+	scores = model.predict(reshaped_data)
 
 	#determine if peaks are 0 or 1
-#	zero_indices = np.where(scores == 0)
-#	one_indices = np.where(scores == 1)
-#	zero_data = data[zero_indices]
-#	one_data = data[one_indices]
-#	if np.mean(zero_data) > np.mean(one_data):
-#		scores[zero_indices] = 1
-#		scores[one_indices] = 0
+	zero_indices = np.where(scores == 0)
+	one_indices = np.where(scores == 1)
+	zero_data = data[zero_indices]
+	one_data = data[one_indices]
+	if np.mean(zero_data) > np.mean(one_data):
+		scores[zero_indices] = 1
+		scores[one_indices] = 0
 
 	#find boundaries of peaks
-#	peaks = []
-#	in_peak = False
-#	for i, score in enumerate(scores):
-#		if in_peak and score == 0:	#end of peak
-#			in_peak = False
-#			peak.append(i)
-#			peaks.append(peak)
-#		elif not in_peak and score == 1:	#start of peak
-#			in_peak = True
-#			peak = [i]
+	peaks = []
+	in_peak = False
+	for i, score in enumerate(scores):
+		if in_peak and score == 0:	#end of peak
+			in_peak = False
+			peak.append(i)
+			peaks.append(peak)
+		elif not in_peak and score == 1:	#start of peak
+			in_peak = True
+			peak = [i]
 
-#	return peaks
+	return peaks
 
 res_kb = 100
 cell_type1 = sys.argv[1]
@@ -57,8 +57,8 @@ num_partitions = sys.argv[5]
 smoothing_parameter = float(sys.argv[6])
 n = 1
 
-path1 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
-path2 = "hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
+path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
+path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
 
 min_error = sys.float_info.max
 for iteration in range(n):
@@ -120,14 +120,14 @@ at.makeSymmetric(contacts1)
 at.makeSymmetric(contacts2)
 
 enrichments = np.array(np.loadtxt("binding_data/Gm12878_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
-bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+bin_nums = structure1.nonzero_abs_indices() + structure1.chrom.minPos/structure1.chrom.res
 enrichments = enrichments[bin_nums]
-compartments1 = np.array(ca.get_compartments(contacts1, structure1, enrichments))
+compartments1 = np.array(ca.get_compartments(contacts1, enrichments))
 
 enrichments = np.array(np.loadtxt("binding_data/K562_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
-bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
+bin_nums = structure2.nonzero_abs_indices() + structure2.chrom.minPos/structure2.chrom.res
 enrichments = enrichments[bin_nums]
-compartments2 = np.array(ca.get_compartments(contacts2, structure2, enrichments))
+compartments2 = np.array(ca.get_compartments(contacts2, enrichments))
 
 gen_coords = structure1.getGenCoords()
 
