@@ -3,7 +3,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import stats as st
 
-os.system("rm polycomb_enrichment.txt enhancer_enrichment.txt")
+if os.path.isfile("polycomb_enrichment.txt"):
+	os.system("rm polycomb_enrichment.txt")
+
+if os.path.isfile("enhancer_enrichment.txt"):
+	os.system("rm enhancer_enrichment.txt")
 
 with open("peaks_filtered_GM12878_only_enhancer.bed") as in_file:
 	for line in in_file:
@@ -26,7 +30,7 @@ with open("peaks_filtered_GM12878_only_enhancer.bed") as in_file:
 			if fc < 0:	#loop in K562 only
 				os.system("cat binding_data/wgEncodeBroadHistoneK562H3k27me3StdPk_100kb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(chrom, partner))
 			else:	#loop in GM12878 only
-				os.system("cat GM12878_enhancers_100kb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(chrom, partner))
+				os.system("cat binding_data/GM12878_enhancers_100kb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(chrom, partner))
 	in_file.close()
 
 
@@ -53,7 +57,7 @@ with open("peaks_filtered_K562_only_enhancer.bed") as in_file:
 			if fc > 0:	#loop in GM12878 only
 				os.system("cat binding_data/wgEncodeBroadHistoneGm12878H3k27me3StdPkV2_100kb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(chrom, partner))
 			else:	#loop in K562 only
-				os.system("cat K562_enhancers_100kb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(chrom, partner))
+				os.system("cat binding_data/K562_enhancers_100kb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(chrom, partner))
 	in_file.close()
 
 with open("peaks_filtered_both_enhancer.bed") as in_file:
