@@ -18,6 +18,9 @@ do
 done
 
 #unique enhancers
+mkdir -p binding_data
+cd binding_data
+
 if [ ! -e GM12878_enhancers.bed ] 
 	then
 		if [ ! -e GM12878.csv ]
@@ -38,6 +41,8 @@ if [ ! -e K562_enhancers.bed ]
 		cat K562.csv | awk -F "," '$1 != "track name=\"Enhancers in K562\" itemRGB=On color=0" {print $2"\t"$3"\t"$4}' > K562_enhancers.bed
 fi
 
+cd ..
+
 if [ ! -e peaks_filtered_GM12878_enhancer_coverage.bed ]
 	then
 		bedtools coverage -a peaks_filtered.bed -b GM12878_enhancers.bed > peaks_filtered_GM12878_enhancer_coverage.bed 
@@ -53,7 +58,7 @@ paste peaks_filtered_GM12878_enhancer_coverage.bed peaks_filtered_K562_enhancer_
 paste peaks_filtered_GM12878_enhancer_coverage.bed peaks_filtered_K562_enhancer_coverage.bed | awk '$7 > 0.1 && $14 > 0.1 {print $1"\t"$2"\t"$3}' > peaks_filtered_both_enhancer.bed
 
 #polycomb
-mkdir -p binding_data
+
 cd binding_data
 
 WINDOW_FILE=hg19_100kb_windows.bed
@@ -79,10 +84,10 @@ if [ ! -e wgEncodeBroadHistoneK562H3k27me3StdPk_100kb_windows_enrichment.bed ]
 		bedtools coverage -a $WINDOW_FILE -b wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak > wgEncodeBroadHistoneK562H3k27me3StdPk_100kb_windows_enrichment.bed
 fi
 
-cd ..
+bedtools coverage -a $WINDOW_FILE -b GM12878_enhancers.bed > GM12878_enhancers_100kb_windows_enrichment.bed
+bedtools coverage -a $WINDOW_FILE -b K562_enhancers.bed > K562_enhancers_100kb_windows_enrichment.bed
 
-bedtools coverage -a binding_data/$WINDOW_FILE -b GM12878_enhancers.bed > GM12878_enhancers_100kb_windows_enrichment.bed
-bedtools coverage -a binding_data/$WINDOW_FILE -b K562_enhancers.bed > K562_enhancers_100kb_windows_enrichment.bed
+cd ..
 
 #negative control
 if [ ! -e A_compartment.bed ]
