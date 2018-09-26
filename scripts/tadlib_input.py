@@ -14,10 +14,10 @@ for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 	points = structure.getPoints()
 	with open("{}_tadlib_input/chr{}.txt".format(cell_type, chrom), "w") as out:
 		for i in range(len(mat)):
-			point_num1 = points[i].num
+			point_num1 = points[i].absolute_index
 			for j in range(i):
 				if mat[i,j] != 0:
-					point_num2 = points[j].num
+					point_num2 = points[j].absolute_index
 					out.write("\t".join((str(point_num1), str(point_num2), str(mat[i,j]))))
 					out.write("\n")
 		out.close()
