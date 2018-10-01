@@ -21,7 +21,6 @@ for p in ps:
 	all_changes = []
 	for i in range(n):
 		print(i)
-		#perform MDS
 		os.system("python ../multimds.py --full {} {}".format(path1, path2))
 
 		structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[0], chrom, res_kb))
@@ -63,8 +62,7 @@ labels.append("Kabsch")
 
 all_r_sq.append(kabsch_r_sq)
 
-fig = plt.figure()  # define the figure window
-ax = fig.add_subplot(111)   # define the axis
+fig, ax = plt.subplots()  # define the figure window
 ax.boxplot(all_r_sq)
 ax.set_ylabel("Reproducibility", fontsize=20)
 ax.set_xticklabels(labels, fontsize=15)
