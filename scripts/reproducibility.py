@@ -21,7 +21,7 @@ for p in ps:
 	all_changes = []
 	for i in range(n):
 		print(i)
-		os.system("python ../multimds.py --full {} {}".format(path1, path2))
+		os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
 
 		structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[0], chrom, res_kb))
 		structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[1], chrom, res_kb))

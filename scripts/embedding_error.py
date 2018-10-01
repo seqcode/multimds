@@ -3,8 +3,8 @@ sys.path.append("..")
 import data_tools as dt
 import numpy as np
 import linear_algebra as la
-from joint_mds import Joint_MDS
 from matplotlib import pyplot as plt
+import os
 
 def error(dists, coords):
 	assert len(dists) == len(coords)
@@ -29,26 +29,20 @@ prefix2 = "K562"
 path1 = "hic_data/{}_{}_{}kb.bed".format(prefix1, chrom, res_kb)
 path2 = "hic_data/{}_{}_{}kb.bed".format(prefix2, chrom, res_kb)
 
-structure1 = dt.structureFromBed(path1, None, None)
-structure2 = dt.structureFromBed(path2, None, None)
-
-#make structures compatible
-dt.make_compatible((structure1, structure2))
-
-#get distance matrices
-dists1 = dt.normalized_dist_mat(path1, structure1)
-dists2 = dt.normalized_dist_mat(path2, structure2)
-
 ps = np.arange(0, 0.6, 0.1)
 errors1 = np.zeros_like(ps)
 errors2 = np.zeros_like(ps)
 
 for i, p in enumerate(ps):
-	#joint MDS
-	coords1, coords2 = Joint_MDS(n_components=3, p=p, random_state1=np.random.RandomState(), random_state2=np.random.RandomState(), dissimilarity="precomputed", n_jobs=-1).fit_transform(dists1, dists2)
+	os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
+	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
+	structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
 
-	errors1[i] = error(dists1, coords1)
-	errors2[i] = error(dists2, coords2)
+	dists1 = dt.normalized_dist_mat(path1, structure1)
+	dists2 = dt.normalized_dist_mat(path2, structure2)
+
+	errors1[i] = error(dists1, structure1.getCoords())
+	errors2[i] = error(dists2, structure2.getCoords())
 
 errors1 = errors1/errors1[0]
 errors2 = errors2/errors2[0]
