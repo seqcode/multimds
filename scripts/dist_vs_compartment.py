@@ -13,19 +13,17 @@ res_kb = 100
 cell_type1 = "GM12878_combined"
 cell_type2 = "K562"
 chroms = (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)
-partition_nums = (4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2)
-midpoints = (135, 93, 92, 51, 48, 60, 60, 45, 41, 53, 36, 0, 0, 0, 40, 24, 17, 26, 28, 0, 0)
+#partition_nums = (4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2)
+#midpoints = (135, 93, 92, 51, 48, 60, 60, 45, 41, 53, 36, 0, 0, 0, 40, 24, 17, 26, 28, 0, 0)
 multimds_z_rs = np.zeros_like(chroms, dtype=float)
 contacts_pearson_rs = np.zeros_like(chroms, dtype=float)
 contacts_spearman_rs = np.zeros_like(chroms, dtype=float)
-dists_pearson_rs = np.zeros_like(chroms, dtype=float)
-dists_spearman_rs = np.zeros_like(chroms, dtype=float)
 
 for j, chrom in enumerate(chroms):	
 	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
 	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-	os.system("python ../multimds.py -m {} -N {} -o hic_data/ {} {}".format(midpoints[j]*10**6, partition_nums[j], path1, path2))
+	os.system("python ../multimds.py --full {} {}".format(path1, path2))
 
 	#load structures
 	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
@@ -45,8 +43,11 @@ for j, chrom in enumerate(chroms):
 	mat2 = dt.matFromBed(path2, structure2)
 	
 	#compartments
-	compartments1 = ca.infer_compartments(mat1, structure1, cell_type1, chrom, res_kb)
-	compartments2 = ca.infer_compartments(mat2, structure2, cell_type2, chrom, res_kb)
+	compartments1 = ca.get_compartments(mat1)
+	compartments2 = ca.get_compartments(mat2)
+	r, p = st.pearsonr(compartments1, compartments2)
+	if r < 0:
+		compartments2 = -compartments2
 	compartment_diffs = compartments1 - compartments2
 
 	#SVR
