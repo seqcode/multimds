@@ -223,7 +223,7 @@ def main():
 	structure1.write("{}_structure.tsv".format(prefix1))
 	prefix2 = args.path2.split("/")[-1].split(".bed")[0]
 	#structure2.write("{}/{}{}_structure.tsv".format("/".join(args.path2.split("/")[0:-1]), prefix, prefix2))
-	structure1.write("{}_structure.tsv".format(prefix2))
+	structure2.write("{}_structure.tsv".format(prefix2))
 
 if __name__ == "__main__":
 	main()
