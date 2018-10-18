@@ -9,9 +9,15 @@ import array_tools as at
 import linear_algebra as la
 import tools
 import tad
+from hic_oe import get_expected
 
-def distmat(contactMat, structure, alpha):
+def distmat(contactMat, structure, alpha, weight):
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
+
+	expected = get_expected(contactMat)
+	for i in range(len(contactMat)):
+		for j in range(i):
+			contactMat[i,j] = (1-weight)*contactMat[i,j] + weight*expected[i-j-1]
 
 	at.makeSymmetric(contactMat)
 	rowsums = np.array([sum(row) for row in contactMat])
@@ -24,24 +30,24 @@ def distmat(contactMat, structure, alpha):
 	
 	return distMat
 
-def infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads):
+def infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads, weight):
 	"""Infers 3D coordinates for one structure"""
-	distMat1 = distmat(contactMat1, structure1, alpha)	
-	distMat2 = distmat(contactMat2, structure2, alpha)
+	distMat1 = distmat(contactMat1, structure1, alpha, weight)	
+	distMat2 = distmat(contactMat2, structure2, alpha, weight)
 
 	coords1, coords2 = Joint_MDS(p=penalty, n_components=3, metric=True, random_state1=np.random.RandomState(), random_state2=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat1, distMat2)
 
 	structure1.setCoords(coords1)
 	structure2.setCoords(coords2)
 
-def fullMDS(path1, path2, alpha, penalty, num_threads):
+def fullMDS(path1, path2, alpha, penalty, num_threads, weight):
 	"""MDS without partitioning"""
 	structure1 = dt.structureFromBed(path1)
 	structure2 = dt.structureFromBed(path2)
 	dt.make_compatible((structure1, structure2))
 	contactMat1 = dt.matFromBed(path1, structure1)
 	contactMat2 = dt.matFromBed(path2, structure2)
-	infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads)
+	infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads, weight)
 	return structure1, structure2
 
 def create_low_res_structure(path, res_ratio):
@@ -82,6 +88,7 @@ def partitionedMDS(path1, path2, args):
 	alpha = args[4]
 	res_ratio = args[5]
 	penalty = args[6]
+	weight = args[7]
 
 	#create low-res structures
 	lowstructure1 = create_low_res_structure(path1, res_ratio)
@@ -144,7 +151,7 @@ def partitionedMDS(path1, path2, args):
 	highstructure1 = dt.Structure([], high_substructures1, highChrom1, 0)
 	highstructure2 = dt.Structure([], high_substructures2, highChrom2, 0)
 
-	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads)
+	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads, weight)
 	print "Low-resolution MDS complete"
 
 	highSubstructures1 = pymp.shared.list(highstructure1.structures)
@@ -165,7 +172,7 @@ def partitionedMDS(path1, path2, args):
 			structure_contactMat1 = dt.matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
 			structure_contactMat2 = dt.matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
 
-			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads)
+			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads, weight)
 
 			transform(trueLow1, highSubstructure1, res_ratio)
 			transform(trueLow2, highSubstructure2, res_ratio)
@@ -193,14 +200,15 @@ def main():
 	parser.add_argument("-P", type=float, default=0.05, help="joint MDS penalty")
 	parser.add_argument("-m", type=int, default=0, help="midpoint (usually centromere) for partitioning")
 	parser.add_argument("-N", type=int, default=2, help="number of partitions")
+	parser.add_argument("-w", type=float, default=0.05, help="weight of distance decay prior")
 	args = parser.parse_args()
 
 	if args.full:	#not partitioned
-		structure1, structure2 = fullMDS(args.path1, args.path2, args.a, args.P, args.n)
+		structure1, structure2 = fullMDS(args.path1, args.path2, args.a, args.P, args.n, args.w)
 	else:	#partitioned
-		params = (args.m, args.N, args.r, args.n, args.a, args.l, args.P)
-		names = ("Midpoint", "Number of partitions", "Maximum memory", "Number of threads", "Alpha", "Resolution ratio", "Penalty")
-		intervals = ((None, None), (1, None), (0, None), (0, None), (1, None), (1, None), (0, None))
+		params = (args.m, args.N, args.r, args.n, args.a, args.l, args.P, args.w)
+		names = ("Midpoint", "Number of partitions", "Maximum memory", "Number of threads", "Alpha", "Resolution ratio", "Penalty", "Weight")
+		intervals = ((None, None), (1, None), (0, None), (0, None), (1, None), (1, None), (0, None), (0, 1))
 		if not tools.args_are_valid(params, names, intervals):
 			sys.exit(0)
 
