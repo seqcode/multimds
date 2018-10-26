@@ -214,7 +214,7 @@ def basicParamsFromBed(path):
 		infile.close()
 	return i, res
 
-def matFromBed(path, structure=None):	
+def matFromBed(path, num_threads, structure=None):	
 	"""Converts BED file to matrix. Only includes loci in structure."""
 	if structure is None:
 		structure = structureFromBed(path, None, None)
@@ -243,7 +243,7 @@ def matFromBed(path, structure=None):
 				mat[row, col] += float(line[6])
 		infile.close()
 
-	at.makeSymmetric(mat)	
+	mat = at.makeSymmetric(mat, num_threads)	
 	rowsums = np.array([sum(row) for row in mat])
 	assert len(np.where(rowsums == 0)[0]) == 0
 
