@@ -214,8 +214,9 @@ def basicParamsFromBed(path):
 		infile.close()
 	return i, res
 
-def matFromBed(path, structure=None):	
+def matFromBed(path, num_threads, structure=None):	
 	"""Converts BED file to matrix. Only includes loci in structure."""
+	#TODO: parallelize
 	if structure is None:
 		structure = structureFromBed(path, None, None)
 
