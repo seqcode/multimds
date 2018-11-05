@@ -193,7 +193,7 @@ def main():
 	parser.add_argument("path2", help="path to second intrachromosomal Hi-C BED file")
 	parser.add_argument("--full", action="store_true", help="use full MDS (default: partitioned MDS)")
 	parser.add_argument("-l", type=int, help="low resolution/high resolution", default=10)
-	parser.add_argument("-o", help="output file prefix")
+	#parser.add_argument("-o", help="output file prefix")
 	parser.add_argument("-r", default=32000000, help="maximum RAM to use (in kb)")
 	parser.add_argument("-n", type=int, default=3, help="number of threads")
 	parser.add_argument("-a", type=float, default=4, help="alpha factor for converting contact frequencies to physical distances")
@@ -214,14 +214,16 @@ def main():
 
 		structure1, structure2 = partitionedMDS(args.path1, args.path2, params)
 	
-	if args.o:
-		prefix = args.o
-	else:
-		prefix = ""
+	#if args.o:
+	#	prefix = args.o
+	#else:
+	#	prefix = ""
 	prefix1 = args.path1.split("/")[-1].split(".bed")[0]
-	structure1.write("{}/{}{}_structure.tsv".format("/".join(args.path1.split("/")[0:-1]), prefix, prefix1))
+	#structure1.write("{}/{}{}_structure.tsv".format("/".join(args.path1.split("/")[0:-1]), prefix, prefix1))
+	structure1.write("{}_structure.tsv".format(prefix1))
 	prefix2 = args.path2.split("/")[-1].split(".bed")[0]
-	structure2.write("{}/{}{}_structure.tsv".format("/".join(args.path2.split("/")[0:-1]), prefix, prefix2))
+	#structure2.write("{}/{}{}_structure.tsv".format("/".join(args.path2.split("/")[0:-1]), prefix, prefix2))
+	structure2.write("{}_structure.tsv".format(prefix2))
 
 if __name__ == "__main__":
 	main()

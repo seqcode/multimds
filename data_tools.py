@@ -156,7 +156,7 @@ def structureFromBed(path, chrom=None, start=None, end=None, offset=0):
 
 	structure = Structure([], [], chrom, offset)
 	
-	structure.points = np.zeros((end - start)/chrom.res + 1, dtype=object)	#true if locus should be added
+	structure.points = np.zeros(int((end - start)/chrom.res) + 1, dtype=object)	#true if locus should be added
 	tracker = Tracker("Identifying loci", structure.chrom.size)
 
 	#add loci
@@ -165,12 +165,12 @@ def structureFromBed(path, chrom=None, start=None, end=None, offset=0):
 			line = line.strip().split()
 			pos1 = int(line[1])
 			pos2 = int(line[4])
-			if pos1 >= start and pos1 < end and pos2 >= start and pos2 < end:
+			if pos1 >= start and pos1 <= end and pos2 >= start and pos2 <= end:
 				abs_index1 = structure.chrom.getAbsoluteIndex(pos1)
 				abs_index2 = structure.chrom.getAbsoluteIndex(pos2)
 				if abs_index1 != abs_index2:	#non-self-interacting
-					structure.points[(pos1 - start)/chrom.res] = Point((0,0,0), structure.chrom, abs_index1, 0)
-					structure.points[(pos2 - start)/chrom.res] = Point((0,0,0), structure.chrom, abs_index2, 0)
+					structure.points[int((pos1 - start)/chrom.res)] = Point((0,0,0), structure.chrom, abs_index1, 0)
+					structure.points[int((pos2 - start)/chrom.res)] = Point((0,0,0), structure.chrom, abs_index2, 0)
 			tracker.increment()
 		listFile.close()
 
@@ -214,8 +214,9 @@ def basicParamsFromBed(path):
 		infile.close()
 	return i, res
 
-def matFromBed(path, structure=None):	
+def matFromBed(path, num_threads, structure=None):	
 	"""Converts BED file to matrix. Only includes loci in structure."""
+	#TODO: parallelize
 	if structure is None:
 		structure = structureFromBed(path, None, None)
 
@@ -243,7 +244,7 @@ def matFromBed(path, structure=None):
 				mat[row, col] += float(line[6])
 		infile.close()
 
-	at.makeSymmetric(mat)	
+	at.makeSymmetric(mat, num_threads)	
 	rowsums = np.array([sum(row) for row in mat])
 	assert len(np.where(rowsums == 0)[0]) == 0
 
