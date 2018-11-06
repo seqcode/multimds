@@ -16,54 +16,33 @@ n = 10
 
 all_r_sq = []
 
-ps = np.arange(0.01, 0.1, 0.01)
+ps = np.arange(0, 0.1, 0.01)
+
 for p in ps:
 	all_changes = []
 	for i in range(n):
 		print(i)
 		os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
 
-		structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[0], chrom, res_kb))
-		structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[1], chrom, res_kb))
+		structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(exp_names[0], chrom, res_kb))
+		structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(exp_names[1], chrom, res_kb))
+		
+		if p == 0:
+			r, t = la.getTransformation(structure1, structure2)
+			structure1.transform(r,t)
 
 		all_changes.append(np.array([la.calcDistance(coord1, coord2) for coord1, coord2 in zip(structure1.getCoords(), structure2.getCoords())]))
 
-	multimds_r_sq = []
+	r_sq = []
 	for i in range(n):
 		for j in range(i):
 			r, p = st.pearsonr(all_changes[i], all_changes[j])
-			multimds_r_sq.append(r**2)
+			r_sq.append(r**2)
 
-	all_r_sq.append(multimds_r_sq)
+	all_r_sq.append(r_sq)
 
-all_changes = []
-for i in range(n):
-	print(i)
-	os.system("python minimds.py {}".format(path1))
-	os.system("python minimds.py {}".format(path2))
-
-	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[0], chrom, res_kb))
-	structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(exp_names[1], chrom, res_kb))
-
-	#kabsch
-	r, t = la.getTransformation(structure1, structure2)
-	structure1.transform(r,t)
-
-	all_changes.append(np.array([la.calcDistance(coord1, coord2) for coord1, coord2 in zip(structure1.getCoords(), structure2.getCoords())]))
-
-kabsch_r_sq = []
-for i in range(n):
-	for j in range(i):
-		r, p = st.pearsonr(all_changes[i], all_changes[j])
-		kabsch_r_sq.append(r**2)
-
-labels = ["p={}".format(p) for p in ps]
-labels.append("Kabsch")
-
-all_r_sq.append(kabsch_r_sq)
-
-fig, ax = plt.subplots()  # define the figure window
-ax.boxplot(all_r_sq)
-ax.set_ylabel("Reproducibility", fontsize=20)
-ax.set_xticklabels(labels, fontsize=15)
+medianprops = dict(linestyle="none")
+plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops, showfliers=False)
+plt.ylabel("Correlation between iterations", fontsize=15)
+plt.xlabel("Difference penalty", fontsize=15)
 plt.savefig("reproducibility")
