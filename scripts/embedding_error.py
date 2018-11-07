@@ -42,14 +42,22 @@ for i, p in enumerate(ps):
 
 	errors[i] = np.mean((error(dists1, structure1.getCoords()), error(dists1, structure1.getCoords())))
 
-ind = np.arange(len(ps)) 
-width = 0.35
 
-plt.subplot2grid((10,10), (0,0), 10, 10, frameon=False)
-plt.bar(ind+width, errors, width)
-plt.ylabel("Average RMSE", fontsize=15)
-plt.xlabel("Difference penalty", fontsize=15)
-plt.axvline(color="k", lw=4)
-plt.axhline(color="k", lw=6)
-plt.xticks(ind, ps)
+xs = ps
+x_int_size = 0.1
+ys = errors
+y_int_size = 0.05
+x_start = min(xs) - x_int_size/4.
+x_end = max(xs) + x_int_size/5.
+y_start = -y_int_size/5.
+y_end = max(ys) + y_int_size/5.
+
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+plt.bar(ps, errors, 0.04, bottom=y_start)
+plt.ylabel("Average RMSE", fontsize=14)
+plt.xlabel("Difference penalty", fontsize=14)
+plt.axis([x_start, x_end, y_start, y_end],frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=-0.01, color="k", lw=6)	
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 plt.savefig("embedding_error")
