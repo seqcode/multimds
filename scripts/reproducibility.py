@@ -41,8 +41,20 @@ for p in ps:
 
 	all_r_sq.append(r_sq)
 
+xs = range(len(ps))
+y_int_size = 0.1
+x_start = min(xs) - 0.05
+x_end = len(xs) + 1
+y_start = -y_int_size/5.
+y_end = 1 + y_int_size/5.
+
 medianprops = dict(linestyle="none")
-plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops, showfliers=False)
-plt.ylabel("Correlation between iterations", fontsize=15)
-plt.xlabel("Difference penalty", fontsize=15)
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops)
+plt.ylabel("Correlation between iterations", fontsize=14)
+plt.xlabel("Difference penalty", fontsize=14)
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=6)	
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 plt.savefig("reproducibility")
