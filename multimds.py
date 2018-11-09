@@ -11,7 +11,7 @@ import tools
 import tad
 from hic_oe import get_expected
 
-def distmat(contactMat, structure, alpha, weight):
+def distmat(contactMat, structure, alpha, weight, num_threads):
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
 
 	expected = get_expected(contactMat)
@@ -32,8 +32,8 @@ def distmat(contactMat, structure, alpha, weight):
 
 def infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads, weight):
 	"""Infers 3D coordinates for one structure"""
-	distMat1 = distmat(contactMat1, structure1, alpha, weight)	
-	distMat2 = distmat(contactMat2, structure2, alpha, weight)
+	distMat1 = distmat(contactMat1, structure1, alpha, weight, num_threads)	
+	distMat2 = distmat(contactMat2, structure2, alpha, weight, num_threads)
 
 	coords1, coords2 = Joint_MDS(p=penalty, n_components=3, metric=True, random_state1=np.random.RandomState(), random_state2=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat1, distMat2)
 
@@ -169,8 +169,8 @@ def partitionedMDS(path1, path2, args):
 			trueLow2 = lowSubstructures2[substructurenum]
 
 			#joint MDS
-			structure_contactMat1 = dt.matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
-			structure_contactMat2 = dt.matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
+			structure_contactMat1 = dt.matFromBed(path1, num_threads, highSubstructure1)	#contact matrix for this structure only
+			structure_contactMat2 = dt.matFromBed(path2, num_threads, highSubstructure2)	#contact matrix for this structure only
 
 			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads, weight)
 
