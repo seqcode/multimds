@@ -1,4 +1,5 @@
 import sys
+sys.path.append("..")
 import data_tools as dt
 
 res_kb = 100

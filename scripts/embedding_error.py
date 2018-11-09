@@ -30,32 +30,34 @@ path1 = "hic_data/{}_{}_{}kb.bed".format(prefix1, chrom, res_kb)
 path2 = "hic_data/{}_{}_{}kb.bed".format(prefix2, chrom, res_kb)
 
 ps = np.arange(0, 0.6, 0.1)
-errors1 = np.zeros_like(ps)
-errors2 = np.zeros_like(ps)
+errors = np.zeros_like(ps)
 
 for i, p in enumerate(ps):
 	os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
-	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
-	structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
+	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
+	structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
 
 	dists1 = dt.normalized_dist_mat(path1, structure1)
 	dists2 = dt.normalized_dist_mat(path2, structure2)
 
-	errors1[i] = error(dists1, structure1.getCoords())
-	errors2[i] = error(dists2, structure2.getCoords())
+	errors[i] = np.mean((error(dists1, structure1.getCoords()), error(dists1, structure1.getCoords())))
 
-errors1 = errors1/errors1[0]
-errors2 = errors2/errors2[0]
 
-width = 0.35
-ind = np.arange(len(ps)) 
+xs = ps
+x_int_size = 0.1
+ys = errors
+y_int_size = 0.05
+x_start = min(xs) - x_int_size/4.
+x_end = max(xs) + x_int_size/5.
+y_start = -y_int_size/5.
+y_end = max(ys) + y_int_size/5.
 
-fig, ax = plt.subplots()
-rects1 = ax.bar(ind, errors1, width, color="b")
-rects2 = ax.bar(ind+width, errors2, width, color="g")
-plt.ylabel("Normalized RMSE")
-plt.xlabel("Difference penalty")
-ax.set_xticks(ind + width / 2)
-ax.set_xticklabels(ps)
-ax.legend((rects1[0], rects2[0]), ("Embedding 1", "Embedding 2"))
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+plt.bar(ps, errors, 0.04, bottom=y_start)
+plt.ylabel("Average RMSE", fontsize=14)
+plt.xlabel("Difference penalty", fontsize=14)
+plt.axis([x_start, x_end, y_start, y_end],frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=6)	
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 plt.savefig("embedding_error")
