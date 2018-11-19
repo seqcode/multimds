@@ -57,10 +57,12 @@ def get_compartments(mat, enrichments=None, active=True):
 	pca = PCA(n_components=1)
 	pca.fit(cor_mat)
 	scores = pca.fit_transform(cor_mat)[:,0]
+	print pca.explained_variance_ratio_
 
 	#enforce positive score = active chromatin
 	if enrichments is not None:
 		r, p = st.pearsonr(scores, enrichments)
+		print r
 		if active and r < 0:
 			scores = -scores
 		elif not active and r > 0:

@@ -60,7 +60,7 @@ smoothing_parameter = float(sys.argv[6])
 path1 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type1, chrom, res_kb)
 path2 = "/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered.bed".format(cell_type2, chrom, res_kb)
 
-os.system("python ../multimds.py --full {} {}".format(path1, path2))
+#os.system("python ../multimds.py --full {} {}".format(path1, path2))
 
 #load structures
 structure1 = dt.structure_from_file("/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}kb_filtered_structure.tsv".format(cell_type1, chrom, res_kb))	

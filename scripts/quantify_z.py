@@ -11,98 +11,112 @@ import array_tools as at
 from scipy import stats as st
 
 res_kb = 100
-chroms = (22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 8, 7, 6, 5, 4, 3, 2, 1)
-cell_type1 = "GM12878_combined"
-cell_type2 = "K562"
+chroms = range(1, int(sys.argv[1]))
+design_file = sys.argv[2]
+penalty = float(sys.argv[3])
 
-x_means = np.zeros_like(chroms, dtype=float)
-y_means = np.zeros_like(chroms, dtype=float)
-z_means = np.zeros_like(chroms, dtype=float)
-x_lengths = np.zeros_like(chroms, dtype=float)
-y_lengths = np.zeros_like(chroms, dtype=float)
-z_lengths = np.zeros_like(chroms, dtype=float)
+x_means = []
+y_means = []
+z_means = []
+x_lengths = []
+y_lengths = []
+z_lengths = []
 
-for i, chrom in enumerate(chroms):
-	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
-	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
+with open(design_file) as infile:
+	for line in infile:
+		cell_type1, cell_type2 = line.strip().split()
+		for chrom in chroms:
+			path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
+			path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-	os.system("python ../multimds.py --full {} {}".format(path1, path2))
-	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
-	structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+			if os.path.isfile(path1) and os.path.isfile(path2):
+				os.system("python ../multimds.py --full -P {} {} {}".format(penalty, path1, path2))
+				structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
+				structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 
-	#compartments
-	contacts1 = dt.matFromBed(path1, structure1)
-	contacts2 = dt.matFromBed(path2, structure2)
+				#compartments
+				contacts1 = dt.matFromBed(path1, structure1)
+				contacts2 = dt.matFromBed(path2, structure2)
 
-	at.makeSymmetric(contacts1)
-	at.makeSymmetric(contacts2)
+				at.makeSymmetric(contacts1)
+				at.makeSymmetric(contacts2)
 
-	compartments1 = np.array(ca.get_compartments(contacts1))
-	compartments2 = np.array(ca.get_compartments(contacts2))
+				compartments1 = np.array(ca.get_compartments(contacts1, 1))
+				compartments2 = np.array(ca.get_compartments(contacts2, 1))
 
-	r, p = st.pearsonr(compartments1, compartments2)
-	if r < 0:
-		compartments2 = -compartments2
+				r, p = st.pearsonr(compartments1, compartments2)
+				if r < 0:
+					compartments2 = -compartments2
 
-	#SVR
-	coords1 = structure1.getCoords()
-	coords2 = structure2.getCoords()
-	coords = np.concatenate((coords1, coords2))
-	compartments = np.concatenate((compartments1, compartments2))
-	clf = svm.LinearSVR()
-	clf.fit(coords, compartments)
-	coef = clf.coef_
+				#SVR
+				coords1 = structure1.getCoords()
+				coords2 = structure2.getCoords()
+				coords = np.concatenate((coords1, coords2))
+				compartments = np.concatenate((compartments1, compartments2))
+				clf = svm.LinearSVR()
+				clf.fit(coords, compartments)
+				coef = clf.coef_
 
-	transformed_coords1 = np.array(la.change_coordinate_system(coef, coords1))
-	transformed_coords2 = np.array(la.change_coordinate_system(coef, coords2))
+				transformed_coords1 = np.array(la.change_coordinate_system(coef, coords1))
+				transformed_coords2 = np.array(la.change_coordinate_system(coef, coords2))
 
-	x_diffs = transformed_coords1[:,0] - transformed_coords2[:,0]
-	y_diffs = transformed_coords1[:,1] - transformed_coords2[:,1]
-	z_diffs = transformed_coords1[:,2] - transformed_coords2[:,2]
+				x_diffs = transformed_coords1[:,0] - transformed_coords2[:,0]
+				y_diffs = transformed_coords1[:,1] - transformed_coords2[:,1]
+				z_diffs = transformed_coords1[:,2] - transformed_coords2[:,2]
 
-	x_means[i] = np.mean(np.abs(x_diffs))
-	y_means[i] = np.mean(np.abs(y_diffs))
-	z_means[i] = np.mean(np.abs(z_diffs))
+				x_means.append(np.mean(np.abs(x_diffs)))
+				y_means.append(np.mean(np.abs(y_diffs)))
+				z_means.append(np.mean(np.abs(z_diffs)))
 
-	#axis lengths
-	centroid1 = np.mean(transformed_coords1, axis=0)
-	centroid2 = np.mean(transformed_coords2, axis=0)
-	x_length1 = np.mean([np.abs(coord1[0] - centroid1[0]) for coord1 in transformed_coords1])
-	y_length1 = np.mean([np.abs(coord1[1] - centroid1[1]) for coord1 in transformed_coords1])
-	z_length1 = np.mean([np.abs(coord1[2] - centroid1[2]) for coord1 in transformed_coords1])
-	x_length2 = np.mean([np.abs(coord2[0] - centroid2[0]) for coord2 in transformed_coords2])
-	y_length2 = np.mean([np.abs(coord2[1] - centroid2[1]) for coord2 in transformed_coords2])
-	z_length2 = np.mean([np.abs(coord2[2] - centroid2[2]) for coord2 in transformed_coords2])
+				#axis lengths
+				centroid1 = np.mean(transformed_coords1, axis=0)
+				centroid2 = np.mean(transformed_coords2, axis=0)
+				x_length1 = np.mean([np.abs(coord1[0] - centroid1[0]) for coord1 in transformed_coords1])
+				y_length1 = np.mean([np.abs(coord1[1] - centroid1[1]) for coord1 in transformed_coords1])
+				z_length1 = np.mean([np.abs(coord1[2] - centroid1[2]) for coord1 in transformed_coords1])
+				x_length2 = np.mean([np.abs(coord2[0] - centroid2[0]) for coord2 in transformed_coords2])
+				y_length2 = np.mean([np.abs(coord2[1] - centroid2[1]) for coord2 in transformed_coords2])
+				z_length2 = np.mean([np.abs(coord2[2] - centroid2[2]) for coord2 in transformed_coords2])
 
-	x_lengths[i] = np.mean((x_length1, x_length2))
-	y_lengths[i] = np.mean((y_length1, y_length2))
-	z_lengths[i] = np.mean((z_length1, z_length2))
+				x_lengths.append(np.mean((x_length1, x_length2)))
+				y_lengths.append(np.mean((y_length1, y_length2)))
+				z_lengths.append(np.mean((z_length1, z_length2)))
 
+x_fractions = np.zeros_like(x_means)
+y_fractions = np.zeros_like(y_means)
 z_fractions = np.zeros_like(z_means)
 for i, (x_mean, y_mean, z_mean) in enumerate(zip(x_means, y_means, z_means)):
-	z_fractions[i] = z_mean/(x_mean + y_mean + z_mean)
+	tot = x_mean + y_mean + z_mean
+	x_fractions[i] = x_mean/tot
+	y_fractions[i] = y_mean/tot
+	z_fractions[i] = z_mean/tot
 
 print np.mean(z_fractions)
 
-ind = np.arange(len(chroms))  # the x locations for the groups
-width = 0.2       # the width of the bars
+medianprops = dict(linestyle="none")
+labels = ("Orthogonal 1", "Orthogonal 2", "Compartment axis")
+prefix = design_file.split("_design.txt")[0]
 
-fig, ax = plt.subplots()
-rects1 = ax.bar(ind, x_means, width, color="r")
-rects2 = ax.bar(ind + width, y_means, width, color="y")
-rects3 = ax.bar(ind + 2*width, z_means, width, color="b")
-ax.set_ylabel("Mean absolute change")
-ax.set_xticks(ind + width / 3)
-ax.set_xticklabels(chroms)
-ax.legend((rects1[0], rects2[0], rects3[0]), ("x", "y", "z"))
-plt.savefig("change_by_axis")
+y_int_size = 0.02
+x_start = 0.5
+x_end = 3.5
+y_start = min((min(x_fractions), min(y_fractions), min(z_fractions))) -y_int_size/5.
+y_end = max((max(x_fractions), max(y_fractions), max(z_fractions))) + y_int_size/5.
 
-fig, ax = plt.subplots()
-rects1 = ax.bar(ind, x_lengths, width, color="r")
-rects2 = ax.bar(ind + width, y_lengths, width, color="y")
-rects3 = ax.bar(ind + 2*width, z_lengths, width, color="b")
-ax.set_ylabel("Mean length")
-ax.set_xticks(ind + width / 3)
-ax.set_xticklabels(chroms)
-ax.legend((rects1[0], rects2[0], rects3[0]), ("x", "y", "z"))
-plt.savefig("axis_length")
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+plt.boxplot([x_fractions, y_fractions, z_fractions], notch=True, patch_artist=True, labels=labels, medianprops=medianprops)
+plt.ylabel("Fractional relocalization", fontsize=11)
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=6)	
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
+plt.savefig("{}_change_by_axis".format(prefix))
+
+#plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+#plt.boxplot([x_means, y_means, z_means], notch=True, patch_artist=True, labels=labels, medianprops=medianprops)
+#plt.ylabel("Length", fontsize=12)
+#plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+#plt.axvline(x=x_start, color="k", lw=4)
+#plt.axhline(y=y_start, color="k", lw=6)	
+#plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=0, labelsize=8)
+#plt.savefig("{}_axis_length".format(prefix))
