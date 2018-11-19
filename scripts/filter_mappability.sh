@@ -6,8 +6,8 @@ if [ ! -e $PREFIX"_filtered".bed ]
 	then
 		if [ ! -e mappability_sorted.bed ]
 			then
-				wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDukeMapabilityUniqueness35bp.bigWig
-				wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToWig
+				curl http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDukeMapabilityUniqueness35bp.bigWig -o wgEncodeDukeMapabilityUniqueness35bp.bigWig
+				curl http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToWig -o bigWigToWig
 				chmod +x bigWigToWig
 				./bigWigToWig wgEncodeDukeMapabilityUniqueness35bp.bigWig mappability.wig
 				rm wgEncodeDukeMapabilityUniqueness35bp.bigWig
