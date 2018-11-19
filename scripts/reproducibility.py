@@ -44,6 +44,7 @@ for p in ps:
 
 medianprops = dict(linestyle="none")
 <<<<<<< HEAD
+<<<<<<< HEAD
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops)
 plt.title("{} vs. {}".format(celltype1, celltype2))
@@ -56,6 +57,8 @@ plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad
 plt.savefig("{}_{}_reproducibility".format(celltype1, celltype2))
 plt.show()
 =======
+=======
+>>>>>>> parent of 951c14b... improved fig
 plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops, showfliers=False)
 plt.ylabel("Correlation between iterations", fontsize=15)
 plt.xlabel("Difference penalty", fontsize=15)
