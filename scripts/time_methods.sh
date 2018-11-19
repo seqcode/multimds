@@ -3,7 +3,7 @@ set -e
 ./get_hic_data.sh GM12878_combined
 ./get_hic_data.sh K562
 
-for METHOD in MultiMDS Independent_MDS
+for METHOD in multimds kabsch
 do
 	OUTPUT=$METHOD"_times".txt
 
