@@ -14,7 +14,7 @@ def format_celltype(cell_type):
 cell_type1 = sys.argv[1]
 cell_type2 = sys.argv[2]
 chrom = sys.argv[3]
-res = int(sys.argv[3])
+res = int(sys.argv[4])
 res_kb = res/1000
 
 path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
@@ -53,6 +53,6 @@ gen_coords = np.array(structure1.getGenCoords())[indices][0:n]
 with open("{}_A_relocalization.bed".format(chrom), "w") as out:
 	for gen_coord, dist, comp1, comp2 in zip(gen_coords, dists, comps1, comps2):
 		if np.abs(comp1 - comp2) < 0.2 and comp1 > 0 and comp2 > 0:
-			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res)))
+			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res))))
 			out.write("\n")
 	out.close()
