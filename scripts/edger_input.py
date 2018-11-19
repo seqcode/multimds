@@ -40,7 +40,7 @@ def fullMatFromBed(path, chrom):
 
 	return mat
 
-res_kb = 100
+res_kb = int(sys.argv[1])
 cell_types = ("K562", "GM12878_primary", "GM12878_replicate")
 
 for chrom_name in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22):
@@ -51,7 +51,7 @@ for chrom_name in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1
 
 	sum_mat = np.sum(mats, 0)
 
-	with open("chr{}_edgeR_table.tsv".format(chrom_name), "w") as out:
+	with open("chr{}_{}kb_edgeR_table.tsv".format(chrom_name, res_kb), "w") as out:
 		out.write("Symbol\t")
 		out.write("\t".join(cell_types))	#header
 		out.write("\n")
