@@ -42,14 +42,8 @@ for p in ps:
 
 	all_r_sq.append(r_sq)
 
-xs = range(len(ps))
-y_int_size = 0.1
-x_start = min(xs) - 0.05
-x_end = len(xs) + 1
-y_start = -y_int_size/5.
-y_end = 1 + y_int_size/5.
-
 medianprops = dict(linestyle="none")
+<<<<<<< HEAD
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops)
 plt.title("{} vs. {}".format(celltype1, celltype2))
@@ -61,3 +55,9 @@ plt.axhline(y=y_start, color="k", lw=6)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 plt.savefig("{}_{}_reproducibility".format(celltype1, celltype2))
 plt.show()
+=======
+plt.boxplot(all_r_sq, notch=True, patch_artist=True, labels=ps, medianprops=medianprops, showfliers=False)
+plt.ylabel("Correlation between iterations", fontsize=15)
+plt.xlabel("Difference penalty", fontsize=15)
+plt.savefig("reproducibility")
+>>>>>>> parent of 951c14b... improved fig
