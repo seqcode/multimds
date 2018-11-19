@@ -7,7 +7,6 @@ import compartment_analysis as ca
 from matplotlib import pyplot as plt
 import os
 import linear_algebra as la
-import array_tools as at
 from scipy import stats as st
 
 res_kb = 100
@@ -27,15 +26,12 @@ for i, chrom in enumerate(chroms):
 	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
 	os.system("python ../multimds.py --full {} {}".format(path1, path2))
-	structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
-	structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
+	structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 
 	#compartments
 	contacts1 = dt.matFromBed(path1, structure1)
 	contacts2 = dt.matFromBed(path2, structure2)
-
-	at.makeSymmetric(contacts1)
-	at.makeSymmetric(contacts2)
 
 	compartments1 = np.array(ca.get_compartments(contacts1))
 	compartments2 = np.array(ca.get_compartments(contacts2))
