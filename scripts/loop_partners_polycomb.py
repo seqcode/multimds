@@ -42,8 +42,8 @@ for chrom in chroms:
 with open("peaks_filtered_GM12878_only_enhancer.bed") as in_file:
 	for line in in_file:
 		line = line.strip().split()
-		chrom = int(line[0])
-		loc = line[1]
+		chrom = line[0]
+		loc = int(line[1])
 		try:
 			partner, fc = partners[chrom][loc]
 			if fc < 0:	#loop in K562 only
@@ -58,8 +58,8 @@ with open("peaks_filtered_GM12878_only_enhancer.bed") as in_file:
 with open("peaks_filtered_K562_only_enhancer.bed") as in_file:
 	for line in in_file:
 		line = line.strip().split()
-		chrom = int(line[0])
-		loc = line[1]
+		chrom = line[0]
+		loc = int(line[1])
 		try:
 			partner, fc = partners[chrom][loc]
 			if fc > 0:	#loop in GM12878 only
@@ -73,8 +73,8 @@ with open("peaks_filtered_K562_only_enhancer.bed") as in_file:
 with open("peaks_filtered_both_enhancer.bed") as in_file:
 	for line in in_file:
 		line = line.strip().split()
-		chrom = int(line[0])
-		loc = line[1]
+		chrom = line[0]
+		loc = int(line[1])
 		try:
 			partner, fc = partners[chrom][loc]
 			os.system("cat binding_data/GM12878_enhancers_%dkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
