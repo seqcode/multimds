@@ -26,7 +26,7 @@ Requirements:
 
 ## Testing
 
-On Linux, please run test.sh (in the scripts directory) and report any issues. (multimds is compatible with Mac, but the shell scripts only run on Linux.) 
+Please run test.sh (in the scripts directory) and report any issues.
 
 ## Usage
 
@@ -44,7 +44,7 @@ Example - chr21 data at 10-Kbp resolution:
 > 
 >...
 
-Important: BED file 1 and BED file 2 must be the same species, chromosome, and resolution!
+Important: the BED files must be the same species, chromosome, and resolution!
 
 ### Running the program
 
@@ -70,25 +70,32 @@ The parameter -P controls how similar the output structures will be. By default 
 The minimum weight that can achieve reproducibility is recommended. The script reproducibility.py (in the scripts directory) plots reproducibility at different values of this parameter. Choose the parameter at which the increase in reproducibility levels off.
 
 For example run
+
 ``python reproducibility.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+
+Output:
+
+![alt text](http://lugh.bmb.psu.edu/data/rieber/multimds_fig2.png "Reproducibility")
+
+In this example a weight of approximately 0.05 appears best.
 
 
 ### Output files
 
-### Relocalization peaks
+#### Relocalization
 
-Genomic regions that significantly relocalize between the cell types are saved to a BED file, with the format [PREFIX1]_[PREFIX2]_peaks.bed
+The relocalization of each locus is written to a BED file, with the format [PREFIX1]_[PREFIX2]_relocalization.bed
 
 For example the output of
 
 ``python multimds.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
-is GM12878_combined_21_100kb_K562_21_100kb_peaks.bed
+is GM12878_combined_21_100kb_K562_21_100kb_relocalization.bed
 
 #### Structure files
 Aligned structures are saved to tsv files, which can be used for plotting (see below). The header contains the name of the chromosome, the resolution, and the starting genomic coordinate. Each line in the file contains the genomic bin number followed by the 3D coordinates (with "nan" for missing data). 
 
-Example - chr21 at 10-Kbp resolution:
+Example - chr21 at 10-kb resolution:
 
 >chr21
 > 
