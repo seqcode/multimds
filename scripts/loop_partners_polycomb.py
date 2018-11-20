@@ -12,77 +12,70 @@ if os.path.isfile("polycomb_enrichment.txt"):
 if os.path.isfile("enhancer_enrichment.txt"):
 	os.system("rm enhancer_enrichment.txt")
 
+chroms = range(1, 23)
+
+partners = [{} for chrom in chroms]
+
+for i, chrom in enumerate(chroms):
+	with open("{}_{}kb_edgeR_output_sig.tsv".format(chrom, res_kb)) as infile:
+		for line in infile:
+			line = line.strip().split()
+			loc1 = int(line[0])
+			loc2 = int(line[1])
+			fc = float(line[2])
+			try:
+				old_fc = partners[i][loc1][1]
+				if np.abs(fc) > np.abs(old_fc):
+					partners[i][loc1] = (loc2, fc)
+			except KeyError:
+				partners[i][loc1] = (loc2, fc)
+			try:
+				old_fc = partners[i][loc2][1]
+				if np.abs(fc) > np.abs(old_fc):
+					partners[i][loc2] = (loc1, fc)
+			except KeyError:
+				partners[i][loc2] = (loc1, fc)
+		infile.close()
+
 with open("peaks_filtered_GM12878_only_enhancer.bed") as in_file:
 	for line in in_file:
 		line = line.strip().split()
-		chrom = line[0]
+		chrom = int(line[0])
 		loc = line[1]
-		os.system("cat %s_%fkb_edgeR_output_sig.tsv | awk '$1 == %s || $2 == %s {print $0}' > partners.tsv"%(chrom, res_kb, loc, loc))
-		mat = np.loadtxt("partners.tsv", dtype=object)
-		if len(mat) > 0:
-			try:
-				fcs = np.abs(np.array(mat[:,2], dtype=float))
-				best_line = mat[np.argmax(fcs)]
-			except IndexError:
-				best_line = mat
-			if best_line[0] == loc:
-				partner = best_line[1]
-			else:
-				partner = best_line[0]
-			fc = float(best_line[2])
+		try:
+			partner, fc = partners[chrom-1][loc]
 			if fc < 0:	#loop in K562 only
-				os.system("cat binding_data/wgEncodeBroadHistoneK562H3k27me3StdPk_%fkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
+				os.system("cat binding_data/wgEncodeBroadHistoneK562H3k27me3StdPk_%dkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
 			else:	#loop in GM12878 only
-				os.system("cat binding_data/GM12878_enhancers_%fkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(res_kb, chrom, partner))
+				os.system("cat binding_data/GM12878_enhancers_%dkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(res_kb, chrom, partner))
+		except KeyError:
+			pass
 	in_file.close()
 
 
 with open("peaks_filtered_K562_only_enhancer.bed") as in_file:
 	for line in in_file:
 		line = line.strip().split()
-		chrom = line[0]
+		chrom = int(line[0])
 		loc = line[1]
-		os.system("cat %s_%fkb_edgeR_output_sig.tsv | awk '$1 == %s || $2 == %s {print $0}' > partners.tsv"%(chrom, res_kb, loc, loc))
-		mat = np.loadtxt("partners.tsv", dtype=object)
-		if len(mat) > 0:
-			try:
-				fcs = np.abs(np.array(mat[:,2], dtype=float))
-				best_line = mat[np.argmax(fcs)]
-			except IndexError:
-				best_line = mat
-			if best_line[0] == loc:
-				partner = best_line[1]
-			else:
-				partner = best_line[0]
-			os.system("cat mappability.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' > mappability.txt"%(chrom, partner))
-			mappability = np.loadtxt("mappability.txt")
-			fc = float(best_line[2])
+		try:
+			partner, fc = partners[chrom-1][loc]
 			if fc > 0:	#loop in GM12878 only
-				os.system("cat binding_data/wgEncodeBroadHistoneGm12878H3k27me3StdPkV2_%fkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
+				os.system("cat binding_data/wgEncodeBroadHistoneGm12878H3k27me3StdPkV2_%dkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
 			else:	#loop in K562 only
-				os.system("cat binding_data/K562_enhancers_%fkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(res_kb, chrom, partner))
+				os.system("cat binding_data/K562_enhancers_%dkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> enhancer_enrichment.txt"%(res_kb, chrom, partner))
+		except KeyError:
+			pass
 	in_file.close()
 
 with open("peaks_filtered_both_enhancer.bed") as in_file:
 	for line in in_file:
 		line = line.strip().split()
-		chrom = line[0]
+		chrom = int(line[0])
 		loc = line[1]
-		os.system("cat %s_%fkb_edgeR_output_sig.tsv | awk '$2 == %s || $3 == %s {print $0}' > partners.tsv"%(chrom, res_kb, loc, loc))
-		mat = np.loadtxt("partners.tsv", dtype=object)
-		if len(mat) > 0:
-			try:
-				fcs = np.abs(np.array(mat[:,2], dtype=float))
-				best_line = mat[np.argmax(fcs)]
-			except IndexError:
-				best_line = mat
-			if best_line[0] == loc:
-				partner = best_line[1]
-			else:
-				partner = best_line[0]
-			os.system("cat mappability.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' > mappability.txt"%(chrom, partner))
-			mappability = np.loadtxt("mappability.txt")
-			os.system("cat binding_data/GM12878_enhancers_%fkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
+		try:
+			partner, fc = partners[chrom-1][loc]
+			os.system("cat binding_data/GM12878_enhancers_%dkb_windows_enrichment.bed | awk '$1 == \"%s\" && $2 == %s {print $4}' >> polycomb_enrichment.txt"%(res_kb, chrom, partner))
 	in_file.close()
 
 os.system("bedtools coverage -a A_background_filtered.bed -b binding_data/wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak > A_background_filtered_polycomb.bed")
