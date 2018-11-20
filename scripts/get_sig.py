@@ -4,7 +4,7 @@ import os
 
 in_path = sys.argv[1]
 prefix = in_path.split(".")[0]
-res = 100000
+res = int(sys.argv[2])
 
 ps = []
 
