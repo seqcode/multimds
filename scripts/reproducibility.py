@@ -25,8 +25,8 @@ for p in ps:
 		print(i)
 		os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
 
-		structure1 = dt.structure_from_file("{}_structure.tsv".format(prefix1))
-		structure2 = dt.structure_from_file("{}_structure.tsv".format(prefix2))
+		structure1 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix1)))
+		structure2 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix2)))
 		
 		if p == 0:
 			r, t = la.getTransformation(structure1, structure2)
@@ -41,6 +41,13 @@ for p in ps:
 			r_sq.append(r**2)
 
 	all_r_sq.append(r_sq)
+
+x_int_size = 0.01
+y_int_size = 0.2
+x_start = min(ps) - x_int_size/5.
+x_end = max(ps)
+y_start = -y_int_size/5.
+y_end = 1
 
 medianprops = dict(linestyle="none")
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
