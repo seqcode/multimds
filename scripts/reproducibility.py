@@ -10,8 +10,8 @@ import os
 path1 = sys.argv[1]
 path2 = sys.argv[2]
 
-prefix1 = path1.split(".")[0]
-prefix2 = path2.split(".")[0]
+prefix1 = os.file.basename(path1.split(".")[0])
+prefix2 = os.file.basename(path2.split(".")[0])
 
 n = 10
 
