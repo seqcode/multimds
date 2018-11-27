@@ -1,7 +1,6 @@
 # MultiMDS
 
-MultiMDS is a tool for locus-specific structural comparisons of two Hi-C datasets. It jointly infers and aligns 3D structures from two datasets, such as different cell types. The output is aligned 3D structure files (which can be plotted, see below) and a list of loci that significantly relocalize between the datasets (measured using Euclidean distance). These may represent A/B compartment changes, changes in enhancer localization, or other structural changes. 
-
+MultiMDS is a tool for locus-specific structural comparisons of two Hi-C datasets. It jointly infers and aligns 3D structures from two datasets, such as different cell types. The output is aligned 3D structure files (which can be plotted, see below). 
 ## Installation
 
 Requirements:
@@ -23,11 +22,11 @@ Requirements:
 
 ## TLDR
 
-``python multimds.py [Hi-C BED path 1] [Hi-C BED path 2]``
+``python multimds.py --full [Hi-C BED path 1] [Hi-C BED path 2]``
 
 ## Testing
 
-On Linux, please run test.sh (in the scripts directory) and report any issues. (multimds is compatible with Mac, but the shell scripts only run on Linux.) 
+Please run test.sh (in the scripts directory) and report any issues.
 
 ## Usage
 
@@ -45,7 +44,7 @@ Example - chr21 data at 10-Kbp resolution:
 > 
 >...
 
-Important: BED file 1 and BED file 2 must be the same species, chromosome, and resolution!
+Important: the BED files must be the same species, chromosome, and resolution!
 
 ### Running the program
 
@@ -61,24 +60,42 @@ For example:
 
 ``python multimds.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
-MultiMDS prints the RMSD between the aligned structures for QC purposes. A "good" RMSD depends on the individual datasets and on whether you want to highlight similarities or differences between structures. However, a typical RMSD would be about 0.2. RMSD > ~0.5 may indicate that your structures did not properly align. Visual inspection using 3D plotting (see below) may be useful. 
+
+### Similarity weight
+
+The parameter -P controls how similar the output structures will be. By default it is set to 0.05, but it is recommended that this be changed. 
+
+``python multimds.py -P 0.02 GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+
+The minimum weight that can achieve reproducibility is recommended. The script reproducibility.py (in the scripts directory) plots reproducibility at different values of this parameter. Choose the parameter at which the increase in reproducibility levels off.
+
+For example run
+
+``python reproducibility.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+
+Output:
+
+![alt text](http://lugh.bmb.psu.edu/data/rieber/multimds_fig2.png "Reproducibility")
+
+In this example a weight of approximately 0.05 appears best.
+
 
 ### Output files
 
-### Relocalization peaks
+#### Relocalization
 
-Genomic regions that significantly relocalize between the cell types are saved to a BED file, with the format [PREFIX1]_[PREFIX2]_peaks.bed
+The relocalization of each locus is written to a BED file, with the format [PREFIX1]_[PREFIX2]_relocalization.bed
 
 For example the output of
 
 ``python multimds.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
-is GM12878_combined_21_100kb_K562_21_100kb_peaks.bed
+is GM12878_combined_21_100kb_K562_21_100kb_relocalization.bed
 
 #### Structure files
 Aligned structures are saved to tsv files, which can be used for plotting (see below). The header contains the name of the chromosome, the resolution, and the starting genomic coordinate. Each line in the file contains the genomic bin number followed by the 3D coordinates (with "nan" for missing data). 
 
-Example - chr21 at 10-Kbp resolution:
+Example - chr21 at 10-kb resolution:
 
 >chr21
 > 
@@ -152,7 +169,7 @@ Multiple structures can also be plotted in a single gif:
 
 #### Full MDS
 
-By default, partitioned MDS is used. Full MDS is recommended for low-resolution high-quality (not sparse) files:
+By default, partitioned MDS is used. To use full MDS:
 
 ``python multimds.py --full GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
@@ -161,12 +178,6 @@ By default, partitioned MDS is used. Full MDS is recommended for low-resolution 
 Partitioning is used in the structural inference step for greater efficiency and accuracy. By default 4 partitions are used. This can be controlled with the -N parameter: 
 
 ``python multimds.py -N 2 GM12878_combined_21_100kb.bed K562_21_100kb.bed``
-
-##### Centromere
-
-Better results are achieved if the chromosome is partitioned at the centromere in the partitioning step. The genomic coordinate of the centromere can be entered with the -m parameter
-
-``python multimds.py -m 28000000 GM12878_combined_20_100kb.bed K562_20_100kb.bed``
 
 #### Resolution ratio
 
