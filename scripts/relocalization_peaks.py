@@ -20,11 +20,13 @@ res_kb = res/1000
 path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
 path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-os.system("python ../multimds.py --full {} {}".format(path1, path2))
+#os.system("python ../multimds.py --full {} {}".format(path1, path2))
 
 #load structures
-structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
-structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
+structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+#structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
+#structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 
 dists = np.array([la.calcDistance(coord1, coord2) for coord1, coord2 in zip(structure1.getCoords(), structure2.getCoords())])
 
@@ -33,10 +35,10 @@ contacts1 = dt.matFromBed(path1, structure1)
 contacts2 = dt.matFromBed(path2, structure2)
 
 active1 = np.array(np.loadtxt("binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type1), chrom, res_kb), dtype=object)[:,6], dtype=float)
-bin_nums1 = structure1.chrom.minPos/structure1.chrom.res + structure1.getPointNums()
+bin_nums1 = structure1.chrom.minPos/structure1.chrom.res + structure1.nonzero_abs_indices()
 active1 = active1[bin_nums1]
 active2 = np.array(np.loadtxt("binding_data/{}_{}_{}kb_active_coverage.bed".format(format_celltype(cell_type2), chrom, res_kb), dtype=object)[:,6], dtype=float)
-bin_nums2 = structure2.chrom.minPos/structure2.chrom.res + structure2.getPointNums()
+bin_nums2 = structure2.chrom.minPos/structure2.chrom.res + structure2.nonzero_abs_indices()
 active2 = active2[bin_nums2]
 
 compartments1 = np.array(ca.get_compartments(contacts1, active1))
