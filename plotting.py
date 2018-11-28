@@ -3,7 +3,6 @@ import numpy as np
 import linear_algebra as la
 import os
 import sys
-from matplotlib import pyplot as plt
 
 #from Rippe 2001
 kl = 289	#Kuhn length (nm)
@@ -14,11 +13,6 @@ default_colors = np.array([[255,0,0], [0,255,238], [255,238,0], [0,102,255], [25
 default_colors = [tuple(color) for color in default_colors]	#convert to tuple
 
 def plot_structures_interactive(structures, all_enrichments=None, colors=default_colors, radius=None, cut=False, out_path=None):
-	#legend
-	for i, (color, structure) in enumerate(zip(colors, structures)):
-		plt.text(0, i, structure.chrom.name, color=color)
-	plt.show()
-
 	mlab.close(all=True)
 	mlab.figure(bgcolor=(1,1,1))
 	if radius is None:
@@ -38,7 +32,6 @@ def plot_structures_interactive(structures, all_enrichments=None, colors=default
 			mlab.plot3d(xs, ys, zs, all_enrichments[i], tube_radius=radius)
 		else:
 			mlab.plot3d(xs, ys, zs, [0 for x in xs], tube_radius=radius, color=colors[i])
-			mlab.colorbar(title=structure.chrom.name, nb_labels=0)
 	if out_path:
 		mlab.savefig(out_path)		
 	mlab.show()
@@ -61,7 +54,7 @@ def plot_structure_interactive(structure, enrichments=None, color=(1,0,0), radiu
 
 def plot_structures_gif(structures, outname, all_enrichments=None, colors=default_colors, radius=None, increment=10):
 	if 360%increment != 0:
-		print "Error. Increment must be factor of 360."
+		print("Error. Increment must be factor of 360.")
 		sys.exit(0)
 	if radius is None:
 		radius = calculateRadius(structures)
@@ -82,7 +75,7 @@ def plot_structures_gif(structures, outname, all_enrichments=None, colors=defaul
 
 def plot_structure_gif(structure, outname, enrichments=None, color=(1,0,0), radius=None, increment=10):
 	if 360%increment != 0:
-		print "Error. Increment must be factor of 360."
+		print("Error. Increment must be factor of 360.")
 		sys.exit(0)
 	if radius is None:
 		radius = calculateRadius([structure])
