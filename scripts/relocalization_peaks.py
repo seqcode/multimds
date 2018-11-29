@@ -46,7 +46,7 @@ compartments2 = np.array(ca.get_compartments(contacts2, active2))
 
 n = 50	#number of top peaks
 
-indices = np.flip(np.argsort(dists))
+indices = np.flip(np.argsort(dists), 0)
 sorted_dists = dists[indices][0:n]
 sorted_comps1 = compartments1[indices][0:n]
 sorted_comps2 = compartments2[indices][0:n]
