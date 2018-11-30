@@ -53,7 +53,7 @@ sorted_comps2 = compartments2[indices][0:n]
 gen_coords = np.array(structure1.getGenCoords())[indices][0:n]
 
 with open("{}_A_relocalization.bed".format(chrom), "w") as out:
-	for gen_coord, dist, comp1, comp2 in zip(gen_coords, dists, comps1, comps2):
+	for gen_coord, dist, comp1, comp2 in zip(gen_coords, sorted_dists, sorted_comps1, sorted_comps2):
 		if np.abs(comp1 - comp2) < 0.2 and comp1 > 0 and comp2 > 0:
 			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res))))
 			out.write("\n")
