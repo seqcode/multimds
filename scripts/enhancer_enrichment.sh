@@ -1,9 +1,11 @@
 set -e
 
-./get_hic_data.sh GM12878_combined
-./get_hic_data.sh K562
-./get_activity_data.sh
-./relocalization_peaks.sh
+RES=$1
+
+#./get_hic_data.sh GM12878_combined $RES
+#./get_hic_data.sh K562 $RES
+#./get_activity_data.sh $RES
+./relocalization_peaks.sh $RES
 
 #enhancers
 if [ ! -e GM12878_enhancers.bed ] 
