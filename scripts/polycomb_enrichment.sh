@@ -9,16 +9,16 @@ RES_KB=$(($RES/1000))
 
 #if [ ! -e peaks_filtered.bed ]
 #	then 
-#		./relocalization_peaks.sh
+#		./relocalization_peaks.sh 10
 #fi
 
-python edger_input.py $RES_KB
-for CHROM in 1 2 3 4 5 6 7 8 10 11 12 13 14 15 16 17 18 19 20 21 22
-do
-	echo $CHROM
-	Rscript run_edger.R chr$CHROM_${RES_KB}kb_edgeR_table.tsv chr$CHROM_${RES_KB}kb_edgeR_output.tsv
-	python get_sig.py chr$CHROM_${RES_KB}kb_edgeR_output.tsv
-done
+#python edger_input.py $RES_KB
+#for CHROM in 1 2 3 4 5 6 7 8 10 11 12 13 14 15 16 17 18 19 20 21 22
+#do
+#	echo $CHROM
+#	Rscript run_edger.R chr${CHROM}_${RES_KB}kb_edgeR_table.tsv chr${CHROM}_${RES_KB}kb_edgeR_output.tsv
+#	python get_sig.py chr${CHROM}_${RES_KB}kb_edgeR_output.tsv $RES
+#done
 
 #unique enhancers
 mkdir -p binding_data
@@ -67,28 +67,41 @@ cd binding_data
 WINDOW_FILE=hg19_${RES_KB}kb_windows.bed
 if [ ! -e $WINDOW_FILE ]
 	then
-		wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes
+		curl http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes -o hg19.chrom.sizes
 		bedtools makewindows -g hg19.chrom.sizes -w $RES > $WINDOW_FILE
 fi
 
 if [ ! -e wgEncodeBroadHistoneGm12878H3k27me3StdPkV2_${RES_KB}kb_windows_enrichment.bed ]
 	then 
-		wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak.gz
-		gunzip wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak.gz
+		if [ ! -e wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak ]
+			then
+				curl http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak.gz -o wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak.gz
+				gunzip wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak.gz
+		fi
 		
 		bedtools coverage -a $WINDOW_FILE -b wgEncodeBroadHistoneGm12878H3k27me3StdPkV2.broadPeak > wgEncodeBroadHistoneGm12878H3k27me3StdPkV2_${RES_KB}kb_windows_enrichment.bed
 fi
 
 if [ ! -e wgEncodeBroadHistoneK562H3k27me3StdPk_${RES_KB}kb_windows_enrichment.bed ]
-	then 
-		wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak.gz
-		gunzip wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak.gz
+	then
+		if [ ! -e wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak ]
+			then 
+				curl http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak.gz -o wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak
+				gunzip wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak.gz
+		fi
 		
 		bedtools coverage -a $WINDOW_FILE -b wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak > wgEncodeBroadHistoneK562H3k27me3StdPk_${RES_KB}kb_windows_enrichment.bed
 fi
 
-bedtools coverage -a $WINDOW_FILE -b GM12878_enhancers.bed > GM12878_enhancers_${RES_KB}kb_windows_enrichment.bed
-bedtools coverage -a $WINDOW_FILE -b K562_enhancers.bed > K562_enhancers_${RES_KB}kb_windows_enrichment.bed
+if [ ! -e GM12878_enhancers_${RES_KB}kb_windows_enrichment.bed ]
+	then
+		bedtools coverage -a $WINDOW_FILE -b GM12878_enhancers.bed > GM12878_enhancers_${RES_KB}kb_windows_enrichment.bed
+fi
+
+if [ ! -e K562_enhancers_${RES_KB}kb_windows_enrichment.bed ]
+	then
+		bedtools coverage -a $WINDOW_FILE -b K562_enhancers.bed > K562_enhancers_${RES_KB}kb_windows_enrichment.bed
+fi
 
 cd ..
 
@@ -108,4 +121,4 @@ if [ ! -e A_background_filtered.bed ]
 		./filter_mappability.sh A_background
 fi
 
-python loop_partners_polycomb.py
+python loop_partners_polycomb.py $RES_KB
