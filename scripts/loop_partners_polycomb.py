@@ -90,6 +90,46 @@ background_enrichment = np.array(mat[:,3], dtype=float)
 
 print st.ttest_ind(background_enrichment, partner_enrichment)
 
-plt.boxplot([background_enrichment, partner_enrichment], labels=("Background A compartment", "Loop partners"))
-plt.ylabel("H3K27me3 enrichment")
-plt.savefig("polycomb_enrichment")
+plt.hist(background_enrichment, bins=30)
+plt.show()
+
+plt.hist(partner_enrichment, bins=30)
+plt.show()
+
+sys.exit(0)
+
+x_int_size = 0.1
+x_start = -x_int_size/5.
+x_end = max((max(enrichments1), max(enrichments2)))
+
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+counts, bounds, patches = plt.hist(background_enrichment)
+y_int_size = 2000
+y_start = y_int_size/5.
+y_end = counts[0] - y_int_size/5.
+plt.title("Background A compartment", fontsize=14)
+plt.xlabel("H3K27me3", fontsize=14)
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=6)	
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
+plt.savefig("background_h3k27me3_coverage")
+plt.show()
+
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+counts, bounds, patches = plt.hist(enrichments2)
+y_int_size = 10
+y_start = y_int_size/5.
+y_end = counts[0] - y_int_size/5.
+plt.title("Loop partners of lost enhancers", fontsize=14)
+plt.xlabel("H3K27me3", fontsize=14)
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=6)	
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
+plt.savefig("loop_partner_h3k27me3_coverage")
+plt.show()
+
+#plt.boxplot([background_enrichment, partner_enrichment], labels=("Background A compartment", "Loop partners"))
+#plt.ylabel("H3K27me3 enrichment")
+#plt.savefig("polycomb_enrichment")
