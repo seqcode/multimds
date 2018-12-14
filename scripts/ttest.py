@@ -9,6 +9,8 @@ mat2 = np.loadtxt(sys.argv[2], dtype=object)
 enrichments2 = np.array(mat2[:,6], dtype=float)
 print st.ttest_ind(enrichments1, enrichments2)
 
+celltype = sys.argv[3]
+
 xs = enrichments1 
 #need to know bins to get y range
 bins = plt.hist(xs)	
@@ -18,7 +20,7 @@ plt.close()
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
-plt.xlabel("GM12878 enhancer coverage", fontsize=14)
+plt.xlabel("{} enhancer coverage".format(celltype), fontsize=14)
 plt.title("Relocalized", fontsize=14)
 
 #define offsets
@@ -46,9 +48,9 @@ plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 
-plt.savefig("relocalization_enhancer_coverage")
+plt.savefig("relocalization_{}_enhancer_coverage".format(celltype))
 plt.close()
 
 xs = enrichments2 
@@ -60,7 +62,7 @@ plt.close()
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
-plt.xlabel("GM12878 enhancer coverage", fontsize=14)
+plt.xlabel("{} enhancer coverage".format(celltype), fontsize=14)
 plt.title("Background", fontsize=14)
 
 #define offsets
@@ -88,7 +90,7 @@ plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 
-plt.savefig("background_enhancer_coverage")
+plt.savefig("background_{}_enhancer_coverage".format(celltype))
 plt.close()
