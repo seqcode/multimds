@@ -16,7 +16,7 @@ tot = 0
 count = 0
 
 with open(wig) as in_file:
-	with open("{}.bed".format(prefix), "w") as out_file:
+	with open("{}_{}kb.bed".format(prefix, bin_size/1000), "w") as out_file:
 		for line in in_file:
 			line = line.strip().split()
 			if line[0] == "fixedStep":	#header
