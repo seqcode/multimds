@@ -6,7 +6,11 @@ import array_tools as at
 import os
 import numpy as np
 
-os.system("rm A_compartment.bed")
+res = int(sys.argv[1])
+res_kb = res/1000
+
+if os.path.isfile("A_compartment_{}kb.bed".format(res_kb)):
+	os.system("rm A_compartment_{}kb.bed".format(res_kb))
 
 for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22):
 	path = "hic_data/GM12878_combined_{}_100kb.bed".format(chrom)
@@ -19,8 +23,9 @@ for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 	compartments = np.array(ca.get_compartments(contacts, enrichments))
 	gen_coords = np.array(structure.getGenCoords())
 	a_gen_coords = gen_coords[np.where(compartments > 0)]
-	with open("A_compartment.bed", "a") as out:
+	with open("A_compartment_{}kb.bed".format(res_kb), "a") as out:
 		for a_gen_coord in a_gen_coords:
-			out.write("\t".join((structure.chrom.name, str(a_gen_coord), str(a_gen_coord + structure.chrom.res))))
-			out.write("\n")
+			for i in range(100/res_kb):
+				out.write("\t".join((structure.chrom.name, str(a_gen_coord + i*structure.chrom.res), str(a_gen_coord + (i+1)*structure.chrom.res))))
+				out.write("\n")
 		out.close()

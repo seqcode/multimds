@@ -1,11 +1,12 @@
 set -e
 
 RES=$1
+RES_KB=$(($RES/1000))
 
-#./get_hic_data.sh GM12878_combined $RES
-#./get_hic_data.sh K562 $RES
-#./get_activity_data.sh $RES
-./relocalization_peaks.sh $RES
+#./get_hic_data.sh GM12878_combined
+#./get_hic_data.sh K562
+#./get_activity_data.sh
+#./relocalization_peaks.sh $RES
 
 #enhancers
 if [ ! -e GM12878_enhancers.bed ] 
@@ -24,19 +25,19 @@ fi
 #fi
 
 #negative control
-if [ ! -e A_compartment.bed ]
+if [ ! -e A_compartment_${RES_KB}kb.bed ]
 	then
-		python get_a_compartment.py
+		python get_a_compartment.py $RES
 fi
 
 #if [ ! -e A_background.bed ]
 #	then
-		bedtools subtract -a A_compartment.bed -b peaks_filtered.bed > A_background.bed
+		bedtools subtract -a A_compartment_${RES_KB}kb.bed -b peaks_filtered.bed > A_background.bed
 #fi
 
 #if [ ! -e A_background_filtered.bed ]
 #	then
-		./filter_mappability.sh A_background
+		./filter_mappability.sh A_background $RES
 #fi
 
 #if [ ! -e A_background_filtered_GM12878_enhancer_coverage.bed ]
