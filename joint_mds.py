@@ -174,7 +174,7 @@ def _smacof_single(dissimilarities1, dissimilarities2, p, weights1=None, weights
             disparities2 = nonmetric_disparities2(dis2, sim_flat2, n_samples)
 
         # Compute stress
-	stress = ((dis1.ravel() - disparities1.ravel()) ** 2).sum() + ((dis2.ravel() - disparities2.ravel()) ** 2).sum() + n_samples * p * ssd(X1, X2)	#multiply by n_samples to make ssd term comparable in magnitude to embedding error terms
+        stress = ((dis1.ravel() - disparities1.ravel()) ** 2).sum() + ((dis2.ravel() - disparities2.ravel()) ** 2).sum() + n_samples * p * ssd(X1, X2)   #multiply by n_samples to make ssd term comparable in magnitude to embedding error terms
 
         # Update X1 using the Guttman transform
         X1 = guttman(X1, X2, disparities1, inv_V, V2, dis1)
