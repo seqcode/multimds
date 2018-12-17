@@ -127,7 +127,7 @@ def _smacof_single(dissimilarities1, dissimilarities2, p, weights1=None, weights
     dissimilarities2 = check_symmetric(dissimilarities2, raise_exception=True)
 
     if dissimilarities1.shape != dissimilarities2.shape:
-         print "Error. Distance matrices have different shapes."
+         print("Error. Distance matrices have different shapes.")
          sys.exit("Error. Distance matrices have different shapes.")
 
     n_samples = dissimilarities1.shape[0]
