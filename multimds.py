@@ -152,7 +152,7 @@ def partitionedMDS(path1, path2, args):
 	highstructure2 = dt.Structure([], high_substructures2, highChrom2, 0)
 
 	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads, weight)
-	print "Low-resolution MDS complete"
+	print("Low-resolution MDS complete")
 
 	highSubstructures1 = pymp.shared.list(highstructure1.structures)
 	highSubstructures2 = pymp.shared.list(highstructure2.structures)
@@ -180,7 +180,7 @@ def partitionedMDS(path1, path2, args):
 			highSubstructures1[substructurenum] = highSubstructure1
 			highSubstructures2[substructurenum] = highSubstructure2
 
-			print "MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures)
+			print("MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures))
 		
 	highstructure1.setstructures(highSubstructures1)
 	highstructure2.setstructures(highSubstructures2)
