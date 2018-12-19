@@ -25,7 +25,7 @@ for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 	a_gen_coords = gen_coords[np.where(compartments > 0)]
 	with open("A_compartment_{}kb.bed".format(res_kb), "a") as out:
 		for a_gen_coord in a_gen_coords:
-			for i in range(100/res_kb):
-				out.write("\t".join((structure.chrom.name, str(a_gen_coord + i*structure.chrom.res), str(a_gen_coord + (i+1)*structure.chrom.res))))
+			for i in range(structure.chrom.res/res):
+				out.write("\t".join((structure.chrom.name, str(a_gen_coord + i*res), str(a_gen_coord + (i+1)*res))))
 				out.write("\n")
 		out.close()

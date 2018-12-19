@@ -5,7 +5,6 @@ import data_tools as dt
 import compartment_analysis as ca
 import os
 import linear_algebra as la
-import array_tools as at
 from scipy import signal as sg
 from hmmlearn import hmm
 
@@ -66,13 +65,13 @@ path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 #min_error = sys.float_info.max
 #for iteration in range(n):
 	#os.system("python ../multimds.py -m {} -N {} -o {}_ {} {}".format(centromere, num_partitions, iteration, path1, path2))
-os.system("python /home/lur159/git/multimds/multimds.py --full {} {}".format(path1, path2))
+#os.system("python /home/lur159/git/multimds/multimds.py --full {} {}".format(path1, path2))
 		
 #load structures
 #structure1 = dt.structure_from_file("/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}_{}kb_filtered_structure.tsv".format(iteration, cell_type1, chrom, res_kb))	
 #structure2 = dt.structure_from_file("/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}_{}kb_filtered_structure.tsv".format(iteration, cell_type2, chrom, res_kb))
-structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
-structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
+structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 
 #rescale
 structure1.rescale()
@@ -103,50 +102,74 @@ structure1.transform(r,t)
 #		os.system("rm /data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}_{}kb_filtered_structure.tsv".format(iteration, cell_type2, chrom, res_kb))	
 
 #rescale
-structure1.rescale()
-structure2.rescale()
+#structure1.rescale()
+#structure2.rescale()
 
 #make structures compatible
-dt.make_compatible((structure1, structure2))
+#dt.make_compatible((structure1, structure2))
 
 #align
-r, t = la.getTransformation(structure1, structure2)
-structure1.transform(r,t)
+#r, t = la.getTransformation(structure1, structure2)
+#structure1.transform(r,t)
 
-#calculate error
+#calculate changes
 coords1 = np.array(structure1.getCoords())
 coords2 = np.array(structure2.getCoords())
 dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
 print np.mean(dists)
 
 #compartments
-contacts1 = dt.matFromBed(path1, structure1)
-contacts2 = dt.matFromBed(path2, structure2)
-at.makeSymmetric(contacts1)
-at.makeSymmetric(contacts2)
+chrom1 = dt.chromFromBed(path1)
+chrom2 = dt.chromFromBed(path2)
+chrom1.res = 100000	#reduce res to reduce RAM usage in compartment calculation
+chrom2.res = 100000
+chrom1.minPos = int(np.floor(float(chrom1.minPos)/chrom1.res)) * chrom1.res	#round
+chrom1.maxPos = int(np.ceil(float(chrom1.maxPos)/chrom1.res)) * chrom1.res
+chrom2.minPos = int(np.floor(float(chrom2.minPos)/chrom2.res)) * chrom2.res	#round
+chrom2.maxPos = int(np.ceil(float(chrom2.maxPos)/chrom2.res)) * chrom2.res
 
-enrichments = np.array(np.loadtxt("binding_data/Gm12878_{}_{}kb_active_coverage.bed".format(chrom, res_kb), dtype=object)[:,6], dtype=float)
-bin_nums = structure1.nonzero_abs_indices() + structure1.chrom.minPos/structure1.chrom.res
+low_struct1 = dt.structureFromBed(path1, chrom1)
+low_struct2 = dt.structureFromBed(path2, chrom2)
+dt.make_compatible((low_struct1, low_struct2))
+contacts1 = dt.matFromBed(path1, low_struct1)		
+contacts2 = dt.matFromBed(path2, low_struct2)
+
+enrichments = np.loadtxt("binding_data/{}_{}_100kb_active_coverage.bed".format(format_celltype(cell_type1), chrom), usecols=6)
+bin_nums = low_struct1.nonzero_abs_indices() + low_struct1.chrom.minPos/low_struct1.chrom.res
 enrichments = enrichments[bin_nums]
 compartments1 = np.array(ca.get_compartments(contacts1, enrichments))
 
-enrichments = np.array(np.loadtxt("binding_data/K562_{}_{}kb_active_coverage.bed".format(chrom, res_kb), dtype=object)[:,6], dtype=float)
-bin_nums = structure1.nonzero_abs_indices() + structure1.chrom.minPos/structure1.chrom.res
+enrichments = np.loadtxt("binding_data/{}_{}_100kb_active_coverage.bed".format(format_celltype(cell_type2), chrom), usecols=6)
+bin_nums = low_struct2.nonzero_abs_indices() + low_struct2.chrom.minPos/low_struct2.chrom.res
 enrichments = enrichments[bin_nums]
 compartments2 = np.array(ca.get_compartments(contacts2, enrichments))
 
 gen_coords = structure1.getGenCoords()
 
-dists = normalize(dists)
+#dists = normalize(dists)
 compartment_diffs = np.abs(compartments1 - compartments2)
-compartment_diffs = normalize(compartment_diffs)
+#compartment_diffs = normalize(compartment_diffs)
 
 smoothed_dists = sg.cwt(dists, sg.ricker, [smoothing_parameter])[0]
 dist_peaks = call_peaks(smoothed_dists)
 smoothed_diffs = sg.cwt(compartment_diffs, sg.ricker, [smoothing_parameter])[0]
 diff_peaks = call_peaks(smoothed_diffs)
 
-gen_coords = structure1.getGenCoords()
+high_coords = structure1.getGenCoords()
+low_coords = low_struct1.getGenCoords()
+
+high_comps1 = []
+high_comps2 = []
+
+for high_coord in high_coords:
+	low_index1 = low_struct1.get_rel_index(high_coord)
+	assert low_index1 is not None
+	low_comp1 = compartments1[low_index1]
+	high_comps1.append(low_comp1)
+	low_index2 = low_struct2.get_rel_index(high_coord)
+	assert low_index2 is not None
+	low_comp2 = compartments2[low_index2]
+	high_comps2.append(low_comp2)
 
 with open("{}_dist_peaks.bed".format(chrom), "w") as out:
 	for peak in dist_peaks:
@@ -154,7 +177,7 @@ with open("{}_dist_peaks.bed".format(chrom), "w") as out:
 		peak_dists = dists[start:end]
 		max_dist_index = np.argmax(peak_dists) + start
 		#out.write("\t".join(("{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
-		out.write("\t".join((structure1.chrom.name, str(gen_coords[max_dist_index]), str(gen_coords[max_dist_index] + structure1.chrom.res), str(compartments1[max_dist_index]), str(compartments2[max_dist_index]))))
+		out.write("\t".join((structure1.chrom.name, str(high_coords[max_dist_index]), str(high_coords[max_dist_index] + structure1.chrom.res), str(high_comps1[max_dist_index]), str(high_comps2[max_dist_index]))))
 		out.write("\n")
 	out.close()
 
@@ -163,7 +186,7 @@ with open("{}_comp_peaks.bed".format(chrom), "w") as out:
 		start, end = peak
 		peak_diffs = compartment_diffs[start:end]
 		max_diff_index = np.argmax(peak_diffs) + start
-		out.write("\t".join((structure1.chrom.name, str(gen_coords[max_diff_index]), str(gen_coords[max_diff_index] + structure1.chrom.res))))
+		out.write("\t".join((structure1.chrom.name, str(high_coords[max_diff_index]), str(high_coords[max_diff_index] + low_struct1.chrom.res))))
 		#out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
 		out.write("\n")
 	out.close()
