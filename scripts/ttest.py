@@ -10,6 +10,7 @@ enrichments2 = np.array(mat2[:,6], dtype=float)
 print st.ttest_ind(enrichments1, enrichments2)
 
 celltype = sys.argv[3]
+name = sys.argv[4]
 
 xs = enrichments1 
 #need to know bins to get y range
@@ -20,7 +21,7 @@ plt.close()
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
-plt.xlabel("{} enhancer coverage".format(celltype), fontsize=14)
+plt.xlabel("{} {} coverage".format(celltype, name), fontsize=14)
 plt.title("Relocalized", fontsize=14)
 
 #define offsets
@@ -50,7 +51,7 @@ plt.axhline(y=y_start, color="k", lw=4)
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 
-plt.savefig("relocalization_{}_enhancer_coverage".format(celltype))
+plt.savefig("relocalization_{}_{}_coverage".format(celltype, name))
 plt.close()
 
 xs = enrichments2 
@@ -62,7 +63,7 @@ plt.close()
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
-plt.xlabel("{} enhancer coverage".format(celltype), fontsize=14)
+plt.xlabel("{} {} coverage".format(celltype, name), fontsize=14)
 plt.title("Background", fontsize=14)
 
 #define offsets
@@ -92,5 +93,5 @@ plt.axhline(y=y_start, color="k", lw=4)
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 
-plt.savefig("background_{}_enhancer_coverage".format(celltype))
+plt.savefig("background_{}_{}_coverage".format(celltype, name))
 plt.close()
