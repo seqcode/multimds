@@ -17,18 +17,18 @@ if [ ! -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal ]
 	tar xzf GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal
 fi
 
-if [ $CELL_TYPE == "K562" ]
+if [ $CELL_TYPE == "K562" ] || [ $CELL_TYPE == "KBM7" ]
 	then
-		CHROMS=`seq 21`		#skip philadelphia chromosome
+		CHROMS=1 2 3 4 5 6 7 8 10 11 12 13 14 15 16 17 18 19 20 21	#skip translocated
 	else
 		CHROMS=`seq 22`
 fi
 
 for CHROM in $CHROMS
 do
-	echo $CHROM
 	if [ -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal/chr$CHROM ] && [ ! -e ${CELL_TYPE}_${CHROM}_${RES_KB}kb.bed ]
 		then
+			echo $CHROM
 			python ../normalize.py $CELL_TYPE $RES $CHROM
 	fi
 done
