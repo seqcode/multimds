@@ -91,10 +91,10 @@ xmin = min(xs)
 xmax = max(xs)
 x_range = xmax - xmin
 x_start = xmin - x_range/15.	#bigger offset for bar plot
-x_end = xmax + x_range/15.
+x_end = xmax + x_range/5.
 
 ymin = 0
-ymax = max([max(multimds_z_rs), max(independent_z_rs), max(contacts_pearson_rs), max(contacts_spearman_rs)])
+ymax = max([max(multimds_z_rs), max(contacts_pearson_rs), max(contacts_spearman_rs)])
 y_range = ymax - ymin
 y_start = ymin - y_range/25.
 y_end = ymax + y_range/25.
@@ -117,7 +117,7 @@ plt.axhline(y=y_start, color="k", lw=4)
 plt.xticks(xs, chroms)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
 
-plt.legend()
+plt.legend(frameon=False)
 
 plt.savefig("dist_vs_compartment")
 plt.show()
