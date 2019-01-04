@@ -48,7 +48,7 @@ def calculate_compartment_fraction(structure1, structure2, path1, path2):
 	z_length = np.mean((z_length1, z_length2))
 
 	x_mean = np.mean(np.abs(x_diffs))/x_length
-	y_mean = np.mean(np.abs(y_diffs))/y_length)
+	y_mean = np.mean(np.abs(y_diffs))/y_length
 	z_mean = np.mean(np.abs(z_diffs))/z_length
 
 	return z_mean/(x_mean + y_mean + z_mean)
