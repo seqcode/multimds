@@ -223,9 +223,9 @@ def main():
 	else:
 		prefix = ""
 
-	prefix1 = os.path.basename(path1)
+	prefix1 = os.path.basename(args.path1)
 	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
-	prefix2 = os.path.basename(path2)
+	prefix2 = os.path.basename(args.path2)
 	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
 
 	coords1 = np.array(structure1.getCoords())
@@ -234,7 +234,7 @@ def main():
 	np.savetxt("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2))
 
 	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(structure1, structure2, path1, path2))
+	print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
 
 if __name__ == "__main__":
 	main()
