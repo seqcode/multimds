@@ -231,7 +231,7 @@ def main():
 	coords1 = np.array(structure1.getCoords())
 	coords2 = np.array(structure2.getCoords())
 	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-	np.savetxt("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2))
+	np.savetxt("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), dists)
 
 	print("Fractional compartment change: ")
 	print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
