@@ -1,6 +1,7 @@
 # MultiMDS
 
-MultiMDS is a tool for locus-specific structural comparisons of two Hi-C datasets. It jointly infers and aligns 3D structures from two datasets, such as different cell types. The output is aligned 3D structure files (which can be plotted, see below). 
+MultiMDS is a tool for locus-specific structural comparisons of two Hi-C datasets. It jointly infers and aligns 3D structures from two datasets, such as different cell types. The output is aligned 3D structure files (which can be plotted, see below), locus-specific quantifications of relocalization, and compartment changes as a fraction of total relocalization. The amount of relocalization at each locus represents how much the locus changes between the datasets, which may be correlated with functional changes. The compartment fraction represents the importance of compartment changes to the global reorganization, which is expected to be 1/3 by chance. An enrichment of compartment changes suggests differential compartmentalization between the datasets. A lack of enrichment (or depletion) suggests that compartment-independent changes (such as TAD changes) dominate. 
+
 ## Installation
 
 Requirements:
@@ -22,7 +23,7 @@ Requirements:
 
 ## TLDR
 
-``python multimds.py --full [Hi-C BED path 1] [Hi-C BED path 2]``
+``python multimds.py [Hi-C BED path 1] [Hi-C BED path 2]``
 
 ## Testing
 
@@ -167,23 +168,23 @@ Multiple structures can also be plotted in a single gif:
 
 #### Parameters (optional)
 
-#### Full MDS
+#### Partitioned MDS
 
-By default, partitioned MDS is used. To use full MDS:
+By default, full MDS is used. To use partitioned MDS:
 
-``python multimds.py --full GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+``python multimds.py --partitioned GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
 ##### Number of partitions
 
 Partitioning is used in the structural inference step for greater efficiency and accuracy. By default 4 partitions are used. This can be controlled with the -N parameter: 
 
-``python multimds.py -N 2 GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+``python multimds.py --partitioned -N 2 GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
 #### Resolution ratio
 
-Multimds first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
+Partitioned MDS first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
 
-``python multimds.py -l 20 GM12878_combined_21_10kb.bed K562_21_10kb.bed``
+``python multimds.py --partitioned -l 20 GM12878_combined_21_10kb.bed K562_21_10kb.bed``
 
 The value you choose depends on your tradeoff between speed and accuracy (but must be an integer). Lower resolutions (i.e. higher ratios) are faster but less accurate.
 
@@ -202,3 +203,11 @@ The scaling factor a describes the assumed relationship between contact frequenc
 ``python multimds.py -a 3 GM12878_combined_21_10kb.bed K562_21_10kb.bed``
 
 a can be any value >1, including non-integer.
+
+##### Output prefix
+
+Use the -o option to use a custom prefix for your output files. For example
+
+``python multimds.py -o test_ GM12878_combined_21_10kb.bed K562_21_10kb.bed``
+
+will output test_GM12878_combined_21_10kb_structure.tsv, test_K562_21_10kb_structure.tsv, test_GM12878_combined_21_10kb_K562_21_10kb_relocalization.bed
