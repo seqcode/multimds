@@ -180,6 +180,10 @@ Partitioning is used in the structural inference step for greater efficiency and
 
 ``python multimds.py --partitioned -N 2 GM12878_combined_21_100kb.bed K562_21_100kb.bed``
 
+You can limit the maximum RAM (in Kb) used by any given partition using -r (default = 32000000):
+
+``python minimds.py -r 50000 GM12878_combined_22_5kb.bed``
+
 #### Resolution ratio
 
 Partitioned MDS first infers a global intrachromosomal structure at low resolution, which it uses as a scaffold for high-resolution inference. By default a resolution ratio of 10 is used. So if your input file is 100-kb resolution, a 1-Mb structure will be used for approximation. The resolution ratio can be changed with the l option. 
@@ -211,3 +215,11 @@ Use the -o option to use a custom prefix for your output files. For example
 ``python multimds.py -o test_ GM12878_combined_21_10kb.bed K562_21_10kb.bed``
 
 will output test_GM12878_combined_21_10kb_structure.tsv, test_K562_21_10kb_structure.tsv, test_GM12878_combined_21_10kb_K562_21_10kb_relocalization.bed
+
+##### Prior
+
+Exponential decay in contact frequency with genomic separation is a hallmark of Hi-C data. To reduce noise, miniMDS corrects contact frequencies with a distance-decay prior. The default prior weight is 0.05. You can change the weight using -w. 
+
+``python minimds.py -w 0 GM12878_combined_22_5kb.bed``
+
+w can be any value between 0 and 1. 
