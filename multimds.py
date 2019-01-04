@@ -171,8 +171,8 @@ def partitionedMDS(path1, path2, args):
 			trueLow2 = lowSubstructures2[substructurenum]
 
 			#joint MDS
-			structure_contactMat1 = dt.matFromBed(path1, num_threads, highSubstructure1)	#contact matrix for this structure only
-			structure_contactMat2 = dt.matFromBed(path2, num_threads, highSubstructure2)	#contact matrix for this structure only
+			structure_contactMat1 = dt.matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
+			structure_contactMat2 = dt.matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
 
 			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads, weight)
 
