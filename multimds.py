@@ -10,6 +10,8 @@ import linear_algebra as la
 import tools
 import tad
 from hic_oe import get_expected
+import os
+from compartment_fraction import calculate_compartment_fraction
 
 def distmat(contactMat, structure, alpha, weight, num_threads):
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
@@ -191,9 +193,9 @@ def main():
 	parser = argparse.ArgumentParser(description="Jointly reconstruct 3D coordinates from two normalized intrachromosomal Hi-C BED files.")
 	parser.add_argument("path1", help="path to first intrachromosomal Hi-C BED file")
 	parser.add_argument("path2", help="path to second intrachromosomal Hi-C BED file")
-	parser.add_argument("--full", action="store_true", help="use full MDS (default: partitioned MDS)")
+	parser.add_argument("--partitioned", action="store_true", help="use partitioned MDS (default: full MDS)")
 	parser.add_argument("-l", type=int, help="low resolution/high resolution", default=10)
-	#parser.add_argument("-o", help="output file prefix")
+	parser.add_argument("-o", help="output file prefix")
 	parser.add_argument("-r", default=32000000, help="maximum RAM to use (in kb)")
 	parser.add_argument("-n", type=int, default=3, help="number of threads")
 	parser.add_argument("-a", type=float, default=4, help="alpha factor for converting contact frequencies to physical distances")
@@ -203,9 +205,8 @@ def main():
 	parser.add_argument("-w", type=float, default=0.05, help="weight of distance decay prior")
 	args = parser.parse_args()
 
-	if args.full:	#not partitioned
-		structure1, structure2 = fullMDS(args.path1, args.path2, args.a, args.P, args.n, args.w)
-	else:	#partitioned
+	if args.partitioned:
+		#TODO: cleanup
 		params = (args.m, args.N, args.r, args.n, args.a, args.l, args.P, args.w)
 		names = ("Midpoint", "Number of partitions", "Maximum memory", "Number of threads", "Alpha", "Resolution ratio", "Penalty", "Weight")
 		intervals = ((None, None), (1, None), (0, None), (0, None), (1, None), (1, None), (0, None), (0, 1))
@@ -213,17 +214,27 @@ def main():
 			sys.exit(0)
 
 		structure1, structure2 = partitionedMDS(args.path1, args.path2, params)
+
+	else:
+		structure1, structure2 = fullMDS(args.path1, args.path2, args.a, args.P, args.n, args.w)
 	
-	#if args.o:
-	#	prefix = args.o
-	#else:
-	#	prefix = ""
-	prefix1 = args.path1.split("/")[-1].split(".bed")[0]
-	#structure1.write("{}/{}{}_structure.tsv".format("/".join(args.path1.split("/")[0:-1]), prefix, prefix1))
-	structure1.write("{}_structure.tsv".format(prefix1))
-	prefix2 = args.path2.split("/")[-1].split(".bed")[0]
-	#structure2.write("{}/{}{}_structure.tsv".format("/".join(args.path2.split("/")[0:-1]), prefix, prefix2))
-	structure2.write("{}_structure.tsv".format(prefix2))
+	if args.o:
+		prefix = args.o
+	else:
+		prefix = ""
+
+	prefix1 = os.path.basename(path1)
+	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
+	prefix2 = os.path.basename(path2)
+	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
+
+	coords1 = np.array(structure1.getCoords())
+	coords2 = np.array(structure2.getCoords())
+	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
+	np.savetxt("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2))
+
+	print("Fractional compartment change: ")
+	print(calculate_compartment_fraction(structure1, structure2, path1, path2))
 
 if __name__ == "__main__":
 	main()
