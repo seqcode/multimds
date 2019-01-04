@@ -30,9 +30,7 @@ with open(design_file) as infile:
 			path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
 			if os.path.isfile(path1) and os.path.isfile(path2):
-				os.system("python ../multimds.py --full -P {} {} {}".format(penalty, path1, path2))
-				#os.system("python /home/lur159/git/miniMDS/minimds.py {}".format(path1))
-				#os.system("python /home/lur159/git/miniMDS/minimds.py {}".format(path2))
+				os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
 				structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
 				structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 
