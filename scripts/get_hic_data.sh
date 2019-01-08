@@ -33,4 +33,6 @@ do
 	fi
 done
 	
+#rm GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz
+
 cd ..
