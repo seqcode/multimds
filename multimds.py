@@ -223,9 +223,9 @@ def main():
 	else:
 		prefix = ""
 
-	prefix1 = os.path.basename(args.path1)
+	prefix1 = os.path.splitext(os.path.basename(args.path1))
 	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
-	prefix2 = os.path.basename(args.path2)
+	prefix2 = os.path.splitext(os.path.basename(args.path2))
 	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
 
 	coords1 = np.array(structure1.getCoords())
