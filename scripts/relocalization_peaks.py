@@ -65,6 +65,7 @@ path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 #min_error = sys.float_info.max
 #for iteration in range(n):
 	#os.system("python ../multimds.py -m {} -N {} -o {}_ {} {}".format(centromere, num_partitions, iteration, path1, path2))
+
 #os.system("python /home/lur159/git/multimds/multimds.py --full {} {}".format(path1, path2))
 		
 #load structures
@@ -81,8 +82,8 @@ structure2.rescale()
 dt.make_compatible((structure1, structure2))
 
 #align
-r, t = la.getTransformation(structure1, structure2)
-structure1.transform(r,t)
+#r, t = la.getTransformation(structure1, structure2)
+#structure1.transform(r,t)
 
 	#calculate error
 	#coords1 = np.array(structure1.getCoords())
@@ -150,10 +151,19 @@ gen_coords = structure1.getGenCoords()
 compartment_diffs = np.abs(compartments1 - compartments2)
 #compartment_diffs = normalize(compartment_diffs)
 
-smoothed_dists = sg.cwt(dists, sg.ricker, [smoothing_parameter])[0]
-dist_peaks = call_peaks(smoothed_dists)
-smoothed_diffs = sg.cwt(compartment_diffs, sg.ricker, [smoothing_parameter])[0]
-diff_peaks = call_peaks(smoothed_diffs)
+#smoothed_dists = sg.cwt(dists, sg.ricker, [smoothing_parameter])[0]
+#dist_peaks = call_peaks(smoothed_dists)
+dist_peaks = sg.find_peaks_cwt(dists, np.arange(1,10))
+#randomize
+#num_peaks = len(dist_peaks)
+#dist_peaks = np.random.randint(len(dists), size=num_peaks)
+
+#smoothed_diffs = sg.cwt(compartment_diffs, sg.ricker, [smoothing_parameter])[0]
+#diff_peaks = call_peaks(smoothed_diffs)
+diff_peaks = sg.find_peaks_cwt(compartment_diffs, np.arange(1,10))
+#randomize
+#num_peaks = len(diff_peaks)
+#diff_peaks = np.random.randint(len(compartment_diffs), size=num_peaks)
 
 high_coords = structure1.getGenCoords()
 low_coords = low_struct1.getGenCoords()
@@ -173,9 +183,10 @@ for high_coord in high_coords:
 
 with open("{}_dist_peaks.bed".format(chrom), "w") as out:
 	for peak in dist_peaks:
-		start, end = peak
-		peak_dists = dists[start:end]
-		max_dist_index = np.argmax(peak_dists) + start
+		#start, end = peak
+		#peak_dists = dists[start:end]
+		#max_dist_index = np.argmax(peak_dists) + start
+		max_dist_index = peak
 		#out.write("\t".join(("{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
 		out.write("\t".join((structure1.chrom.name, str(high_coords[max_dist_index]), str(high_coords[max_dist_index] + structure1.chrom.res), str(high_comps1[max_dist_index]), str(high_comps2[max_dist_index]))))
 		out.write("\n")
@@ -183,9 +194,10 @@ with open("{}_dist_peaks.bed".format(chrom), "w") as out:
 
 with open("{}_comp_peaks.bed".format(chrom), "w") as out:
 	for peak in diff_peaks:
-		start, end = peak
-		peak_diffs = compartment_diffs[start:end]
-		max_diff_index = np.argmax(peak_diffs) + start
+		#start, end = peak
+		#peak_diffs = compartment_diffs[start:end]
+		#max_diff_index = np.argmax(peak_diffs) + start
+		max_diff_index = peak
 		out.write("\t".join((structure1.chrom.name, str(high_coords[max_diff_index]), str(high_coords[max_diff_index] + low_struct1.chrom.res))))
 		#out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
 		out.write("\n")

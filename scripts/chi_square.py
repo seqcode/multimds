@@ -1,23 +1,30 @@
 from matplotlib import pyplot as plt
 from scipy import stats as st
 import numpy as np
+import sys
 
-datasets = ("GM12878_H3K27ac", "GM12878_H3K4me1", "GM12878_H3K4me3", "GM12878_H3K9ac", "GM12878_CTCF", "GM12878_H2AZ", "GM12878_H3K4me2", "GM12878_H3K79me2", "GM12878_H4K20me1", "K562_H3K27me3")
+datasets = ("GM12878_H3K27ac", "GM12878_H3K4me1", "GM12878_H3K4me3", "GM12878_H3K9ac", "GM12878_H2AZ", "GM12878_H3K4me2", "GM12878_H3K79me2", "GM12878_H4K20me1", "K562_H3K27me3")
 
 overrepresentation = np.zeros_like(datasets, dtype=float)
+
 
 for i, dataset in enumerate(datasets):
 	peaks_coverage = np.loadtxt("peaks_filtered_{}_coverage.bed".format(dataset), usecols=6)
 	background_coverage = np.loadtxt("A_background_filtered_{}_coverage.bed".format(dataset), usecols=6)
-	peaks_zero_coverage = len(np.where(peaks_coverage == 0)[0])
-	peaks_nonzero_coverage = len(np.where(peaks_coverage > 0)[0])
-	background_zero_coverage = len(np.where(background_coverage == 0)[0])
-	background_nonzero_coverage = len(np.where(background_coverage > 0)[0])
 
-	chi2, p, dof, expected = st.chi2_contingency([[peaks_zero_coverage, background_zero_coverage], [peaks_nonzero_coverage, background_nonzero_coverage]])
-	print p
+	print st.ttest_ind(peaks_coverage, background_coverage)
 
-	overrepresentation[i] = (float(peaks_nonzero_coverage)/peaks_zero_coverage)/(float(background_nonzero_coverage)/background_zero_coverage)
+	overrepresentation[i] = np.mean(peaks_coverage)/np.mean(background_coverage)
+
+	#peaks_zero_coverage = len(np.where(peaks_coverage == 0)[0])
+	#peaks_nonzero_coverage = len(np.where(peaks_coverage > 0)[0])
+	#background_zero_coverage = len(np.where(background_coverage == 0)[0])
+	#background_nonzero_coverage = len(np.where(background_coverage > 0)[0])
+
+	#chi2, p, dof, expected = st.chi2_contingency([[peaks_zero_coverage, background_zero_coverage], [peaks_nonzero_coverage, background_nonzero_coverage]])
+	#print p
+
+	#overrepresentation[i] = (float(peaks_nonzero_coverage)/peaks_zero_coverage)/(float(background_nonzero_coverage)/background_zero_coverage)
 
 ys = overrepresentation 
 
