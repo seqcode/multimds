@@ -61,6 +61,17 @@ class Structure(object):
 		"""All non-zero points"""
 		return self.points[np.where(self.points != 0)[0]]
 
+	def subsamplePoints(self, start_abs_index, end_abs_index):
+		"""Set structure's points to only include start_abs_index through end_abs_index"""
+		points = self.points[start_abs_index:end_abs_index+1]
+		self.chrom.maxPos = self.chrom.getGenCoord(end_abs_index)
+		self.chrom.minPos = self.chrom.getGenCoord(start_abs_index)
+		#re-index
+		for abs_index in np.where(points != 0)[0]:
+			points[abs_index].absolute_index = abs_index
+		self.points = points
+		self.set_rel_indices()
+
 	def getGenCoords(self):
 		"""Non-zero genomic coordinates of structure"""
 		return [self.chrom.getGenCoord(abs_index) for abs_index in self.nonzero_abs_indices()]
@@ -224,8 +235,6 @@ def matFromBed(path, structure=None):
 	numpoints = len(abs_indices)
 	mat = np.zeros((numpoints, numpoints))	
 
-	assert max(abs_indices) - structure.offset < len(structure.points)
-
 	with open(path) as infile:
 		for line in infile:
 			line = line.strip().split()
@@ -245,6 +254,8 @@ def matFromBed(path, structure=None):
 
 	at.makeSymmetric(mat)	
 	rowsums = np.array([sum(row) for row in mat])
+	if len(np.where(rowsums == 0)[0]) > 0:
+		print(np.array(structure.getGenCoords())[np.where(rowsums == 0)[0]])
 	assert len(np.where(rowsums == 0)[0]) == 0
 
 	return mat
