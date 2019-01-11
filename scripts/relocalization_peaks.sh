@@ -3,10 +3,6 @@ set -e
 RES=$1
 RES_KB=$(($RES/1000))
 
-#./get_hic_data.sh GM12878_combined
-#./get_hic_data.sh K562
-#./get_activity_data.sh
-
 PARTITION_NUMS=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 2 2 2)
 MIDPOINTS=(135 93 92 51 48 60 60 45 41 53 36 0 0 0 40 24 17 26 28 0 0)
 CHROMS=(1 2 3 4 5 6 7 8 10 11 12 13 14 15 16 17 18 19 20 21 X)
