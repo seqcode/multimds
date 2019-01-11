@@ -15,7 +15,7 @@ class ChromParameters(object):
 
 	def getLength(self):
 		"""Number of possible loci"""
-		return (self.maxPos - self.minPos)/self.res + 1
+		return int((self.maxPos - self.minPos)/self.res) + 1
 
 	def getAbsoluteIndex(self, genCoord):
 		"""Converts genomic coordinate into absolute index. Absolute indexing includes empty (zero) points."""
