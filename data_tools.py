@@ -253,7 +253,7 @@ def highToLow(highstructure, resRatio):
 	"""Reduces resolution of structure"""
 	lowChrom = highstructure.chrom.reduceRes(resRatio)
 
-	low_n = len(highstructure.points)/resRatio + 1
+	low_n = int(len(highstructure.points)/resRatio) + 1
 
 	lowstructure = Structure(np.zeros(low_n, dtype=np.object), [], lowChrom, highstructure.offset/resRatio)
 
@@ -262,7 +262,7 @@ def highToLow(highstructure, resRatio):
 	for highPoint in highstructure.getPoints():
 		pointsToMerge = []
 		high_abs_index = highPoint.absolute_index - highstructure.offset
-		low_abs_index = high_abs_index/resRatio
+		low_abs_index = int(high_abs_index/resRatio)
 		allPointsToMerge[low_abs_index].append(highPoint)
 
 	index = lowstructure.offset

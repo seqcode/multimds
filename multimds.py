@@ -100,7 +100,7 @@ def partitionedMDS(path1, path2, args):
 	#get partitions
 	n = len(lowstructure1.getPoints())
 	if centromere == 0:
-		midpoint = n/2
+		midpoint = int(n/2)
 	else:	
 		midpoint = lowstructure1.chrom.getAbsoluteIndex(centromere)
 	
@@ -111,10 +111,10 @@ def partitionedMDS(path1, path2, args):
 
 	lowpartitions = []	#low substructures, defined on absolute indices not relative indices
 
-	for i in range(num_partitions/2):
+	for i in range(int(num_partitions/2)):
 		lowpartitions.append((i*partition_size1, min(((i+1)*partition_size1), midpoint)))
 
-	for i in range(num_partitions/2):
+	for i in range(int(num_partitions/2)):
 		lowpartitions.append((midpoint + i*partition_size2, min((midpoint + (i+1)*partition_size2), n-1)))
 
 	lowpartitions = np.array(lowpartitions)
@@ -187,6 +187,9 @@ def partitionedMDS(path1, path2, args):
 	highstructure1.setstructures(highSubstructures1)
 	highstructure2.setstructures(highSubstructures2)
 
+	highstructure1.set_rel_indices()
+	highstructure2.set_rel_indices()
+
 	return highstructure1, highstructure2
 
 def main():
@@ -222,6 +225,15 @@ def main():
 		prefix = args.o
 	else:
 		prefix = ""
+
+	#print("structure 1")
+	#for i in range(len(structure1.points)):
+	#	if structure1.points[i] != 0:
+	#		print(structure1.points[i].relative_index)
+	#print("structure 2")
+	#for i in range(len(structure2.points)):
+	#	if structure2.points[i] != 0:
+	#		print(structure2.points[i].relative_index)
 
 	prefix1 = os.path.splitext(os.path.basename(args.path1))[0]
 	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
