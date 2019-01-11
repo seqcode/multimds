@@ -41,6 +41,7 @@ do
 				cat $COVERAGE_FILE | awk -v chrom=chr$CHROM '$1 == chrom {print $0}' > $CELL_TYPE"_"$CHROM"_"${RES_KB}kb_active_coverage.bed
 		fi
 	done
+
 done
 
 cd ..

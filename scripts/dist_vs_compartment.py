@@ -21,7 +21,7 @@ for j, chrom in enumerate(chroms):
 	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
 	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-	#os.system("python ../multimds.py {} {}".format(path1, path2))
+	os.system("python ../multimds.py {} {}".format(path1, path2))
 
 	#load structures
 	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))	
