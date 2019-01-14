@@ -15,10 +15,6 @@ os.system("python ../multimds.py {} {}".format(path1, path2))
 struct1 = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")	
 struct2 = dt.structure_from_file("K562_21_100kb_structure.tsv")
 
-print(struct1.chrom.getGenCoord(325))
-print(struct1.chrom.getGenCoord(345))
-sys.exit(0)
-
 contacts1 = dt.matFromBed(path1, struct1)
 enrichments1 = np.loadtxt("binding_data/Gm12878_21_100kb_active_coverage.bed", usecols=6)
 bin_nums1 = struct1.nonzero_abs_indices() + int(struct1.chrom.minPos/struct1.chrom.res)
@@ -44,8 +40,10 @@ transformed_coords2 = np.array(la.change_coordinate_system(coef, coords2))
 struct1.setCoords(transformed_coords1)
 struct2.setCoords(transformed_coords2)
 
-struct1.subsamplePoints(325, 345)
-struct2.subsamplePoints(325, 345)
+index1 = struct1.chrom.getAbsoluteIndex(41900000)
+index2 = struct1.chrom.getAbsoluteIndex(43900000)
+struct1.subsamplePoints(index1, index2)
+struct2.subsamplePoints(index1, index2)
 
 colors = np.zeros_like(struct1.getPoints(), dtype=int)
 index1 = struct1.get_rel_index(42700000)
