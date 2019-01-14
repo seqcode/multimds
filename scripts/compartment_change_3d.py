@@ -40,6 +40,11 @@ transformed_coords2 = np.array(la.change_coordinate_system(coef, coords2))
 struct1.setCoords(transformed_coords1)
 struct2.setCoords(transformed_coords2)
 
+index1 = struct1.get_rel_index(41900000)
+index2 = struct1.get_rel_index(43900000)
+comps1 = comps1[index1:index2+1]
+comps2 = comps2[index1:index2+1]
+
 index1 = struct1.chrom.getAbsoluteIndex(41900000)
 index2 = struct1.chrom.getAbsoluteIndex(43900000)
 struct1.subsamplePoints(index1, index2)
@@ -50,5 +55,6 @@ index1 = struct1.get_rel_index(42700000)
 index2 = struct1.get_rel_index(42900000)
 colors[index1:index2] = 1
 
-plot.plot_structures_interactive((struct1, struct2), colors=((0,1,0), (0,1,238./255)), radius=0.01, out_path="compartment_change_3d.png")
+plot.plot_structures_interactive((struct1, struct2), colors=((0,1,0), (0,1,238./255)), radius=0.01, out_path="compartment_change_3d_by_chrom.png")
 plot.plot_structures_interactive((struct1, struct2), (colors, colors), radius=0.01, out_path="compartment_change_3d_mx.png")
+plot.plot_structures_interactive((struct1, struct2), (comps1, comps2), radius=0.01, out_path="compartment_change_3d_by_compartment.png")
