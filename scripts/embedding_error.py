@@ -21,7 +21,7 @@ def error(dists, coords):
 	rmse = mse**(1./2)
 	return rmse
 
-chrom = sys.argv[1]
+chrom = 21
 res_kb = 100
 prefix1 = "GM12878_combined"
 prefix2 = "K562"
@@ -33,7 +33,7 @@ ps = np.arange(0, 0.6, 0.1)
 errors = np.zeros_like(ps)
 
 for i, p in enumerate(ps):
-	os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
+	os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
 	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
 	structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
 
