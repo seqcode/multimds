@@ -45,9 +45,6 @@ with open ("galactose_{}_Nup60.bed".format(gene)) as infile:
 			plt.plot([start,end], [num_tags,num_tags], c="g")
 	infile.close()
 
-peak = np.loadtxt("{}_Nup60_peak.bed".format(gene), dtype=object)
-plt.plot([float(peak[1])/1000, float(peak[2])/1000], [30,30], c="k", label="Differential Nup60 peak")
-
 plt.xlabel("Genomic coordinate (kb)", fontsize=12)
 plt.ylabel("Tag count", fontsize=12)
 
@@ -65,7 +62,7 @@ ymin = 0
 ymax = max_num_tags
 y_range = ymax - ymin
 y_start = ymin - y_range/25.
-y_end = ymax + y_range/10.
+y_end = ymax + y_range/5.
 
 #define axes with offsets
 plt.axis([x_start, x_end, y_start, y_end], frameon=False)
@@ -77,7 +74,19 @@ plt.axhline(y=y_start, color="k", lw=4)
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
 
-plt.title(gene)
+peak = np.loadtxt("{}_Nup60_peak.bed".format(gene), dtype=object)
+if len(peak) > 0:
+	plt.plot([float(peak[1])/1000, float(peak[2])/1000], [y_range/70., y_range/70.], c="r", label="Differential Nup60 peak")
+
+with open ("{}_transcription_direction.bed".format(gene)) as infile:
+	for line in infile:
+		line = line.strip().split()
+		start = float(line[1])/1000
+		end = float(line[2])/1000
+		plt.arrow(start, y_start + y_range/10., end-start, 0, facecolor="k", head_width=6, head_length=0.1)
+		plt.annotate(line[3], (np.mean((start,end)), y_start + y_range/16.), fontsize=7)
+	infile.close()
+
 plt.legend(loc=2, fontsize=8, frameon=False, shadow=False)
 
 plt.savefig("{}_Nup60".format(gene))
