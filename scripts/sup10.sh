@@ -36,7 +36,8 @@ RES=100000
 
 ./process_hpc7.sh $RES
 ./process_g1e.sh WT $RES
-#TODO: process other cell types
+./process_cohesin-wt.sh
+./process_ctcf-wt.sh
 
 if [ -e mouse_celltype_design.txt ]
 	then
@@ -89,6 +90,6 @@ done
 python quantify_z_independent.py 20 lymphoblastoid_design.txt 0.03
 
 #cohesin
-./process_cohesin.sh
+./process_cohesin-ko.sh
 echo "hepatocyte-cohesin-KO hepatocyte-WT" > cohesin_design.txt
 python quantify_z_independent.py 20 cohesin_design.txt 0.04
