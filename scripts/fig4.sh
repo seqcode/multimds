@@ -39,7 +39,8 @@ RES=100000
 
 ./process_hpc7.sh $RES
 ./process_g1e.sh WT $RES
-#TODO: process other cell types
+./process_ctcf-wt.sh
+./process_cohesin-wt.sh
 
 if [ -e mouse_celltype_design.txt ]
 	then
@@ -73,7 +74,7 @@ python quantify_z.py 20 mouse_celltype_design.txt 0.035
 python quantify_z.py 20 mouse_celltype_rep_design.txt 0.02
 
 #LCL
-./get_lymphoblastoid.sh
+./process_lymphoblastoid.sh
 
 if [ -e lymphoblastoid_design.txt ]
 	then
