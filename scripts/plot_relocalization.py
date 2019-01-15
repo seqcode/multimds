@@ -13,7 +13,7 @@ strain = sys.argv[4]
 res_kb = 32
 
 chrom_name = "{}_{}".format(strain, chrom_num)
-os.system("python ~/git/multimds/multimds.py -P 0.1 -w 0 ctrl_{}_{}kb.bed galactose_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
+os.system("python ../multimds.py -P 0.1 -w 0 ctrl_{}_{}kb.bed galactose_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
 struct1 = dt.structure_from_file("ctrl_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
 struct2 = dt.structure_from_file("galactose_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
 gen_coords = struct1.getGenCoords()
