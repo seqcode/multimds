@@ -135,7 +135,7 @@ plt.axis([x_start, x_end, y_start, y_end], frameon=False)
 plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=6)	
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
-plt.savefig("{}_change_by_axis".format(prefix))
+plt.savefig("{}_change_by_axis_independent".format(prefix))
 
 sys.exit(0)
 
