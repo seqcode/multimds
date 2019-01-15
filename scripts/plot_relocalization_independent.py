@@ -13,8 +13,8 @@ strain = sys.argv[4]
 res_kb = 32
 
 chrom_name = "{}_{}".format(strain, chrom_num)
-os.system("python ~/git/miniMDS/minimds.py -w 0 -o independent_ctrl_{}_{}kb_structure.tsv ctrl_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
-os.system("python ~/git/miniMDS/minimds.py -w 0 -o independent_galactose_{}_{}kb_structure.tsv galactose_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
+os.system("python ../minimds.py -w 0 -o independent_ctrl_{}_{}kb_structure.tsv ctrl_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
+os.system("python ../minimds.py -w 0 -o independent_galactose_{}_{}kb_structure.tsv galactose_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
 struct1 = dt.structure_from_file("independent_ctrl_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
 struct2 = dt.structure_from_file("independent_galactose_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
 dt.make_compatible((struct1, struct2))
