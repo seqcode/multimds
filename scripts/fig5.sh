@@ -1,7 +1,8 @@
 set -e
 
 #cohesin
-./process_cohesin.sh
+./process_cohesin-wt.sh
+./process_cohesin-ko.sh
 echo "hepatocyte-cohesin-KO hepatocyte-WT" > cohesin_design.txt
 python quantify_z.py 20 cohesin_design.txt 0.04
 
@@ -20,7 +21,8 @@ python quantify_z.py 20 brd2_design.txt 0.02
 python quantify_z.py 20 brd2_rep_design.txt 0.035
 
 #CTCF
-./process_ctcf.sh
+./process_ctcf-wt.sh
+./process_ctcf-ko.sh
 
 CELLTYPES=(mESC-WT-rep1 mESC-WT-rep2 mESC-CTCF-KO-rep1 mESC-CTCF-KO-rep2)
 
