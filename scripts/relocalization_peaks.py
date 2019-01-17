@@ -117,7 +117,6 @@ dt.make_compatible((structure1, structure2))
 coords1 = np.array(structure1.getCoords())
 coords2 = np.array(structure2.getCoords())
 dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-print np.mean(dists)
 
 #compartments
 chrom1 = dt.chromFromBed(path1)
@@ -160,7 +159,7 @@ dist_peaks = sg.find_peaks_cwt(dists, np.arange(1,10))
 
 #smoothed_diffs = sg.cwt(compartment_diffs, sg.ricker, [smoothing_parameter])[0]
 #diff_peaks = call_peaks(smoothed_diffs)
-diff_peaks = sg.find_peaks_cwt(compartment_diffs, np.arange(1,10))
+#diff_peaks = sg.find_peaks_cwt(compartment_diffs, np.arange(1,10))
 #randomize
 #num_peaks = len(diff_peaks)
 #diff_peaks = np.random.randint(len(compartment_diffs), size=num_peaks)
@@ -189,16 +188,19 @@ with open("{}_dist_peaks.bed".format(chrom), "w") as out:
 		max_dist_index = peak
 		#out.write("\t".join(("{}".format(structure1.chrom.name), str(gen_coords[start]), str(gen_coords[end]), str(gen_coords[max_dist_index]))))
 		out.write("\t".join((structure1.chrom.name, str(high_coords[max_dist_index]), str(high_coords[max_dist_index] + structure1.chrom.res), str(high_comps1[max_dist_index]), str(high_comps2[max_dist_index]))))
+		#out.write("\t".join((structure1.chrom.name, str(high_coords[start]), str(high_coords[end]), str(high_comps1[max_dist_index]), str(high_comps2[max_dist_index]))))
 		out.write("\n")
 	out.close()
+sys.exit(0)
 
 with open("{}_comp_peaks.bed".format(chrom), "w") as out:
 	for peak in diff_peaks:
 		#start, end = peak
 		#peak_diffs = compartment_diffs[start:end]
 		#max_diff_index = np.argmax(peak_diffs) + start
-		max_diff_index = peak
-		out.write("\t".join((structure1.chrom.name, str(high_coords[max_diff_index]), str(high_coords[max_diff_index] + low_struct1.chrom.res))))
-		#out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
+		#max_diff_index = peak
+		#out.write("\t".join((structure1.chrom.name, str(high_coords[max_diff_index]), str(high_coords[max_diff_index] + low_struct1.chrom.res))))
+		out.write("\t".join((structure1.chrom.name, str(gen_coords[peak]), str(gen_coords[peak] + structure1.chrom.res))))
+		#out.write("\t".join((structure1.chrom.name, str(gen_coords[start]), str(gen_coords[end]))))
 		out.write("\n")
 	out.close()

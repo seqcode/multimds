@@ -3,7 +3,7 @@ from scipy import stats as st
 import numpy as np
 import sys
 
-datasets = ("GM12878_H3K27ac", "GM12878_H3K4me1", "GM12878_H3K4me3", "GM12878_H3K9ac", "GM12878_H2AZ", "GM12878_H3K4me2", "GM12878_H3K79me2", "GM12878_H4K20me1", "K562_H3K27me3")
+datasets = ("GM12878_H3K27ac", "GM12878_H3K4me1", "GM12878_H3K4me3", "GM12878_H3K9ac", "GM12878_H2AZ", "GM12878_H3K4me2", "GM12878_H3K79me2", "GM12878_H4K20me1", "GM12878_H3K27me3", "K562_H3K27ac", "K562_H3K4me1", "K562_H3K4me3", "K562_H3K9ac", "K562_H2AZ", "K562_H3K4me2", "K562_H3K79me2", "K562_H4K20me1", "K562_H3K27me3")
 
 overrepresentation = np.zeros_like(datasets, dtype=float)
 

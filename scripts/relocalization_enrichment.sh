@@ -24,8 +24,8 @@ if [ ! -e A_background_filtered.bed ]
 		./filter_mappability.sh A_background $RES
 fi
 
-IDS=(H3k27acStdPk H3k04me1StdPkV2 H3k04me3StdPkV2 H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk)
-NAMES=(H3K27ac H3K4me1 H3K4me3 H3K9ac H3K36me3 H2AZ H3K4me2 H3K79me2 H4K20me1)
+IDS=(H3k27acStdPk H3k04me1StdPkV2 H3k04me3StdPkV2 H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPkV2)
+NAMES=(H3K27ac H3K4me1 H3K4me3 H3K9ac H3K36me3 H2AZ H3K4me2 H3K79me2 H4K20me1 H3K27me3)
 
 for i in `seq 0 $((${#IDS[@]}-1))`
 do
@@ -41,14 +41,21 @@ do
 	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_GM12878_${NAME}_coverage.bed
 done
 
-NAME=H3K27me3
-FILENAME=wgEncodeBroadHistoneK562H3k27me3StdPk.broadPeak
-if [ ! -e binding_data/$FILENAME ]
-	then
-		curl http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/$FILENAME.gz -o binding_data/$FILENAME.gz
-		gunzip binding_data/$FILENAME.gz
-fi
-bedtools coverage -a peaks_filtered.bed -b binding_data/$FILENAME > peaks_filtered_K562_${NAME}_coverage.bed
-bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
+IDS=(H3k27acStdPk H3k4me1StdPk H3k4me3StdPk H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPk)
+NAMES=(H3K27ac H3K4me1 H3K4me3 H3K9ac H3K36me3 H2AZ H3K4me2 H3K79me2 H4K20me1 H3K27me3)
 
-python chi_square.py
+for i in `seq 0 $((${#IDS[@]}-1))`
+do
+	ID=${IDS[$i]}
+	NAME=${NAMES[$i]}
+	FILENAME=wgEncodeBroadHistoneK562${ID}.broadPeak
+	if [ ! -e binding_data/$FILENAME ]
+		then
+			curl http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/$FILENAME.gz -o binding_data/$FILENAME.gz
+			gunzip binding_data/$FILENAME.gz
+	fi
+	bedtools coverage -a peaks_filtered.bed -b binding_data/$FILENAME > peaks_filtered_K562_${NAME}_coverage.bed
+	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
+done
+
+python relocalization_enrichment.py
