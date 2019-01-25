@@ -14,7 +14,7 @@ do
 		cat ${CONDITION}_${STRAIN}_12_32kb.bed | awk '$2 >= 448000 && $5 >= 448000 {print $0}' > ${CONDITION}_${STRAIN}_12-downstream_32kb.bed
 	done
 
-	python plot_relocalization_independent.py 12-downstream rDNA 448000 $STRAIN
+	python plot_relocalization_independent.py rDNA 12-downstream 448000 $STRAIN
 done
 
 for CONDITION in ctrl galactose
@@ -22,5 +22,5 @@ for CONDITION in ctrl galactose
 		cat ${CONDITION}_Scer_12_32kb.bed | awk '$2 < 448000 && $5 < 448000 {print $0}' > ${CONDITION}_Scer_12-upstream_32kb.bed
 done
 
-python plot_relocalization_independent.py 12-upstream Gal2 290212 Scer
-python plot_relocalization_independent.py 15 Gal2 740086 Suva
+python plot_relocalization_independent.py Gal2 12-upstream 290212 Scer
+python plot_relocalization_independent.py Gal2 15 740086 Suva
