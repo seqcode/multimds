@@ -3,7 +3,7 @@ from scipy import stats as st
 import numpy as np
 import sys
 
-datasets = ("GM12878_H3K27ac", "GM12878_H3K4me1", "GM12878_H3K4me3", "GM12878_H3K9ac", "GM12878_H2AZ", "GM12878_H3K4me2", "GM12878_H3K79me2", "GM12878_H4K20me1", "GM12878_H3K27me3", "K562_H3K27ac", "K562_H3K4me1", "K562_H3K4me3", "K562_H3K9ac", "K562_H2AZ", "K562_H3K4me2", "K562_H3K79me2", "K562_H4K20me1", "K562_H3K27me3")
+datasets = ("GM12878_H3K27ac", "GM12878_H3K4me1", "GM12878_H3K4me3", "GM12878_H3K9ac", "GM12878_H2AZ", "GM12878_H3K4me2", "Gm12878_enhancer", "K562_H3K27me3", "K562_EZH2", "K562_repressed")
 
 overrepresentation = np.zeros_like(datasets, dtype=float)
 
@@ -52,7 +52,7 @@ plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-plt.xticks(xs, datasets, rotation=90)
+plt.xticks(xs, ("GM12878 H3K27ac", "GM12878 H3K4me1", "GM12878 H3K4me3", "GM12878 H3K9ac", "GM12878 H2AZ", "GM12878 H3K4me2", "GM12878 enhancer", "K562 H3K27me3", "K562 EZH2", "K562 repressed"), rotation=90)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, labelsize=9)
 
 plt.savefig("relocalization_enrichment")

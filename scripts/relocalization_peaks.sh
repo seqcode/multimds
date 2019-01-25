@@ -17,10 +17,11 @@ fi
 for i in `seq 0 19`
 do
 	CHROM=${CHROMS[$i]}
-	python relocalization_peaks.py GM12878_combined K562 $CHROM $((${MIDPOINTS[$i]} * 1000000)) ${PARTITION_NUMS[$i]} ${SMOOTHING_PARAMETERS[$i]} $RES
+	#python relocalization_peaks.py GM12878_combined K562 $CHROM $((${MIDPOINTS[$i]} * 1000000)) ${PARTITION_NUMS[$i]} ${SMOOTHING_PARAMETERS[$i]} $RES
 	#bedtools subtract -A -a ${CHROM}_dist_peaks.bed -b ${CHROM}_comp_peaks.bed > ${CHROM}_noncomp_peaks.bed
-	cat ${CHROM}_dist_peaks.bed | awk '($4 - $5 < 0.1 && $4 - $5 > 0) || ($5 - $4 < 0.1 && $4 - $5 > 0) {print $0}' > ${CHROM}_noncomp_peaks.bed
-	cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $1"\t"$2"\t"$3}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
+	cat ${CHROM}_dist_peaks.bed | awk '($4 - $5 < 0.2 && $4 > $5) || ($5 - $4 < 0.2 && $5 > $4) {print $0}' > ${CHROM}_noncomp_peaks.bed
+	#cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $1"\t"$2"\t"$3}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
+	cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $0}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
 	./filter_mappability.sh ${CHROM}_A_noncomp_peaks $RES
 	cat ${CHROM}_A_noncomp_peaks_filtered.bed >> peaks_filtered.bed
 done
