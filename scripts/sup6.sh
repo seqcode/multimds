@@ -1,11 +1,28 @@
 set -e
 
-curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583734/suppl/GSM2583734_galactose_IP.bedgraph.gz -o GSM2583734_galactose_IP.bedgraph.gz
-curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583735/suppl/GSM2583735_galactose_input.bedgraph.gz -o GSM2583735_galactose_input.bedgraph.gz
-curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583736/suppl/GSM2583736_glucose_IP.bedgraph.gz -o GSM2583736_glucose_IP.bedgraph.gz
-curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583737/suppl/GSM2583737_glucose_input.bedgraph.gz -o GSM2583737_glucose_input.bedgraph.gz
+if [ ! -e GSM2583734_galactose_IP.bedgraph ]
+	then
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583734/suppl/GSM2583734_galactose_IP.bedgraph.gz -o GSM2583734_galactose_IP.bedgraph.gz
+		gunzip GSM2583734_galactose_IP.bedgraph.gz
+fi
 
-gunzip *.bedgraph.gz
+if [ ! -e GSM2583735_galactose_input.bedgraph ]
+	then
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583735/suppl/GSM2583735_galactose_input.bedgraph.gz -o GSM2583735_galactose_input.bedgraph.gz
+		gunzip GSM2583735_galactose_input.bedgraph.gz
+fi
+
+if [ ! -e GSM2583736_glucose_IP.bedgraph ]
+	then
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583736/suppl/GSM2583736_glucose_IP.bedgraph.gz -o GSM2583736_glucose_IP.bedgraph.gz
+		gunzip GSM2583736_glucose_IP.bedgraph.gz
+fi
+
+if [ ! -e GSM2583737_glucose_input.bedgraph ]
+	then
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583737/suppl/GSM2583737_glucose_input.bedgraph.gz -o GSM2583737_glucose_input.bedgraph.gz
+		gunzip GSM2583737_glucose_input.bedgraph.gz
+fi
 
 #align
 for NUM in `seq 3 6`

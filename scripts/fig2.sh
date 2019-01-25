@@ -1,6 +1,6 @@
 set -e
 
-#./get_yeast_data.sh
+./get_yeast_data.sh
 
 for STRAIN in Scer Suva
 do
