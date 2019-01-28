@@ -30,10 +30,10 @@ with open(design_file) as infile:
 			path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
 			if os.path.isfile(path1) and os.path.isfile(path2):
-				os.system("python ../minimds.py {}".format(path1))
-				os.system("python ../minimds.py {}".format(path2))
-				structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
-				structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+				os.system("python ../minimds.py -o {}_{}_{}kb_independent_structure.tsv {}".format(cell_type1, chrom, res_kb, path1))
+				os.system("python ../minimds.py -o {}_{}_{}kb_independent_structure.tsv {}".format(cell_type2, chrom, res_kb, path2))
+				structure1 = dt.structure_from_file("hic_data/{}_{}_{}kb_independent_structure.tsv".format(cell_type1, chrom, res_kb))
+				structure2 = dt.structure_from_file("hic_data/{}_{}_{}kb_independent_structure.tsv".format(cell_type2, chrom, res_kb))
 
 				dt.make_compatible((structure1, structure2))
 				structure1.rescale()
