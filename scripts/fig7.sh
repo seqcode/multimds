@@ -7,6 +7,7 @@ RES_KB=$(($RES/1000))
 ./get_hic_data.sh K562 $RES
 ./get_activity_data.sh 100000	#lower resolution (will be used for compartment calculation)
 ./relocalization_peaks.sh $RES
+./get_state_data.sh
 
 #negative control
 if [ ! -e A_compartment_${RES_KB}kb.bed ]
@@ -56,6 +57,15 @@ do
 	fi
 	bedtools coverage -a peaks_filtered.bed -b binding_data/$FILENAME > peaks_filtered_K562_${NAME}_coverage.bed
 	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
+done
+
+for STATE in promoter poised_promoter enhancer insulator transcription repressed heterochromatin
+do
+	for CELLTYPE in Gm12878 K562
+	do
+		bedtools coverage -a peaks_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > peaks_filtered_${CELLTYPE}_${STATE}_coverage.bed
+		bedtools coverage -a A_background_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > A_background_filtered_${CELLTYPE}_${STATE}_coverage.bed
+	done
 done
 
 python relocalization_enrichment.py
