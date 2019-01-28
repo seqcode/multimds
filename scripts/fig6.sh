@@ -59,10 +59,13 @@ do
 	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
 done
 
-bedtools coverage -a peaks_filtered.bed -b binding_data/Gm12878_enhancer.bed > peaks_filtered_Gm12878_enhancer_coverage.bed
-bedtools coverage -a A_background_filtered.bed -b binding_data/Gm12878_enhancer.bed > A_background_filtered_Gm12878_enhancer_coverage.bed
+for STATE in promoter poised_promoter enhancer insulator transcription repressed heterochromatin
+do
+	for CELLTYPE in Gm12878 K562
+	do
+		bedtools coverage -a peaks_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > peaks_filtered_${CELLTYPE}_${STATE}_coverage.bed
+		bedtools coverage -a A_background_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > A_background_filtered_${CELLTYPE}_${STATE}_coverage.bed
+	done
+done
 
-bedtools coverage -a peaks_filtered.bed -b binding_data/K562_repressed.bed > peaks_filtered_K562_repressed_coverage.bed
-bedtools coverage -a A_background_filtered.bed -b binding_data/K562_repressed.bed > A_background_filtered_K562_repressed_coverage.bed
-
-python hierarchical_clustering.py
+python relocalization_enrichment.py
