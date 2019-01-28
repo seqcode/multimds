@@ -66,7 +66,7 @@ path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 #for iteration in range(n):
 	#os.system("python ../multimds.py -m {} -N {} -o {}_ {} {}".format(centromere, num_partitions, iteration, path1, path2))
 
-os.system("python ../multimds.py --full {} {}".format(path1, path2))
+os.system("python ../multimds.py {} {}".format(path1, path2))
 		
 #load structures
 #structure1 = dt.structure_from_file("/data/drive1/test/archive/multimds/scripts/hic_data/{}_{}_{}_{}kb_filtered_structure.tsv".format(iteration, cell_type1, chrom, res_kb))	
