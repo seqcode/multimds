@@ -4,9 +4,9 @@ import os
 import numpy as np
 
 gene = sys.argv[1]
-os.system("bedtools intersect -a nup60_sig.bed -b {}.bed -f 0.5 > {}_Nup60_peak.bed".format(gene, gene))
-os.system("bedtools intersect -a ctrl_IP.bedgraph -b {}.bed > ctrl_{}_Nup60.bed".format(gene, gene))
-os.system("bedtools intersect -a galactose_IP.bedgraph -b {}.bed > galactose_{}_Nup60.bed".format(gene, gene))
+#os.system("bedtools intersect -a nup60_sig.bed -b {}.bed -f 0.5 > {}_Nup60_peak.bed".format(gene, gene))
+#os.system("bedtools intersect -a ctrl_IP.bedgraph -b {}.bed > ctrl_{}_Nup60.bed".format(gene, gene))
+#os.system("bedtools intersect -a galactose_IP.bedgraph -b {}.bed > galactose_{}_Nup60.bed".format(gene, gene))
 
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
@@ -22,10 +22,10 @@ with open ("ctrl_{}_Nup60.bed".format(gene)) as infile:
 		if num_tags > max_num_tags:
 			max_num_tags = num_tags
 		if first:
-			plt.plot([start,end], [num_tags,num_tags], c="b", label="glucose")
+			plt.plot([start,end], [num_tags,num_tags], c="c", label="glucose")
 			first = False
 		else:
-			plt.plot([start,end], [num_tags,num_tags], c="b")
+			plt.plot([start,end], [num_tags,num_tags], c="c")
 	infile.close()
 
 first = True 
@@ -84,7 +84,7 @@ with open ("{}_transcription_direction.bed".format(gene)) as infile:
 		start = float(line[1])/1000
 		end = float(line[2])/1000
 		plt.arrow(start, y_start + y_range/10., end-start, 0, facecolor="k", head_width=6, head_length=0.1)
-		plt.annotate(line[3], (np.mean((start,end)), y_start + y_range/16.), fontsize=7)
+		plt.annotate(line[3], (np.mean((start,end)), y_start + y_range/8.), fontsize=16)
 	infile.close()
 
 plt.legend(loc=2, fontsize=8, frameon=False, shadow=False)
