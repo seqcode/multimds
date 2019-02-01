@@ -1,12 +1,12 @@
 import os
 import sys
 sys.path.append("..")
-import plotting as plot
 import data_tools as dt
 import numpy as np
 import compartment_analysis as ca
 from sklearn import svm
 import linear_algebra as la
+from mayavi import mlab
 
 path1 = "hic_data/GM12878_combined_21_100kb.bed"
 path2 = "hic_data/K562_21_100kb.bed"
@@ -55,6 +55,20 @@ index1 = struct1.get_rel_index(42700000)
 index2 = struct1.get_rel_index(42900000)
 colors[index1:index2] = 1
 
-plot.plot_structures_interactive((struct1, struct2), colors=((0,1,0), (0,1,238./255)), radius=0.01, out_path="compartment_change_3d_by_chrom.png")
-plot.plot_structures_interactive((struct1, struct2), (colors, colors), radius=0.01, out_path="compartment_change_3d_mx.png")
-plot.plot_structures_interactive((struct1, struct2), (comps1, comps2), radius=0.01, out_path="compartment_change_3d_by_compartment.png")
+mlab.close(all=True)
+mlab.figure(bgcolor=(1,1,1))
+coords1 = np.array(struct1.getCoords())
+mlab.plot3d(coords1[:,0], coords1[:,1], coords1[:,2], colors, colormap="autumn")
+coords2 = np.array(struct2.getCoords())
+mlab.plot3d(coords2[:,0], coords2[:,1], coords2[:,2], colors, colormap="spring")
+mlab.savefig("sup8a.png")
+mlab.show()
+
+mlab.close(all=True)
+mlab.figure(bgcolor=(1,1,1))
+coords1 = np.array(struct1.getCoords())
+mlab.plot3d(coords1[:,0], coords1[:,1], coords1[:,2], comps1, colormap="bwr")
+coords2 = np.array(struct2.getCoords())
+mlab.plot3d(coords2[:,0], coords2[:,1], coords2[:,2], comps2, colormap="bwr")
+mlab.savefig("sup8b.png")
+mlab.show()
