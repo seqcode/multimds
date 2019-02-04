@@ -53,14 +53,14 @@ struct2.subsamplePoints(index1, index2)
 colors = np.zeros_like(struct1.getPoints(), dtype=int)
 index1 = struct1.get_rel_index(42700000)
 index2 = struct1.get_rel_index(42900000)
-colors[index1:index2] = 1
+colors[index1:index2] = -1
 
 mlab.close(all=True)
 mlab.figure(bgcolor=(1,1,1))
 coords1 = np.array(struct1.getCoords())
-mlab.plot3d(coords1[:,0], coords1[:,1], coords1[:,2], colors, colormap="autumn")
+mlab.plot3d(coords1[:,0], coords1[:,1], coords1[:,2], colors, colormap="RdYlBu")
 coords2 = np.array(struct2.getCoords())
-mlab.plot3d(coords2[:,0], coords2[:,1], coords2[:,2], colors, colormap="spring")
+mlab.plot3d(coords2[:,0], coords2[:,1], coords2[:,2], colors, colormap="RdYlGn")
 mlab.savefig("sup8a.png")
 mlab.show()
 
