@@ -11,14 +11,14 @@ struct1 = dt.structure_from_file("ctrl_Suva_13_32kb_structure.tsv")
 struct2 = dt.structure_from_file("galactose_Suva_13_32kb_structure.tsv")
 
 colors = np.zeros_like(struct1.getPoints(), dtype=int)
-colors[struct1.get_rel_index(852000)] = 1
+colors[struct1.get_rel_index(852000)] = -1
 
 #plot.plot_structures_interactive((struct1, struct2), (colors, colors))
 
 mlab.close(all=True)
 mlab.figure(bgcolor=(1,1,1))
 coords1 = np.array(struct1.getCoords())
-mlab.plot3d(coords1[:,0], coords1[:,1], coords1[:,2], colors, colormap="autumn")
+mlab.plot3d(coords1[:,0], coords1[:,1], coords1[:,2], colors, colormap="RdYlBu")
 coords2 = np.array(struct2.getCoords())
-mlab.plot3d(coords2[:,0], coords2[:,1], coords2[:,2], colors, colormap="spring")
+mlab.plot3d(coords2[:,0], coords2[:,1], coords2[:,2], colors, colormap="RdYlGn")
 mlab.show()
