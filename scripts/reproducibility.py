@@ -23,7 +23,7 @@ for p in ps:
 	all_changes = []
 	for i in range(n):
 		print(i)
-		os.system("python ../multimds.py -P {} --full {} {}".format(p, path1, path2))
+		os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
 
 		structure1 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix1)))
 		structure2 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix2)))
