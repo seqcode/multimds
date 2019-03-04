@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append("/home/lur159/git/miniMDS")
+sys.path.append("..")
 import data_tools as dt
 import linear_algebra as la
 from matplotlib import pyplot as plt
@@ -50,8 +50,7 @@ plt.locator_params(axis="y", nbins=3)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=1, labelsize=15)
 
 gen_coord = struct1.getGenCoords()[struct1.get_rel_index(gene_loc)]/1000
-plt.scatter([gen_coord], [0.005], c="g", s=80, marker="*")
-plt.annotate(gene_name, (gen_coord+20, 0.01), fontsize=16)
+plt.scatter([gen_coord], [0.005], c="g", s=500, marker="*", label=gene_name)
 
 plt.savefig("{}_{}".format(strain, gene_name))
 plt.show()
