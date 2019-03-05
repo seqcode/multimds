@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use("Agg")
 from sklearn import svm
 import numpy as np
 import sys
@@ -51,6 +53,12 @@ with open(design_file) as infile:
 				if r < 0:
 					compartments2 = -compartments2
 
+				#np.savetxt("{}_{}_comps.txt".format(cell_type1, chrom), compartments1)
+				#np.savetxt("{}_{}_comps.txt".format(cell_type2, chrom), compartments2)
+
+				#compartments1 = np.loadtxt("{}_{}_comps.txt".format(cell_type1, chrom))
+				#compartments2 = np.loadtxt("{}_{}_comps.txt".format(cell_type2, chrom))
+
 				#SVR
 				coords1 = structure1.getCoords()
 				coords2 = structure2.getCoords()
@@ -81,13 +89,13 @@ with open(design_file) as infile:
 				y_length = np.mean((y_length1, y_length2))
 				z_length = np.mean((z_length1, z_length2))
 
-				x_means.append(np.mean(np.abs(x_diffs)))
-				y_means.append(np.mean(np.abs(y_diffs)))
-				z_means.append(np.mean(np.abs(z_diffs)))
+				x_means.append(np.mean(np.abs(x_diffs))/x_length)
+				y_means.append(np.mean(np.abs(y_diffs))/y_length)
+				z_means.append(np.mean(np.abs(z_diffs))/z_length)
 
-				x_lengths.append(np.mean((x_length1, x_length2)))
-				y_lengths.append(np.mean((y_length1, y_length2)))
-				z_lengths.append(np.mean((z_length1, z_length2)))
+				#x_lengths.append(np.mean((x_length1, x_length2)))
+				#y_lengths.append(np.mean((y_length1, y_length2)))
+				#z_lengths.append(np.mean((z_length1, z_length2)))
 
 x_fractions = np.zeros_like(x_means)
 y_fractions = np.zeros_like(y_means)
@@ -103,38 +111,46 @@ print st.ttest_ind(x_fractions, y_fractions)
 print st.ttest_ind(x_fractions, z_fractions)
 print st.ttest_ind(y_fractions, z_fractions)
 
-x_length_fractions = np.zeros_like(x_lengths)
-y_length_fractions = np.zeros_like(y_lengths)
-z_length_fractions = np.zeros_like(z_lengths)
-for i, (x_length, y_length, z_length) in enumerate(zip(x_lengths, y_lengths, z_lengths)):
-	tot = x_length + y_length + z_length
-	x_length_fractions[i] = x_length/tot
-	y_length_fractions[i] = y_length/tot
-	z_length_fractions[i] = z_length/tot
+#x_length_fractions = np.zeros_like(x_lengths)
+#y_length_fractions = np.zeros_like(y_lengths)
+#z_length_fractions = np.zeros_like(z_lengths)
+#for i, (x_length, y_length, z_length) in enumerate(zip(x_lengths, y_lengths, z_lengths)):
+#	tot = x_length + y_length + z_length
+#	x_length_fractions[i] = x_length/tot
+#	y_length_fractions[i] = y_length/tot
+#	z_length_fractions[i] = z_length/tot
 
-print np.mean(z_length_fractions)
-print st.ttest_ind(x_length_fractions, y_length_fractions)
-print st.ttest_ind(x_length_fractions, z_length_fractions)
-print st.ttest_ind(y_length_fractions, z_length_fractions)
+#print np.mean(z_length_fractions)
+#print st.ttest_ind(x_length_fractions, y_length_fractions)
+#print st.ttest_ind(x_length_fractions, z_length_fractions)
+#print st.ttest_ind(y_length_fractions, z_length_fractions)
 
 medianprops = dict(linestyle="none")
 labels = ("Orthogonal 1", "Orthogonal 2", "Compartment axis")
 prefix = design_file.split("_design.txt")[0]
 
 y_int_size = 0.02
-x_start = 0.5
-x_end = 3.5
-y_start = min((min(x_fractions), min(y_fractions), min(z_fractions))) -y_int_size/5.
-y_end = max((max(x_fractions), max(y_fractions), max(z_fractions))) + y_int_size/5.
+x_start = 0
+x_end = 0.6
+#y_start = min((min(x_fractions), min(y_fractions), min(z_fractions))) -y_int_size/5.
+#y_end = max((max(x_fractions), max(y_fractions), max(z_fractions))) + y_int_size/5.
+ymin = 0
+ymax = float(sys.argv[4])
+y_range = ymax - ymin
+y_start = ymin - y_range/25.
+y_end = ymax + y_range/25.
 
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
-plt.boxplot([x_fractions, y_fractions, z_fractions], notch=True, patch_artist=True, labels=labels, medianprops=medianprops)
-plt.ylabel("Fractional relocalization", fontsize=11)
+plt.boxplot([x_fractions, y_fractions, z_fractions], positions=(0.075, 0.275, 0.475), widths=(0.1, 0.1, 0.1), notch=True, patch_artist=True, labels=labels, medianprops=medianprops)
+#plt.ylabel("Normalized fractional relocalization", fontsize=11)
 plt.axis([x_start, x_end, y_start, y_end], frameon=False)
 plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=6)	
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
+plt.locator_params(axis="y", nbins=2)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
+plt.title(" ".join(sys.argv[5:len(sys.argv)]))
 plt.savefig("{}_change_by_axis".format(prefix))
+sys.exit(0)
 
 y_start = min((min(x_length_fractions), min(y_length_fractions), min(z_length_fractions))) -y_int_size/5.
 y_end = max((max(x_length_fractions), max(y_length_fractions), max(z_length_fractions))) + y_int_size/5.
