@@ -31,8 +31,8 @@ done
 
 echo "GM12878_primary GM12878_replicate" > encode_rep_design.txt
 
-python quantify_z.py 23 encode_design.txt 0.025
-python quantify_z.py 23 encode_rep_design.txt 0.025
+python quantify_z.py 23 encode_design.txt 0.025 0.75 ENCODE
+#python quantify_z.py 23 encode_rep_design.txt 0.025 GM12878 reps
 
 #mouse cell types
 RES=100000
@@ -70,8 +70,8 @@ echo "WT-G1E hepatocyte-WT" >> mouse_celltype_design.txt
 echo "mESC-WT-rep1 mESC-WT-rep2" > mouse_celltype_rep_design.txt
 echo "HPC7-rep1 HPC7-rep2" >> mouse_celltype_rep_design.txt
 
-python quantify_z.py 20 mouse_celltype_design.txt 0.035
-python quantify_z.py 20 mouse_celltype_rep_design.txt 0.02
+python quantify_z.py 20 mouse_celltype_design.txt 0.035 0.6 Mouse cell types
+python quantify_z.py 20 mouse_celltype_rep_design.txt 0.02 0.6 Mouse cell type reps
 
 #LCL
 ./process_lymphoblastoid.sh
@@ -94,4 +94,4 @@ do
 
 done
 
-python quantify_z.py 20 lymphoblastoid_design.txt 0.03
+python quantify_z.py 20 lymphoblastoid_design.txt 0.03 0.6 LCLs
