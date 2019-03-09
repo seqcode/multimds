@@ -11,4 +11,4 @@ if [ ! -e hic_data/hepatocyte-cohesin-KO_100kb.bed ]
 		python bed_from_hdf5.py GSE93431_NIPBL.100kb.cool.HDF5 hic_data/hepatocyte-cohesin-KO_100kb.bed
 fi
 
-./split_by_chrom.sh hic_data/hepatocyte-cohesin-KO_100kb
+./split_by_chrom.sh hic_data/hepatocyte-cohesin-KO_100kb.bed
