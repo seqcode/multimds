@@ -1,12 +1,14 @@
+import matplotlib
+matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 import sys
 import os
 import numpy as np
 
 gene = sys.argv[1]
-#os.system("bedtools intersect -a nup60_sig.bed -b {}.bed -f 0.5 > {}_Nup60_peak.bed".format(gene, gene))
-#os.system("bedtools intersect -a ctrl_IP.bedgraph -b {}.bed > ctrl_{}_Nup60.bed".format(gene, gene))
-#os.system("bedtools intersect -a galactose_IP.bedgraph -b {}.bed > galactose_{}_Nup60.bed".format(gene, gene))
+os.system("bedtools intersect -a nup60_sig.bed -b {}.bed -f 0.5 > {}_Nup60_peak.bed".format(gene, gene))
+os.system("bedtools intersect -a ctrl_IP.bedgraph -b {}.bed > ctrl_{}_Nup60.bed".format(gene, gene))
+os.system("bedtools intersect -a galactose_IP.bedgraph -b {}.bed > galactose_{}_Nup60.bed".format(gene, gene))
 
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
@@ -74,9 +76,19 @@ plt.axhline(y=y_start, color="k", lw=4)
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
 
-peak = np.loadtxt("{}_Nup60_peak.bed".format(gene), dtype=object)
-if len(peak) > 0:
-	plt.plot([float(peak[1])/1000, float(peak[2])/1000], [y_range/70., y_range/70.], c="r", label="Differential Nup60 peak")
+peaks = np.loadtxt("{}_Nup60_peak.bed".format(gene), usecols=(1,2))
+if len(peaks) > 0:
+	if len(peaks.shape) == 1:
+		peak = peaks
+		plt.plot([peak[0]/1000, peak[1]/1000], [y_range/70., y_range/70.], c="r", label="Differential Nup60 peak")
+	else:
+		num_peaks = peaks.shape[1]
+		for i in range(num_peaks):
+			peak = peaks[i]
+			if i == 0:
+				plt.plot([peak[0]/1000, peak[1]/1000], [y_range/70., y_range/70.], c="r", label="Differential Nup60 peak")
+			else:
+				plt.plot([peak[0]/1000, peak[1]/1000], [y_range/70., y_range/70.], c="r")
 
 with open ("{}_transcription_direction.bed".format(gene)) as infile:
 	for line in infile:
