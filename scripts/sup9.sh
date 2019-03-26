@@ -1,35 +1,39 @@
 set -e
 
-#ENCODE
-for CELLTYPE in GM12878_primary GM12878_replicate K562 KBM7 IMR90 HUVEC HMEC NHEK
+for CELLTYPE in GM12878_primary GM12878_replicate
 do
 	./get_hic_data.sh $CELLTYPE 100000
 done
 
-if [ -e encode_design.txt ]
-	then
-		rm encode_design.txt
-fi
+#if [ -e encode_design.txt ]
+#	then
+#		rm encode_design.txt
+#fi
 
-for CELLTYPE1 in GM12878_primary GM12878_replicate
-do
-	for CELLTYPE2 in K562 IMR90 HUVEC HMEC NHEK
-	do
-		echo $CELLTYPE1" "$CELLTYPE2 >> encode_design.txt
-	done
-done
+#for CELLTYPE1 in GM12878_primary GM12878_replicate
+#do
+#	for CELLTYPE2 in K562 IMR90 HUVEC HMEC NHEK
+#	do
+#		echo $CELLTYPE1" "$CELLTYPE2 >> encode_design.txt
+#	done
+#done
 
-CELLTYPES=(K562 IMR90 HUVEC HMEC NHEK)
+#CELLTYPES=(K562 IMR90 HUVEC HMEC NHEK)
 
-for i in `seq 0 $((${#CELLTYPES[@]}-1))`
-do	
-	for j in `seq 0 $(($i-1))`
-	do
-		echo ${CELLTYPES[$i]}" "${CELLTYPES[$j]} >> encode_design.txt
-	done
-done
+#for i in `seq 0 $((${#CELLTYPES[@]}-1))`
+#do	
+#	for j in `seq 0 $(($i-1))`
+#	do
+#		echo ${CELLTYPES[$i]}" "${CELLTYPES[$j]} >> encode_design.txt
+#	done
+#done
 
 echo "GM12878_primary GM12878_replicate" > encode_rep_design.txt
+
+#python quantify_z.py 23 encode_design.txt 0.025 0.75 ENCODE
+python quantify_z.py 23 encode_rep_design.txt 0.025 0.5 GM12878 reps
+
+exit
 
 #mouse cell types
 RES=100000
@@ -67,6 +71,9 @@ echo "WT-G1E hepatocyte-WT" >> mouse_celltype_design.txt
 echo "mESC-WT-rep1 mESC-WT-rep2" > mouse_celltype_rep_design.txt
 echo "HPC7-rep1 HPC7-rep2" >> mouse_celltype_rep_design.txt
 
+python quantify_z.py 20 mouse_celltype_design.txt 0.035 0.6 Mouse cell types
+python quantify_z.py 20 mouse_celltype_rep_design.txt 0.02 0.6 Mouse cell type reps
+
 #LCL
 ./process_lymphoblastoid.sh
 
@@ -88,33 +95,4 @@ do
 
 done
 
-#cohesin
-./process_cohesin-ko.sh
-echo "hepatocyte-cohesin-KO hepatocyte-WT" > cohesin_design.txt
-
-#Brd2
-
-RES=100000
-./process_g1e.sh KO-rep1 $RES D_BRD2KO_
-./process_g1e.sh KO-rep2 $RES C8_BRD2KO_
-
-echo "KO-rep1-G1E KO-rep2-G1E" > brd2_rep_design.txt
-echo "KO-rep1-G1E WT-G1E" > brd2_design.txt
-echo "KO-rep2-G1E WT-G1E" >> brd2_design.txt
-
-#CTCF
-./process_ctcf-ko.sh
-
-CELLTYPES=(mESC-WT-rep1 mESC-WT-rep2 mESC-CTCF-KO-rep1 mESC-CTCF-KO-rep2)
-
-if [ -e ctcf_design.txt ]
-	then
-		rm ctcf_design.txt
-fi
-
-for CELLTYPE1 in mESC-WT-rep1 mESC-WT-rep2
-do
-	echo $CELLTYPE1" mESC-CTCF-KO-rep1" >> ctcf_design.txt
-done
-
-python relocalization_magnitude.py
+python quantify_z.py 20 lymphoblastoid_design.txt 0.03 0.6 LCLs
