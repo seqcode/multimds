@@ -34,31 +34,31 @@ fi
 
 if [ ! -e GSM2583739_asy_r2.counts.txt ]
 	then
-		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583739/suppl/GSM2583739_asy_r2.counts.txt.gz
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583739/suppl/GSM2583739_asy_r2.counts.txt.gz -o GSM2583739_asy_r2.counts.txt.gz
 		gunzip GSM2583739_asy_r2.counts.txt.gz
 fi
 
 if [ ! -e GSM2583740_asy_r3.counts.txt ]
 	then
-		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583740/suppl/GSM2583740_asy_r3.counts.txt.gz	
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583740/suppl/GSM2583740_asy_r3.counts.txt.gz	-o GSM2583740_asy_r3.counts.txt.gz
 		gunzip GSM2583740_asy_r3.counts.txt.gz
 fi
 
 if [ ! -e GSM2583741_gal_r1.counts.txt ]
 	then
-		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583741/suppl/GSM2583741_gal_r1.counts.txt.gz
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583741/suppl/GSM2583741_gal_r1.counts.txt.gz -o GSM2583741_gal_r1.counts.txt.gz
 		gunzip GSM2583741_gal_r1.counts.txt.gz
 fi
 
 if [ ! -e GSM2583742_gal_r2.counts.txt ]
 	then
-		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583742/suppl/GSM2583742_gal_r2.counts.txt.gz
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583742/suppl/GSM2583742_gal_r2.counts.txt.gz -o GSM2583742_gal_r2.counts.txt.gz
 		gunzip GSM2583742_gal_r2.counts.txt.gz
 fi
 
 if [ ! -e GSM2583743_gal_r3.counts.txt ]
 	then
-		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583743/suppl/GSM2583743_gal_r3.counts.txt.gz
+		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583743/suppl/GSM2583743_gal_r3.counts.txt.gz -o GSM2583743_gal_r3.counts.txt.gz
 		gunzip GSM2583743_gal_r3.counts.txt.gz
 fi
 
