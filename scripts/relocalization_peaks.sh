@@ -20,8 +20,24 @@ do
 	#python relocalization_peaks.py GM12878_combined K562 $CHROM $((${MIDPOINTS[$i]} * 1000000)) ${PARTITION_NUMS[$i]} ${SMOOTHING_PARAMETERS[$i]} $RES
 	#bedtools subtract -A -a ${CHROM}_dist_peaks.bed -b ${CHROM}_comp_peaks.bed > ${CHROM}_noncomp_peaks.bed
 	cat ${CHROM}_dist_peaks.bed | awk '($4 - $5 < 0.2 && $4 > $5) || ($5 - $4 < 0.2 && $5 > $4) {print $0}' > ${CHROM}_noncomp_peaks.bed
-	cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $1"\t"$2"\t"$3}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
-	#cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $0}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
+	#cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $1"\t"$2"\t"$3}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
+	cat ${CHROM}_noncomp_peaks.bed | awk '$4 > 0 && $5 > 0 {print $0}' > ${CHROM}_A_noncomp_peaks.bed	#A compartment only
 	./filter_mappability.sh ${CHROM}_A_noncomp_peaks $RES
 	cat ${CHROM}_A_noncomp_peaks_filtered.bed >> peaks_filtered.bed
 done
+
+#negative control
+if [ ! -e A_compartment_${RES_KB}kb.bed ]
+	then
+		python get_a_compartment.py $RES
+fi
+
+if [ ! -e A_background.bed ]
+	then
+		bedtools subtract -a A_compartment_${RES_KB}kb.bed -b peaks_filtered.bed > A_background.bed
+fi
+
+if [ ! -e A_background_filtered.bed ]
+	then
+		./filter_mappability.sh A_background $RES
+fi
