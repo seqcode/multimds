@@ -9,13 +9,13 @@ import linear_algebra as la
 from scipy import signal as sg
 import os
 
-chrom = 21
-res_kb = 10
+chrom = 19
+res_kb = 100
 
-os.system("python ../multimds.py hic_data/GM12878_combined_{}_{}kb.bed hic_data/K562_{}_{}kb.bed".format(chrom, res_kb, chrom, res_kb))
+os.system("python ../multimds.py -o test_ hic_data/GM12878_combined_{}_{}kb.bed hic_data/K562_{}_{}kb.bed".format(chrom, res_kb, chrom, res_kb))
 
-struct1 = dt.structure_from_file("GM12878_combined_{}_{}kb_structure.tsv".format(chrom, res_kb))	
-struct2 = dt.structure_from_file("K562_{}_{}kb_structure.tsv".format(chrom, res_kb))
+struct1 = dt.structure_from_file("test_GM12878_combined_{}_{}kb_structure.tsv".format(chrom, res_kb))	
+struct2 = dt.structure_from_file("test_K562_{}_{}kb_structure.tsv".format(chrom, res_kb))
 
 mat1 = dt.matFromBed("hic_data/GM12878_combined_{}_{}kb.bed".format(chrom, res_kb), struct1)
 comps1 = ca.get_compartments(mat1)
@@ -27,6 +27,7 @@ if r < 0:
 	comps1 = -comps1
 
 comp_diffs = np.abs(comps1 - comps2)
+
 dists = np.array([la.calcDistance(coord1, coord2) for coord1, coord2 in zip(struct1.getCoords(), struct2.getCoords())])
 dist_peaks = sg.find_peaks_cwt(dists, np.arange(1,10))
 
@@ -40,6 +41,7 @@ for dist_peak in dist_peaks:
 		plt.scatter([gen_coords[dist_peak]], [0.1], color=(0,0,1), s=40, zorder=2)
 	else:
 		plt.scatter([gen_coords[dist_peak]], [0.1], color=(0.25,0.25,0.25), s=40, zorder=2)
+
 
 plt.xlabel("Genomic coordinate", fontsize=20)
 plt.ylabel("Normalized change", fontsize=20)
