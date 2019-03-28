@@ -39,5 +39,8 @@ RES_KB=$(($RES/1000))
 		elif [ $NF -eq 4 ]
 			then
 				bedtools map -a $PREFIX"_sorted".bed -b mappability_${RES_KB}kb_sorted.bed -o mean -c 4 | awk '$5 >= 0.75 {print $1"\t"$2"\t"$3"\t"$4}' > $PREFIX"_filtered".bed	
+		elif [ $NF -eq 5 ]
+			then
+				bedtools map -a $PREFIX"_sorted".bed -b mappability_${RES_KB}kb_sorted.bed -o mean -c 4 | awk '$6 >= 0.75 {print $1"\t"$2"\t"$3"\t"$4"\t"$5}' > $PREFIX"_filtered".bed	
 		fi
 #fi
