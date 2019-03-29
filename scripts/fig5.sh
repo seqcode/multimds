@@ -22,7 +22,7 @@ python quantify_z.py 20 brd2_rep_design.txt 0.035
 
 #CTCF
 ./process_ctcf-wt.sh
-./process_ctcf-ko.sh
+./process_ctcf-auxin.sh
 
 if [ -e ctcf_design.txt ]
 	then
