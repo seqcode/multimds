@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append("/home/lur159/git/miniMDS")
+sys.path.append("..")
 import data_tools as dt
 import linear_algebra as la
 from matplotlib import pyplot as plt

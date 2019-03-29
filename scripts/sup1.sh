@@ -5,8 +5,7 @@ RES=100000
 ./get_hic_data.sh GM12878_combined $RES
 ./get_hic_data.sh K562 $RES
 
-#for METHOD in MultiMDS Independent_MDS
-for METHOD in Independent_MDS
+for METHOD in MultiMDS Independent_MDS
 do
 	OUTPUT=$METHOD"_times".txt
 
