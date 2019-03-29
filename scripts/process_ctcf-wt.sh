@@ -7,11 +7,11 @@ if [ ! -e GSM264494*.100000.cool ]
 		gunzip *.gz
 fi
 
-if [ ! -e mESC-WT-rep1_100kb.bed ]
+if [ ! -e hic_data/mESC-WT-rep1_100kb.bed ]
 	then
 		python bed_from_hdf5.py GSM2644945_Untreated-R1.100000.cool hic_data/mESC-WT-rep1_100kb.bed
 fi
-if [ ! -e mESC-WT-rep2_100kb.bed ]
+if [ ! -e hic_data/mESC-WT-rep2_100kb.bed ]
 	then
 		python bed_from_hdf5.py GSM2644946_Untreated-R2.100000.cool hic_data/mESC-WT-rep2_100kb.bed
 fi
