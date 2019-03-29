@@ -3,10 +3,10 @@ set -e
 RES=10000
 RES_KB=$(($RES/1000))
 
-#./get_hic_data.sh GM12878_combined $RES
-#./get_hic_data.sh K562 $RES
+./get_hic_data.sh GM12878_combined $RES
+./get_hic_data.sh K562 $RES
 ./get_activity_data.sh 100000	#lower resolution (will be used for compartment calculation)
-#./relocalization_peaks.sh $RES
+./relocalization_peaks.sh $RES
 
 #negative control
 if [ ! -e A_compartment_${RES_KB}kb.bed ]

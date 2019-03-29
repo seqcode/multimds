@@ -8,6 +8,7 @@ from scipy import stats as st
 import linear_algebra as la
 import os
 from sklearn import svm
+from hic_oe import oe
 
 res_kb = 100
 cell_type1 = "GM12878_combined"
@@ -55,17 +56,20 @@ for j, chrom in enumerate(chroms):
 	r, p = st.pearsonr(z_diffs, compartment_diffs)
 	multimds_z_rs[j] = r
 
+	oe1 = oe(mat1)
+	oe2 = oe(mat2)
+
 	#contacts Pearson
-	rs = np.zeros(len(mat1))
-	for i, (row1, row2) in enumerate(zip(mat1, mat2)):
+	rs = np.zeros(len(oe1))
+	for i, (row1, row2) in enumerate(zip(oe1, oe2)):
 		rs[i], p = st.pearsonr(row1, row2)
 
 	r, p = st.pearsonr(1-rs, np.abs(compartment_diffs))
 	contacts_pearson_rs[j] = r
 
 	#contacts Spearman
-	rs = np.zeros(len(mat1))
-	for i, (row1, row2) in enumerate(zip(mat1, mat2)):
+	rs = np.zeros(len(oe1))
+	for i, (row1, row2) in enumerate(zip(oe1, oe2)):
 		rs[i], p = st.spearmanr(row1, row2)
 
 	r, p = st.pearsonr(1-rs, np.abs(compartment_diffs))
@@ -88,7 +92,6 @@ x_start = xmin - x_range/15.	#bigger offset for bar plot
 x_end = xmax + x_range/15.
 
 ymin = min([min(multimds_z_rs), min(contacts_pearson_rs), min(contacts_spearman_rs)])
-#ymax = max([max(multimds_z_rs), max(contacts_pearson_rs), max(contacts_spearman_rs)])
 ymax = 1
 y_range = ymax - ymin
 y_start = ymin - y_range/25.
