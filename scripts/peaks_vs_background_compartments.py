@@ -1,6 +1,5 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import sys
 
 peak_comps = np.loadtxt("peaks_filtered.bed", usecols=(3,4))
 background_comps = np.loadtxt("A_background_filtered.bed", usecols=(3,4))
