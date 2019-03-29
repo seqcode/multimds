@@ -84,7 +84,7 @@ echo "Symbol	ctrl	galactose" > nup60_counts.tsv
 paste glucose_coverage.bed galactose_coverage.bed | cut -d "	" -f 1,2,3,4,8 | awk '{print $1":"$2"-"$3"\t"$4"\t"$5}' >> nup60_counts.tsv
 
 #get differential peaks
-/usr/bin/Rscript run_edger.R
+Rscript run_edger.R
 python process_edger_results.py
 
 for GENE in Gal1-7-10 Gal2 Has1-Tda1 Gal3 Gal4 Hxt1
