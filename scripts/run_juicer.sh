@@ -19,7 +19,10 @@ do
 				echo $CHROM
 				OUT=${f%.*}_${CHROM}_${RES_KB}kb.tsv
 				java -jar juicer_tools.1.8.9_jcuda.0.8.jar dump observed KR $f $CHROM $CHROM BP $RES $OUT
-				cat $OUT | awk -v chr=$CHROM -v res=$RES '$3 != "NaN" {print "chr"chr"\t"$1"\t"$1+res"\tchr"chr"\t"$2"\t"$2+res"\t"$3}' > hic_data/${f%.*}_${CHROM}_${RES_KB}kb.bed
+				if [ -s $OUT ]
+					then
+						cat $OUT | awk -v chr=$CHROM -v res=$RES '$3 != "NaN" {print "chr"chr"\t"$1"\t"$1+res"\tchr"chr"\t"$2"\t"$2+res"\t"$3}' > hic_data/${f%.*}_${CHROM}_${RES_KB}kb.bed
+				fi
 		fi
 	done
 done
