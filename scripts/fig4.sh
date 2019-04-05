@@ -59,7 +59,7 @@ done
 
 for CELLTYPE1 in HPC7-rep1 HPC7-rep2
 do
-	for CELLTYPE2 in mESC-WT-rep1 mESC-WT-rep2 WT-G1E hepatocyte-WT
+	for CELLTYPE2 in WT-G1E hepatocyte-WT
 	do
 		echo $CELLTYPE1" "$CELLTYPE2 >> mouse_celltype_design.txt
 	done
