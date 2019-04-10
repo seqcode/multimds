@@ -2,8 +2,6 @@ import sys
 sys.path.append("..")
 import data_tools as dt
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 import os
 import linear_algebra as la
@@ -45,7 +43,7 @@ n = len(ys)
 width = 0.075
 
 xmin = 0	#boxplot indexing starts at 1
-xmax = (n+1)*width
+xmax = n*width*2
 x_range = xmax - xmin
 x_start = xmin - x_range/10.	#larger offset for boxplot
 x_end = xmax + x_range/10.
@@ -57,7 +55,7 @@ y_start = ymin - y_range/25.
 y_end = ymax + y_range/25.
 
 #plot data
-plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*(width*2), width*2), widths=[0.1 for i in range(n)], labels=("Mouse cell types", "ENCODE", "Cohesin KO", "LCLs", "CTCF depletion", "Brd2 KO", "Mouse cell type reps", "GM12878 reps"), medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
+plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*width*2, width*2), widths=[width for i in range(n)], labels=("Mouse cell types", "ENCODE", "Cohesin KO", "LCLs", "CTCF depletion", "Brd2 KO", "Mouse cell type reps", "GM12878 reps"), medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
 
 #define axes with offsets
 plt.axis([x_start, x_end, y_start, y_end], frameon=False)
@@ -70,4 +68,4 @@ plt.axhline(y=y_start, color="k", lw=4)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
 
 plt.savefig("relocalization_magnitude")
-#plt.show()
+plt.show()
