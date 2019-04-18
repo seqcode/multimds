@@ -12,11 +12,6 @@ RES_KB=$(($RES/1000))
 					then
 						wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDukeMapabilityUniqueness35bp.bigWig
 				fi
-				if [ ! -e bigWigToWig ]
-					then
-						wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToWig
-						chmod +x bigWigToWig
-				fi
 				./bigWigToWig wgEncodeDukeMapabilityUniqueness35bp.bigWig mappability.wig
 				rm wgEncodeDukeMapabilityUniqueness35bp.bigWig
 		fi
