@@ -1,6 +1,7 @@
+import sys
+sys.path.append("..")
 import data_tools as dt
 import numpy as np
-import sys
 import linear_algebra as la
 from sklearn.manifold import MDS
 

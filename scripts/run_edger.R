@@ -1,14 +1,8 @@
 library("edgeR")
 
-args = commandArgs(trailingOnly=TRUE)
-
-mat = read.delim(args[1], row.names="Symbol")
-group = factor(c(1,2,2))
-dge = DGEList(counts=mat, group=group)
-nf = calcNormFactors(dge)
-design = model.matrix(~group)
-disp = estimateDisp(nf, design)
-fit = glmQLFit(disp, design)
-qlf = glmQLFTest(fit, coef=2)
-
-write.table(qlf$table, args[2])
+counts = read.delim("nup60_counts.tsv", row.names="Symbol")
+bcv = 0.1
+y = DGEList(counts=counts, group=1:2)
+et = exactTest(y, dispersion=bcv^2)
+et$table$q = p.adjust(et$table$PValue, method="BH")
+write.table(et$table, "nup60_edgeR_results.tsv")

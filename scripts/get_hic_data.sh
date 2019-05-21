@@ -8,7 +8,7 @@ mkdir -p hic_data
 
 cd hic_data
 
-if [ ! -d $CELL_TYPE/${RES}kb_resolution_intrachromosomal ]
+if [ ! -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal ]
 	then
 		if [ ! -e GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz ]
 			then
@@ -17,18 +17,20 @@ if [ ! -d $CELL_TYPE/${RES}kb_resolution_intrachromosomal ]
 	tar xzf GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal
 fi
 
-for CHROM in `seq 22`
+if [ $CELL_TYPE == "K562" ] || [ $CELL_TYPE == "KBM7" ]
+	then
+		CHROMS=(1 2 3 4 5 6 7 8 10 11 12 13 14 15 16 17 18 19 20 21)	#skip translocated
+	else
+		CHROMS=`seq 22`
+fi
+
+for CHROM in $CHROMS
 do
-	echo $CHROM
 	if [ -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal/chr$CHROM ] && [ ! -e ${CELL_TYPE}_${CHROM}_${RES_KB}kb.bed ]
 		then
+			echo $CHROM
 			python ../normalize.py $CELL_TYPE $RES $CHROM
 	fi
 done
 	
-#rm GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz
-
-cat $CELL_TYPE"_22_"${RES_KB}kb.bed | awk '$2 >= 24000000 && $5 >= 24000000 {print $0}' > tmp	#filter out translocation
-mv tmp $CELL_TYPE"_22_"${RES_KB}kb.bed
-
 cd ..
