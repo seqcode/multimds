@@ -1,6 +1,5 @@
 set -e
 
-#ENCODE
 for CELLTYPE in K562 IMR90 HUVEC HMEC
 do
 	./get_hic_data.sh $CELLTYPE 100000
