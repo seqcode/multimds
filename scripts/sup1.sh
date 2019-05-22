@@ -1,9 +1,9 @@
 set -e
 
-RES=100000
-
-./get_hic_data.sh GM12878_combined $RES
-./get_hic_data.sh K562 $RES
+for CELLTYPE in GM12878_combined K562
+do
+	./get_hic_data.sh $CELLTYPE 100000
+done
 
 python embedding_error.py
 
