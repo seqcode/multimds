@@ -22,9 +22,12 @@ def error(dists, coords):
 	return rmse
 
 chrom = 21
+#chrom = 19
 res_kb = 100
 prefix1 = "GM12878_combined"
 prefix2 = "K562"
+#prefix1 = "mESC-WT-rep1"
+#prefix2 = "hepatocyte-WT"
 	
 path1 = "hic_data/{}_{}_{}kb.bed".format(prefix1, chrom, res_kb)
 path2 = "hic_data/{}_{}_{}kb.bed".format(prefix2, chrom, res_kb)
@@ -55,9 +58,9 @@ y_end = max(ys) + y_int_size/5.
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 plt.bar(ps, errors, 0.04, bottom=y_start)
 plt.ylabel("Average RMSE", fontsize=14)
-plt.xlabel("Difference penalty", fontsize=14)
+plt.xlabel("Similarity weight", fontsize=14)
 plt.axis([x_start, x_end, y_start, y_end],frameon=False)
 plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=-0.01, color="k", lw=6)	
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
-plt.savefig("embedding_error")
+plt.savefig("{}_{}_embedding_error".format(prefix1, prefix2))

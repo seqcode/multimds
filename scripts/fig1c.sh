@@ -6,3 +6,5 @@ RES=100000
 ./get_hic_data.sh K562 $RES
 
 python embedding_error.py
+
+mv GM12878_combined_K562_embedding_error.png fig1c.png
