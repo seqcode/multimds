@@ -60,4 +60,3 @@ plt.scatter([gen_coord], [0.005], c="g", s=200, marker="o")
 plt.annotate(gene_name, (gen_coord+20, 0.01), fontsize=16)
 
 plt.savefig("{}_{}_independent".format(strain, gene_name))
-plt.show()
