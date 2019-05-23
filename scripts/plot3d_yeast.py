@@ -1,7 +1,6 @@
 import sys
 sys.path.append("..")
 import data_tools as dt
-import os
 import numpy as np
 from mayavi import mlab
 
@@ -12,7 +11,6 @@ strain = sys.argv[4]
 res_kb = 32
 
 chrom_name = "{}_{}".format(strain, chrom_num)
-os.system("python ../multimds.py -P 0.1 -w 0 hic_data/ctrl_{}_{}kb.bed hic_data/galactose_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
 struct1 = dt.structure_from_file("ctrl_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
 struct2 = dt.structure_from_file("galactose_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
 coords1 = np.array(struct1.getCoords())
