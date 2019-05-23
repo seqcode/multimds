@@ -1,4 +1,3 @@
-import os
 import sys
 sys.path.append("..")
 import data_tools as dt
@@ -10,7 +9,6 @@ from mayavi import mlab
 
 path1 = "hic_data/GM12878_combined_21_100kb.bed"
 path2 = "hic_data/K562_21_100kb.bed"
-os.system("python ../multimds.py {} {}".format(path1, path2))
 
 struct1 = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")	
 struct2 = dt.structure_from_file("K562_21_100kb_structure.tsv")
