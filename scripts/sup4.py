@@ -1,6 +1,5 @@
 import sys
 sys.path.append("..")
-import os
 import data_tools as dt
 import compartment_analysis as ca
 import numpy as np
@@ -8,9 +7,7 @@ from sklearn import svm
 import linear_algebra as la
 from mayavi import mlab
 
-path = "hic_data/GM12878_combined_21_100kb.bed"
-os.system("python ../minimds.py {}".format(path))
-struct = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")
+struct = dt.structure_from_file("hic_data/GM12878_combined_21_100kb_structure.tsv")
 
 new_start = struct.chrom.getAbsoluteIndex(15000000)
 struct.subsamplePoints(new_start, len(struct.points)-3)
