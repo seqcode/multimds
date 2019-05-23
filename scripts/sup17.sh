@@ -5,4 +5,4 @@ RES=10000
 ./get_hic_data.sh K562 $RES
 ./relocalization_peaks.sh $RES
 
-python peaks_vs_background_compartments.py
+python sup17.py
