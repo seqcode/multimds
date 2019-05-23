@@ -41,5 +41,5 @@ mlab.plot3d(xs, ys, zs, compartments, colormap="bwr")
 x_coord = max_x + x_range/10
 y_coord = max_y + y_range/10
 mlab.quiver3d([0], [0], [1], extent=[0, 0, 0, 0, min_z, max_z], color=(0,0,0), line_width=8)
-mlab.savefig("compartments_3D.png")
+mlab.savefig("sup4.png")
 mlab.show()
