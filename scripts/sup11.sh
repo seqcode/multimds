@@ -3,5 +3,6 @@ set -e
 RES=100000
 ./get_hic_data.sh GM12878_combined $RES
 ./get_hic_data.sh K562 $RES
+./get_activity_data.sh $RES
 
-python compartment_relocalization_line_plot.py
+python sup11.py
