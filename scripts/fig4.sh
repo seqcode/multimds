@@ -32,7 +32,6 @@ done
 echo "GM12878_primary GM12878_replicate" > encode_rep_design.txt
 
 python quantify_z.py 23 encode_design.txt 0.025 0.75 ENCODE
-#python quantify_z.py 23 encode_rep_design.txt 0.025 GM12878 reps
 
 #mouse cell types
 RES=100000
