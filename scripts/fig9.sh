@@ -43,9 +43,9 @@ do
 	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
 done
 
-for STATE in enhancer transcription repressed
+for STATE in enhancer transcription TSS polycomb
 do
-	for CELLTYPE in Gm12878 K562
+	for CELLTYPE in GM12878 K562
 	do
 		bedtools coverage -a peaks_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > peaks_filtered_${CELLTYPE}_${STATE}_coverage.bed
 		bedtools coverage -a A_background_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > A_background_filtered_${CELLTYPE}_${STATE}_coverage.bed
