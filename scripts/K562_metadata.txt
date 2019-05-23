@@ -1,2 +1,0 @@
-res:100000
-rep1:K562_tadlib_input

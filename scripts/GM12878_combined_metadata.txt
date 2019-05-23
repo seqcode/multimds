@@ -1,2 +1,0 @@
-res:100000
-rep1:GM12878_combined_tadlib_input
