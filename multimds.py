@@ -243,10 +243,14 @@ def main():
 	coords1 = np.array(structure1.getCoords())
 	coords2 = np.array(structure2.getCoords())
 	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-	np.savetxt("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), dists)
+	with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
+		for gen_coord, dist in zip(structure1.getGenCoords(), dists):
+			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
+			out.write("\n")
+		out.close()
 
-	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
+	#print("Fractional compartment change: ")
+	#print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
 
 if __name__ == "__main__":
 	main()
