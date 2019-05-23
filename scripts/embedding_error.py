@@ -22,12 +22,9 @@ def error(dists, coords):
 	return rmse
 
 chrom = 21
-#chrom = 19
 res_kb = 100
 prefix1 = "GM12878_combined"
 prefix2 = "K562"
-#prefix1 = "mESC-WT-rep1"
-#prefix2 = "hepatocyte-WT"
 	
 path1 = "hic_data/{}_{}_{}kb.bed".format(prefix1, chrom, res_kb)
 path2 = "hic_data/{}_{}_{}kb.bed".format(prefix2, chrom, res_kb)
