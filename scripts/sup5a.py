@@ -26,8 +26,6 @@ for i, (species, res_kb) in enumerate(zip(all_species, all_res_kb)):
 					pca = PCA(n_components=1)
 					pca.fit(cor_mat)
 					boxes[i].append(pca.explained_variance_ratio_[0])
-				else:
-					print "{} not found".format(path)
 
 		infile.close()
 
