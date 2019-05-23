@@ -1,12 +1,8 @@
 from matplotlib import pyplot as plt
 import sys
-import os
 import numpy as np
 
 gene = sys.argv[1]
-os.system("bedtools intersect -a nup60_sig.bed -b {}.bed -f 0.5 > {}_Nup60_peak.bed".format(gene, gene))
-os.system("bedtools intersect -a ctrl_IP.bedgraph -b {}.bed > ctrl_{}_Nup60.bed".format(gene, gene))
-os.system("bedtools intersect -a galactose_IP.bedgraph -b {}.bed > galactose_{}_Nup60.bed".format(gene, gene))
 
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
@@ -100,4 +96,3 @@ with open ("{}_transcription_direction.bed".format(gene)) as infile:
 plt.legend(loc=2, fontsize=8, frameon=False, shadow=False)
 
 plt.savefig("{}_Nup60".format(gene))
-plt.show()
