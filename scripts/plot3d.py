@@ -1,14 +1,12 @@
 import sys
 sys.path.append("..")
 import data_tools as dt
-import os
 import numpy as np
 import plotting as plot
 
 cell_type1 = sys.argv[1]
 cell_type2 = sys.argv[2]
-res_kb = 25
-os.system("python ../multimds.py hic_data/{}_21_{}kb.bed hic_data/{}_21_{}kb.bed".format(cell_type1, res_kb, cell_type2, res_kb))
+res_kb = int(sys.argv[3])
 
 struct1 = dt.structure_from_file("{}_21_{}kb_structure.tsv".format(cell_type1, res_kb))
 
