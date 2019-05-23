@@ -39,7 +39,7 @@ plt.axhline(y=y_start, color="k", lw=4)
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=1, labelsize=9)
 
-plt.savefig("peaks_vs_background_change")
+plt.savefig("sup17a")
 plt.show()
 
 #start with a frameless plot (extra room on the left)
@@ -77,5 +77,5 @@ plt.axhline(y=y_start, color="k", lw=4)
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
 
-plt.savefig("peaks_vs_background_compartments")
+plt.savefig("sup17b")
 plt.show()
