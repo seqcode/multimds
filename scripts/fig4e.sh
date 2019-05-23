@@ -107,4 +107,4 @@ do
 
 done
 
-python relocalization_magnitude.py
+python fig4e.py
