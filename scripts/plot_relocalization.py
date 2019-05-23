@@ -1,4 +1,3 @@
-import os
 import sys
 sys.path.append("..")
 import data_tools as dt
@@ -10,12 +9,19 @@ gene_name = sys.argv[1]
 chrom_num = sys.argv[2]
 gene_loc = int(sys.argv[3])
 strain = sys.argv[4]
+prefix = sys.argv[5]
 res_kb = 32
 
 chrom_name = "{}_{}".format(strain, chrom_num)
-os.system("python ../multimds.py -P 0.1 -w 0 hic_data/ctrl_{}_{}kb.bed hic_data/galactose_{}_{}kb.bed".format(chrom_name, res_kb, chrom_name, res_kb))
-struct1 = dt.structure_from_file("ctrl_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
-struct2 = dt.structure_from_file("galactose_{}_{}kb_structure.tsv".format(chrom_name, res_kb))
+struct1 = dt.structure_from_file("{}ctrl_{}_{}kb_structure.tsv".format(prefix, chrom_name, res_kb))
+struct2 = dt.structure_from_file("{}galactose_{}_{}kb_structure.tsv".format(prefix, chrom_name, res_kb))
+
+dt.make_compatible((struct1, struct2))
+struct1.rescale()
+struct2.rescale()
+r, t = la.getTransformation(struct1, struct2)
+struct1.transform(r,t)
+
 gen_coords = np.array(struct1.getGenCoords())/1000
 dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(struct1.getCoords(), struct2.getCoords())]
 
@@ -53,3 +59,4 @@ gen_coord = struct1.getGenCoords()[struct1.get_rel_index(gene_loc)]/1000
 plt.scatter([gen_coord], [0.005], c="r", s=200, marker="o", label=gene_name)
 
 plt.savefig("{}_{}".format(strain, gene_name))
+plt.show()
