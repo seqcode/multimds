@@ -92,5 +92,5 @@ do
 	bedtools intersect -a nup60_sig.bed -b ${GENE}.bed -f 0.5 > ${GENE}_Nup60_peak.bed
 	bedtools intersect -a ctrl_IP.bedgraph -b ${GENE}.bed > ctrl_${GENE}_Nup60.bed
 	bedtools intersect -a galactose_IP.bedgraph -b ${GENE}.bed > galactose_${GENE}_Nup60.bed
-	python pileup.py $GENE
+	python sup8.py $GENE
 done
