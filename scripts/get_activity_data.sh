@@ -7,16 +7,26 @@ mkdir -p binding_data
 
 cd binding_data
 
-for CELL_TYPE in Gm12878 K562
+if [ ! -e GM12878_IDEAS.bb ]
+	then
+		curl http://bx.psu.edu/~yuzhang/Roadmap_ideas/test1.114.bb -o GM12878_IDEAS.bb
+fi
+
+if [ ! -e K562_IDEAS.bb ]
+	then
+		curl http://bx.psu.edu/~yuzhang/Roadmap_ideas/test1.121.bb -o K562_IDEAS.bb
+fi
+
+for CELL_TYPE in GM12878 K562
 do
-	if [ ! -e wgEncodeBroadHmm$CELL_TYPE"HMM".bed ]
+	if [ ! -e ${CELL_TYPE}_IDEAS.bed ]
 		then
-			curl http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHmm/wgEncodeBroadHmm$CELL_TYPE"HMM".bed.gz -o wgEncodeBroadHmm$CELL_TYPE"HMM".bed.gz
-			gunzip wgEncodeBroadHmm$CELL_TYPE"HMM".bed.gz
-	fi
-	if [ ! -e $CELL_TYPE"_active".bed ]
+			bigBedToBed ${CELL_TYPE}_IDEAS.bb ${CELL_TYPE}_IDEAS.bed
+	fi	
+
+	if [ ! -e ${CELL_TYPE}_active.bed ]
 		then
-			cat wgEncodeBroadHmm$CELL_TYPE"HMM".bed | awk '$4 == "1_Active_Promoter" || $4 == "2_Weak_Promoter" || $4 == "3_Poised_Promoter" || $4 == "4_Strong_Enhancer" || $4 == "5_Strong_Enhancer" || $4 == "6_Weak_Enhancer" || $4 == "7_Weak_Enhancer" || $4 == "9_Txn_Transition" || $4 == "10_Txn_Elongation" || $4 == "11_Weak_Txn" {print $0}' > $CELL_TYPE"_active".bed
+			cat ${CELL_TYPE}_IDEAS.bed | awk '$4 == "11_EnhBiv" || $4 == "4_Enh" || $4 == "18_Enh/Het" || $4 == "19_Enh/ReprPC" || $4 == "6_EnhG" || $4 == "17_EnhGA" || $4 == "2_TxWk" || $4 == "5_Tx" || $4 == "14_Tss/Wk" || $4 == "8_TssAFlnk" || $4 == "10_TssA" || $4 == "15_TssBiv" {print $0}' > ${CELL_TYPE}_active.bed
 	fi
 
 	WINDOW_FILE=hg19_${RES_KB}kb_windows.bed
