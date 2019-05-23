@@ -52,4 +52,4 @@ do
 	done
 done
 
-python relocalization_enrichment_independent.py
+python sup18.py
