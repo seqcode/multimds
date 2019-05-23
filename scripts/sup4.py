@@ -1,15 +1,20 @@
-import os
-import numpy as np
+from sklearn import svm
 import sys
 sys.path.append("..")
 import data_tools as dt
 import plotting as plot
+import compartment_analysis as ca
+import numpy as np
+import linear_algebra as la
 
-os.system("python ../multimds.py -P 0.1 -w 0 ctrl_Scer_13_32kb.bed galactose_Scer_13_32kb.bed")
-struct1 = dt.structure_from_file("ctrl_Suva_13_32kb_structure.tsv")
-struct2 = dt.structure_from_file("galactose_Suva_13_32kb_structure.tsv")
+struct = dt.structure_from_file("hic_data/GM12878_combined_21_100kb_structure.tsv")
+mat = dt.matFromBed("hic_data/GM12878_combined_21_100kb.bed", struct)
+comps = ca.get_compartments(mat)
 
-colors = np.zeros_like(struct1.getPoints(), dtype=int)
-colors[struct1.get_rel_index(852000)] = 1
-
-plot.plot_structures_interactive((struct1, struct2), (colors, colors))
+coords = struct.getCoords()
+clf = svm.LinearSVR()
+clf.fit(coords, comps)
+coef = clf.coef_
+transformed_coords = np.array(la.change_coordinate_system(coef, coords))
+struct.setCoords(transformed_coords)
+plot.plot_structure_interactive(struct, comps)
