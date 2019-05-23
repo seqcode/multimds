@@ -24,7 +24,7 @@ if [ ! -e GSM2583737_glucose_input.bedgraph ]
 		gunzip GSM2583737_glucose_input.bedgraph.gz
 fi
 
-python nup60_heatmap.py
+python sup9a.py
 
 if [ ! -e GSM2583738_asy_r1.counts.txt ]
 	then
@@ -64,4 +64,4 @@ fi
 
 paste GSM2583738_asy_r1.counts.txt  GSM2583739_asy_r2.counts.txt  GSM2583740_asy_r3.counts.txt  GSM2583741_gal_r1.counts.txt  GSM2583742_gal_r2.counts.txt  GSM2583743_gal_r3.counts.txt | cut -d "	" -f 1,2,4,6,8,10,12 >> rnaseq_counts.tsv
 
-python rnaseq_heatmap.py
+python sup9b.py
