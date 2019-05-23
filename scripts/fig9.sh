@@ -43,7 +43,7 @@ do
 	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
 done
 
-for STATE in promoter poised_promoter enhancer insulator transcription repressed heterochromatin
+for STATE in enhancer transcription repressed
 do
 	for CELLTYPE in Gm12878 K562
 	do
@@ -52,4 +52,4 @@ do
 	done
 done
 
-python relocalization_enrichment.py
+python fig9.py
