@@ -93,4 +93,4 @@ do
 
 done
 
-python comp_correlation.py
+python sup13.py
