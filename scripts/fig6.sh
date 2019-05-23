@@ -1,12 +1,21 @@
 set -e
 
-#ENCODE
+RES=25000
+RES_KB=$(($RES/1000))
+
 for CELLTYPE in K562 IMR90 HUVEC HMEC
 do
-	./get_hic_data.sh $CELLTYPE 100000
+	./get_hic_data.sh $CELLTYPE $RES
 done
 
-python plot_relocalization_compartments.py IMR90 HMEC
-python plot_relocalization_compartments.py IMR90 HUVEC
-python plot_relocalization_compartments.py HMEC HUVEC
-python plot_relocalization_compartments.py K562 HUVEC
+python ../multimds.py hic_data/IMR90_21_${RES_KB}kb.bed hic_data/HMEC_21_${RES_KB}kb.bed
+python plot_relocalization_compartments.py IMR90 HMEC $RES_KB
+
+python ../multimds.py hic_data/IMR90_21_${RES_KB}kb.bed hic_data/HUVEC_21_${RES_KB}kb.bed
+python plot_relocalization_compartments.py IMR90 HUVEC $RES_KB
+
+python ../multimds.py hic_data/HMEC_21_${RES_KB}kb.bed hic_data/HUVEC_21_${RES_KB}kb.bed
+python plot_relocalization_compartments.py HMEC HUVEC $RES_KB
+
+python ../multimds.py hic_data/K562_21_${RES_KB}kb.bed hic_data/HUVEC_21_${RES_KB}kb.bed
+python plot_relocalization_compartments.py K562 HUVEC $RES_KB
