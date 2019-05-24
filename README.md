@@ -4,15 +4,16 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 
 ## Installation
 
-Requirements:
-* python 2.7
+* MultiMDS requirements
     * numpy
     * pymp
     * scikit-learn
     * scipy
-    * matplotlib (optional; for reproducing figures)
-    * statsmodels (optional; for reproducing figures)
-    * tadlib (optional; for reproducing figures)
+* Libraries to reproduce figures
+    * matplotlib
+    * h5py
+    * seaborn 
+    * pandas 
 * Python dependencies can be installed using
 ``pip install -r requirements.txt``
 * The following optional dependencies can be installed manually:
