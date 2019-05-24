@@ -28,4 +28,4 @@ plt.xticks(indices, [])
 plt.tick_params(top=False, right=False, left=False, bottom=False, labelsize=12)		#don't want any ticks showing
 cbaxes = fig.add_axes([0.3, 0.1, 0.02, 0.4]) 
 plt.colorbar(cax=cbaxes)
-plt.savefig("rnaseq_heatmap")
+plt.savefig("sup9b")
