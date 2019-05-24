@@ -1,6 +1,6 @@
 import h5py
 import sys
-sys.path.append("/home/lur159/git/miniMDS")
+sys.path.append("..")
 from tools import Tracker
 import numpy as np
 
