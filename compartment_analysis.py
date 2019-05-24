@@ -2,7 +2,6 @@ import array_tools as at
 from sklearn.decomposition import PCA
 import numpy as np
 from scipy import stats as st
-import sys
 
 def oe(mat):
 	n = len(mat)
