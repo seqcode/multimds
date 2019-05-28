@@ -4,41 +4,23 @@ import data_tools as dt
 import numpy as np
 import plotting as plot
 
-cell_type1 = sys.argv[1]
-cell_type2 = sys.argv[2]
-res_kb = int(sys.argv[3])
+cell_type = sys.argv[1]
+res_kb = int(sys.argv[2])
 
-struct1 = dt.structure_from_file("{}_21_{}kb_structure.tsv".format(cell_type1, res_kb))
+struct = dt.structure_from_file("{}_21_{}kb_structure.tsv".format(cell_type, res_kb))
 
 #truncate
 start = 45000000
-index = struct1.chrom.getAbsoluteIndex(start)
-struct1.points = struct1.points[index:len(struct1.points)]
-struct1.chrom.minPos = start
-for i in range(len(struct1.points)):
-	if struct1.points[i] != 0:
-		struct1.points[i].absolute_index -= index
-struct1.set_rel_indices()
+index = struct.chrom.getAbsoluteIndex(start)
+struct.points = struct.points[index:len(struct.points)]
+struct.chrom.minPos = start
+for i in range(len(struct.points)):
+	if struct.points[i] != 0:
+		struct.points[i].absolute_index -= index
+struct.set_rel_indices()
 
-colors = np.zeros_like(struct1.getPoints(), dtype=int)
-colors[struct1.get_rel_index(46900000):struct1.get_rel_index(46950000)] = 1
-colors[struct1.get_rel_index(47475000)] = 2
+colors = np.zeros_like(struct.getPoints(), dtype=int)
+colors[struct.get_rel_index(46900000):struct.get_rel_index(46950000)] = 2
+colors[struct.get_rel_index(47475000)] = 1
 
-plot.plot_structure_interactive(struct1, colors)
-
-struct2 = dt.structure_from_file("{}_21_{}kb_structure.tsv".format(cell_type2, res_kb))
-
-#truncate
-index = struct2.chrom.getAbsoluteIndex(start)
-struct2.points = struct2.points[index:len(struct2.points)]
-struct2.chrom.minPos = start
-for i in range(len(struct2.points)):
-	if struct2.points[i] != 0:
-		struct2.points[i].absolute_index -= index
-struct2.set_rel_indices()
-
-colors = np.zeros_like(struct2.getPoints(), dtype=int)
-colors[struct2.get_rel_index(46900000):struct2.get_rel_index(46950000)] = 1
-colors[struct2.get_rel_index(47475000)] = 2
-
-plot.plot_structure_interactive(struct2, colors)
+plot.plot_structure_interactive(struct, colors, colormap="brg")
