@@ -63,4 +63,4 @@ plt.scatter([gen_coord], [0.005], c="r", s=100, marker="o", zorder=2)
 
 plt.legend(frameon=False)
 
-plt.savefig("fig6")
+plt.savefig("{}_{}_{}kb_relocalization".format(cell_type1, cell_type2, res_kb))
