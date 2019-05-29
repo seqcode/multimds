@@ -1,4 +1,3 @@
-import array_tools as at
 from sklearn.decomposition import PCA
 import numpy as np
 from scipy import stats as st
@@ -30,8 +29,10 @@ def oe(mat):
 			observed = mat[i,j]
 			s = i-j
 			expected = avgs[s-1]
-			if expected != 0:	
-				oe_mat[i,j] = observed/expected
+			if expected != 0:
+				ratio = observed/expected	
+				oe_mat[i,j] = ratio
+				oe_mat[j,i] = ratio
 
 	return oe_mat
 
@@ -44,15 +45,14 @@ def cor(mat):
 		for j in range(i):
 			r, p = st.pearsonr(mat[i], mat[j])
 			cor_mat[i,j] = r
+			cor_mat[j,i] = r
 
 	return cor_mat
 
 def get_compartments(mat, enrichments=None, active=True):
 	"""From Lieberman-Aiden et al (2009)"""
 	oe_mat = oe(mat)
-	at.makeSymmetric(oe_mat)
 	cor_mat = cor(oe_mat)
-	at.makeSymmetric(cor_mat)
 	pca = PCA(n_components=1)
 	pca.fit(cor_mat)
 	scores = pca.fit_transform(cor_mat)[:,0]
