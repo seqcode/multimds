@@ -13,7 +13,7 @@ new_start = struct.chrom.getAbsoluteIndex(15000000)
 struct.subsamplePoints(new_start, len(struct.points)-3)
 
 #compartments
-contacts = dt.matFromBed(path, struct)
+contacts = dt.matFromBed("hic_data/GM12878_combined_21_100kb.bed", struct)
 
 compartments = np.array(ca.get_compartments(contacts, 1))
 
@@ -42,4 +42,3 @@ x_coord = max_x + x_range/10
 y_coord = max_y + y_range/10
 mlab.quiver3d([0], [0], [1], extent=[0, 0, 0, 0, min_z, max_z], color=(0,0,0), line_width=8)
 mlab.savefig("sup4.png")
-mlab.show()
