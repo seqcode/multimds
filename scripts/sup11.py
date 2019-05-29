@@ -14,7 +14,7 @@ struct1 = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")
 struct2 = dt.structure_from_file("K562_21_100kb_structure.tsv")
 
 contacts1 = dt.matFromBed(path1, struct1)
-enrichments1 = np.loadtxt("binding_data/Gm12878_21_100kb_active_coverage.bed", usecols=6)
+enrichments1 = np.loadtxt("binding_data/GM12878_21_100kb_active_coverage.bed", usecols=6)
 bin_nums1 = struct1.nonzero_abs_indices() + int(struct1.chrom.minPos/struct1.chrom.res)
 enrichments1 = enrichments1[bin_nums1]
 comps1 = np.array(ca.get_compartments(contacts1, enrichments1))
