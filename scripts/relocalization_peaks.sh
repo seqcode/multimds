@@ -19,17 +19,10 @@ do
 done
 
 #negative control
-if [ ! -e A_compartment_${RES_KB}kb.bed ]
+if [ -e A_compartment_${RES_KB}kb.bed ]
 	then
-		python get_a_compartment.py $RES
+		rm A_compartment_${RES_KB}kb.bed
 fi
-
-if [ ! -e A_background.bed ]
-	then
-		bedtools subtract -a A_compartment_${RES_KB}kb.bed -b peaks_filtered.bed > A_background.bed
-fi
-
-if [ ! -e A_background_filtered.bed ]
-	then
-		./filter_mappability.sh A_background $RES
-fi
+python get_a_compartment.py $RES
+bedtools subtract -a A_compartment_${RES_KB}kb.bed -b peaks_filtered.bed > A_background.bed
+./filter_mappability.sh A_background $RES
