@@ -29,8 +29,6 @@ for i, (species, res_kb) in enumerate(zip(all_species, all_res_kb)):
 
 		infile.close()
 
-print boxes
-
 #start with a frameless plot (extra room on the left)
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
