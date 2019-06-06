@@ -7,8 +7,9 @@ import linear_algebra as la
 from scipy import signal as sg
 
 def format_celltype(cell_type):
-	formatted = cell_type.split("_")[0]
-	return formatted[0].upper() + formatted[1:len(formatted)].lower()
+	#formatted = cell_type.split("_")[0]
+	#return formatted[0].upper() + formatted[1:len(formatted)].lower()
+	return cell_type.split("_")[0]
 
 cell_type1 = sys.argv[1]
 cell_type2 = sys.argv[2]
