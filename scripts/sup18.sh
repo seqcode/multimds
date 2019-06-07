@@ -6,7 +6,7 @@ RES_KB=$(($RES/1000))
 ./get_hic_data.sh GM12878_combined $RES
 ./get_hic_data.sh K562 $RES
 ./get_activity_data.sh 100000	#lower resolution (will be used for compartment calculation)
-./relocalization_peaks_independent.sh $RES
+#./relocalization_peaks_independent.sh $RES
 ./get_state_data.sh
 
 IDS=(H3k27acStdPk H3k04me1StdPkV2 H3k04me3StdPkV2 H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPkV2 Ezh239875Pk H3k9me3StdPk H3k36me3StdPk CtcfStdPk)
@@ -43,9 +43,9 @@ do
 	bedtools coverage -a A_background_independent_filtered.bed -b binding_data/$FILENAME > A_background_independent_filtered_K562_${NAME}_coverage.bed
 done
 
-for STATE in promoter poised_promoter enhancer insulator transcription repressed heterochromatin
+for STATE in enhancer transcription TSS polycomb
 do
-	for CELLTYPE in Gm12878 K562
+	for CELLTYPE in GM12878 K562
 	do
 		bedtools coverage -a peaks_filtered_independent.bed -b binding_data/${CELLTYPE}_${STATE}.bed > peaks_filtered_independent_${CELLTYPE}_${STATE}_coverage.bed
 		bedtools coverage -a A_background_independent_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > A_background_independent_filtered_${CELLTYPE}_${STATE}_coverage.bed
