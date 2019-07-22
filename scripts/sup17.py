@@ -1,8 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import sys
 
 peak_comps = np.loadtxt("peaks_filtered.bed", usecols=(3,4))
-background_comps = np.loadtxt("A_background_filtered.bed", usecols=(3,4))
+background_comps = np.loadtxt("same_compartment_background_filtered.bed", usecols=(3,4))
 
 #start with a frameless plot (extra room on the left)
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
@@ -75,6 +76,6 @@ plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
 
 plt.savefig("sup17b")

@@ -13,7 +13,7 @@ ps = np.zeros_like(datasets, dtype=float)
 
 for i, dataset in enumerate(datasets):
 	peaks_coverage = np.loadtxt("peaks_filtered_{}_coverage.bed".format(dataset), usecols=8)
-	background_coverage = np.loadtxt("A_background_filtered_{}_coverage.bed".format(dataset), usecols=6)
+	background_coverage = np.loadtxt("same_compartment_background_filtered_{}_coverage.bed".format(dataset), usecols=8)
 	
 	t, p = st.ttest_ind(peaks_coverage, background_coverage)
 	ps[i] = p
@@ -62,3 +62,4 @@ plt.xticks(xs, datasets, rotation=90)
 plt.tick_params(direction="out", top=False, right=False, bottom=False, length=12, width=3, labelsize=9)
 
 plt.savefig("fig9")
+plt.show()

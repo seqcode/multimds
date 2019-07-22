@@ -23,7 +23,7 @@ do
 			gunzip binding_data/$FILENAME.gz
 	fi
 	bedtools coverage -a peaks_filtered.bed -b binding_data/$FILENAME > peaks_filtered_GM12878_${NAME}_coverage.bed
-	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_GM12878_${NAME}_coverage.bed
+	bedtools coverage -a same_compartment_background_filtered.bed -b binding_data/$FILENAME > same_compartment_background_filtered_GM12878_${NAME}_coverage.bed
 done
 
 IDS=(H3k27acStdPk H3k4me1StdPk H3k4me3StdPk H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPk Ezh239875StdPk H3k9me3StdPk H3k36me3StdPk CtcfStdPk)
@@ -40,7 +40,7 @@ do
 			gunzip binding_data/$FILENAME.gz
 	fi
 	bedtools coverage -a peaks_filtered.bed -b binding_data/$FILENAME > peaks_filtered_K562_${NAME}_coverage.bed
-	bedtools coverage -a A_background_filtered.bed -b binding_data/$FILENAME > A_background_filtered_K562_${NAME}_coverage.bed
+	bedtools coverage -a same_compartment_background_filtered.bed -b binding_data/$FILENAME > same_compartment_background_filtered_K562_${NAME}_coverage.bed
 done
 
 for STATE in enhancer transcription TSS polycomb
@@ -48,7 +48,7 @@ do
 	for CELLTYPE in GM12878 K562
 	do
 		bedtools coverage -a peaks_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > peaks_filtered_${CELLTYPE}_${STATE}_coverage.bed
-		bedtools coverage -a A_background_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > A_background_filtered_${CELLTYPE}_${STATE}_coverage.bed
+		bedtools coverage -a same_compartment_background_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > same_compartment_background_filtered_${CELLTYPE}_${STATE}_coverage.bed
 	done
 done
 
