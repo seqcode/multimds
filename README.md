@@ -6,14 +6,17 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 
 Requirements:
 * python (2 or 3, though 3 is required for mayavi)
+* MultiMDS requirements
     * numpy
     * pymp
     * scikit-learn
     * scipy
-    * matplotlib (optional; for reproducing figures)
-    * statsmodels (optional; for reproducing figures)
-    * tadlib (optional; for reproducing figures)
     * mayavi (optional; for plotting)
+* Libraries to reproduce figures
+    * matplotlib
+    * h5py
+    * seaborn 
+    * pandas 
 * Python dependencies can be installed using
 ``pip install -r requirements.txt``
 * The following optional dependencies can be installed manually:

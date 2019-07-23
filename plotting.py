@@ -12,7 +12,7 @@ chromatinDiameter = 30	#diameter of heterochromatin (nm)
 default_colors = np.array([[255,0,0], [0,255,238], [255,238,0], [0,102,255], [255,0,170], [255,102,0], [204,255,0], [0,238,255], [0,68,255], [255,0,102], [255,136,0], [0,255,34], [0,204,255], [34,0,255], [255,0,68], [255,170,0], [0,255,136], [0,170,255], [204,0,255], [255,204,0], [0,255,204], [0,136,255], [255,0,238]])/255.
 default_colors = [tuple(color) for color in default_colors]	#convert to tuple
 
-def plot_structures_interactive(structures, all_enrichments=None, colors=default_colors, radius=None, cut=False, out_path=None):
+def plot_structures_interactive(structures, all_enrichments=None, colors=default_colors, radius=None, cut=False, out_path=None, colormap="bwr"):
 	mlab.close(all=True)
 	mlab.figure(bgcolor=(1,1,1))
 	if radius is None:
@@ -29,14 +29,14 @@ def plot_structures_interactive(structures, all_enrichments=None, colors=default
 			ys = ys[indices]
 			zs = zs[indices]	
 		if all_enrichments is not None:
-			mlab.plot3d(xs, ys, zs, all_enrichments[i], tube_radius=radius, colormap="bwr")
+			mlab.plot3d(xs, ys, zs, all_enrichments[i], tube_radius=radius, colormap=colormap)
 		else:
 			mlab.plot3d(xs, ys, zs, [0 for x in xs], tube_radius=radius, color=colors[i])
 	if out_path:
 		mlab.savefig(out_path)		
 	mlab.show()
 
-def plot_structure_interactive(structure, enrichments=None, color=(1,0,0), radius=None, out_path=None):
+def plot_structure_interactive(structure, enrichments=None, color=(1,0,0), radius=None, out_path=None, colormap="bwr"):
 	if radius is None:
 		radius = calculateRadius([structure])
 	coords = np.array(structure.getCoords())
@@ -45,14 +45,14 @@ def plot_structure_interactive(structure, enrichments=None, color=(1,0,0), radiu
 	zs = coords[:,2]
 	mlab.figure(bgcolor=(1,1,1))
 	if enrichments is not None:
-		mlab.plot3d(xs, ys, zs, enrichments, tube_radius=radius, colormap="bwr")
+		mlab.plot3d(xs, ys, zs, enrichments, tube_radius=radius, colormap=colormap)
 	else:
 		mlab.plot3d(xs, ys, zs, tube_radius=radius, color=color)
 	if out_path:
 		mlab.savefig(out_path)	
 	mlab.show()
 
-def plot_structures_gif(structures, outname, all_enrichments=None, colors=default_colors, radius=None, increment=10):
+def plot_structures_gif(structures, outname, all_enrichments=None, colors=default_colors, radius=None, increment=10, colormap="bwr"):
 	if 360%increment != 0:
 		print("Error. Increment must be factor of 360.")
 		sys.exit(0)
@@ -63,7 +63,7 @@ def plot_structures_gif(structures, outname, all_enrichments=None, colors=defaul
 		for j, structure in enumerate(structures):
 			coords = np.array(structure.getCoords())
 			if all_enrichments is not None:
-				s = mlab.plot3d(coords[:,0], coords[:,1], coords[:,2], all_enrichments[j], tube_radius=radius, colormap="bwr")
+				s = mlab.plot3d(coords[:,0], coords[:,1], coords[:,2], all_enrichments[j], tube_radius=radius, colormap=colormap)
 			else:
 				s = mlab.plot3d(coords[:,0], coords[:,1], coords[:,2], tube_radius=radius, color=colors[j])
 		mlab.view(i)
@@ -73,7 +73,7 @@ def plot_structures_gif(structures, outname, all_enrichments=None, colors=defaul
 	os.system("convert -loop 1 {}_*.png {}.gif".format(outname, outname))
 	os.system("rm {}_*.png".format(outname))
 
-def plot_structure_gif(structure, outname, enrichments=None, color=(1,0,0), radius=None, increment=10):
+def plot_structure_gif(structure, outname, enrichments=None, color=(1,0,0), radius=None, increment=10, colormap="bwr"):
 	if 360%increment != 0:
 		print("Error. Increment must be factor of 360.")
 		sys.exit(0)
@@ -82,7 +82,7 @@ def plot_structure_gif(structure, outname, enrichments=None, color=(1,0,0), radi
 	coords = np.array(structure.getCoords())
 	mlab.figure(bgcolor=(1,1,1))
 	if enrichments is not None:
-		s = mlab.plot3d(coords[:,0], coords[:,1], coords[:,2], enrichments, tube_radius=radius, colormap="bwr")
+		s = mlab.plot3d(coords[:,0], coords[:,1], coords[:,2], enrichments, tube_radius=radius, colormap=colormap)
 	else:
 		s = mlab.plot3d(coords[:,0], coords[:,1], coords[:,2], tube_radius=radius, color=color)
 	for i in range(0, 360, increment):

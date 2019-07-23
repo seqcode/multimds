@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/lur159/git/miniMDS")
+sys.path.append("..")
 import data_tools as dt
 import numpy as np
 import tools

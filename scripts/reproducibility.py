@@ -22,7 +22,6 @@ ps = np.arange(0, 0.1, 0.01)
 for p in ps:
 	all_changes = []
 	for i in range(n):
-		print(i)
 		os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
 
 		structure1 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix1)))
@@ -48,7 +47,7 @@ ys = all_r_sq
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
-plt.xlabel("Difference penalty", fontsize=14)
+plt.xlabel("Similarity weight", fontsize=14)
 plt.ylabel("Correlation between iterations", fontsize=14)
 
 #define offsets
@@ -80,4 +79,3 @@ plt.axhline(y=y_start, color="k", lw=4)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
 
 plt.savefig("{}_{}_reproducibility".format(prefix1, prefix2))
-plt.show()	

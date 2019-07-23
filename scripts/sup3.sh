@@ -1,11 +1,32 @@
 set -e
 
-./get_yeast_data.sh
+RES=100000
 
-for CONDITION in ctrl galactose
+./get_hic_data.sh GM12878_combined $RES
+./get_hic_data.sh K562 $RES
+
+for METHOD in MultiMDS Independent_MDS
 do
-	cat ${CONDITION}_Scer_12_32kb.bed | awk '$2 < 448000 && $5 < 448000 {print $0}' > ${CONDITION}_Scer_12-upstream_32kb.bed
-	cat ${CONDITION}_Scer_12_32kb.bed | awk '$2 >= 448000 && $5 >= 448000 {print $0}' > ${CONDITION}_Scer_12-downstream_32kb.bed
+	OUTPUT=$METHOD"_times".txt
+
+	if [ -e $OUTPUT ]
+		then
+			rm $OUTPUT
+	fi
+
+	for CHROM in 21 20 19 18 17 16 15 14 13 12 11 10 8 7 6 5 4 3 2 1
+	do
+		echo $CHROM
+		/usr/bin/time -o $OUTPUT -a -f %e python test_$METHOD.py $CHROM | awk '$1 == "rmsd" {print $2}' >> $OUTPUT
+	done
+
 done
+
+exit
+
+if [ ! -e chrom_sizes.txt ]
+	then
+		./get_chrom_sizes.sh
+fi
 
 python sup3.py

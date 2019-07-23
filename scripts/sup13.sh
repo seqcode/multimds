@@ -1,71 +1,96 @@
 set -e
 
-RES=10000
-RES_KB=$(($RES/1000))
-
-#./get_hic_data.sh GM12878_combined $RES
-#./get_hic_data.sh K562 $RES
-./get_activity_data.sh 100000	#lower resolution (will be used for compartment calculation)
-#./relocalization_peaks_independent.sh $RES
-./get_state_data.sh
-
-#negative control
-if [ ! -e A_compartment_${RES_KB}kb.bed ]
-	then
-		python get_a_compartment.py $RES
-fi
-
-if [ ! -e A_background_independent.bed ]
-	then
-		bedtools subtract -a A_compartment_${RES_KB}kb.bed -b peaks_filtered_independent.bed | cut -f 1,2,3 > A_background_independent.bed
-fi
-
-if [ ! -e A_background_independent_filtered.bed ]
-	then
-		./filter_mappability.sh A_background_independent $RES
-fi
-
-IDS=(H3k27acStdPk H3k04me1StdPkV2 H3k04me3StdPkV2 H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPkV2 Ezh239875Pk H3k9me3StdPk H3k36me3StdPk CtcfStdPk)
-NAMES=(H3K27ac H3K4me1 H3K4me3 H3K9ac H3K36me3 H2AZ H3K4me2 H3K79me2 H4K20me1 H3K27me3 EZH2 H3K9me3 H3K36me3 CTCF)
-
-for i in `seq 0 $((${#IDS[@]}-1))`
+#ENCODE
+for CELLTYPE in GM12878_primary GM12878_replicate K562 KBM7 IMR90 HUVEC HMEC NHEK
 do
-	ID=${IDS[$i]}
-	NAME=${NAMES[$i]}
-	FILENAME=wgEncodeBroadHistoneGm12878${ID}.broadPeak
-	if [ ! -e binding_data/$FILENAME ]
-		then
-			curl http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/$FILENAME.gz -o binding_data/$FILENAME.gz
-			gunzip binding_data/$FILENAME.gz
-	fi
-	bedtools coverage -a peaks_filtered_independent.bed -b binding_data/$FILENAME > peaks_filtered_independent_GM12878_${NAME}_coverage.bed
-	bedtools coverage -a A_background_independent_filtered.bed -b binding_data/$FILENAME > A_background_independent_filtered_GM12878_${NAME}_coverage.bed
+	./get_hic_data.sh $CELLTYPE 100000
 done
 
-IDS=(H3k27acStdPk H3k4me1StdPk H3k4me3StdPk H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPk Ezh239875StdPk H3k9me3StdPk H3k36me3StdPk CtcfStdPk)
-NAMES=(H3K27ac H3K4me1 H3K4me3 H3K9ac H3K36me3 H2AZ H3K4me2 H3K79me2 H4K20me1 H3K27me3 EZH2 H3K9me3 H3K36me3 CTCF)
+if [ -e encode_design.txt ]
+	then
+		rm encode_design.txt
+fi
 
-for i in `seq 0 $((${#IDS[@]}-1))`
+for CELLTYPE1 in GM12878_primary GM12878_replicate
 do
-	ID=${IDS[$i]}
-	NAME=${NAMES[$i]}
-	FILENAME=wgEncodeBroadHistoneK562${ID}.broadPeak
-	if [ ! -e binding_data/$FILENAME ]
-		then
-			curl http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/$FILENAME.gz -o binding_data/$FILENAME.gz
-			gunzip binding_data/$FILENAME.gz
-	fi
-	bedtools coverage -a peaks_filtered_independent.bed -b binding_data/$FILENAME > peaks_filtered_independent_K562_${NAME}_coverage.bed
-	bedtools coverage -a A_background_independent_filtered.bed -b binding_data/$FILENAME > A_background_independent_filtered_K562_${NAME}_coverage.bed
-done
-
-for STATE in promoter poised_promoter enhancer insulator transcription repressed heterochromatin
-do
-	for CELLTYPE in Gm12878 K562
+	for CELLTYPE2 in K562 IMR90 HUVEC HMEC NHEK
 	do
-		bedtools coverage -a peaks_filtered_independent.bed -b binding_data/${CELLTYPE}_${STATE}.bed > peaks_filtered_independent_${CELLTYPE}_${STATE}_coverage.bed
-		bedtools coverage -a A_background_independent_filtered.bed -b binding_data/${CELLTYPE}_${STATE}.bed > A_background_independent_filtered_${CELLTYPE}_${STATE}_coverage.bed
+		echo $CELLTYPE1" "$CELLTYPE2 >> encode_design.txt
 	done
 done
 
-python relocalization_enrichment_independent.py
+CELLTYPES=(K562 IMR90 HUVEC HMEC NHEK)
+
+for i in `seq 0 $((${#CELLTYPES[@]}-1))`
+do	
+	for j in `seq 0 $(($i-1))`
+	do
+		echo ${CELLTYPES[$i]}" "${CELLTYPES[$j]} >> encode_design.txt
+	done
+done
+
+echo "GM12878_primary GM12878_replicate" > encode_rep_design.txt
+
+#mouse cell types
+RES=100000
+
+./process_hpc7.sh $RES
+./process_g1e.sh WT $RES
+./process_g1e.sh KO $RES
+./process_ctcf-wt.sh
+./process_cohesin-wt.sh
+./process_cohesin-ko.sh
+
+echo "hepatocyte-cohesin-KO hepatocyte-WT" > cohesin_design.txt
+
+if [ -e mouse_celltype_design.txt ]
+	then
+		rm mouse_celltype_design.txt
+fi
+
+CELLTYPES=(mESC-WT-rep1 mESC-WT-rep2 HPC7-rep1 HPC7-rep2 WT-G1E hepatocyte-WT)
+
+for CELLTYPE1 in mESC-WT-rep1 mESC-WT-rep2
+do
+	for CELLTYPE2 in HPC7-rep1 HPC7-rep2 WT-G1E hepatocyte-WT
+	do
+		echo $CELLTYPE1" "$CELLTYPE2 >> mouse_celltype_design.txt
+	done
+done
+
+for CELLTYPE1 in HPC7-rep1 HPC7-rep2
+do
+	for CELLTYPE2 in mESC-WT-rep1 mESC-WT-rep2 WT-G1E hepatocyte-WT
+	do
+		echo $CELLTYPE1" "$CELLTYPE2 >> mouse_celltype_design.txt
+	done
+done
+
+echo "WT-G1E hepatocyte-WT" >> mouse_celltype_design.txt
+
+echo "mESC-WT-rep1 mESC-WT-rep2" > mouse_celltype_rep_design.txt
+echo "HPC7-rep1 HPC7-rep2" >> mouse_celltype_rep_design.txt
+
+
+#LCL
+./process_lymphoblastoid.sh
+
+if [ -e lymphoblastoid_design.txt ]
+	then
+		rm lymphoblastoid_design.txt
+fi
+
+CELLTYPES=(GM19238 GM19239 GM19240 HG00512 HG00513 HG00514 HG00731 HG00732 HG00733)
+
+for i in `seq 0 $((${#CELLTYPES[@]}-1))`
+do
+	CELLTYPE1=${CELLTYPES[$i]}
+	for j in `seq 0 $(($i-1))`
+	do
+		CELLTYPE2=${CELLTYPES[$j]}
+		echo $CELLTYPE1" "$CELLTYPE2 >> lymphoblastoid_design.txt
+	done
+
+done
+
+python sup13.py

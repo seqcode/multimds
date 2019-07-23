@@ -24,7 +24,7 @@ if [ $CELL_TYPE == "K562" ] || [ $CELL_TYPE == "KBM7" ]
 		CHROMS=`seq 22`
 fi
 
-for CHROM in $CHROMS
+for CHROM in ${CHROMS[*]}
 do
 	if [ -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal/chr$CHROM ] && [ ! -e ${CELL_TYPE}_${CHROM}_${RES_KB}kb.bed ]
 		then

@@ -1,7 +1,11 @@
 set -e
 
 RES=100000
-./get_hic_data.sh GM12878_combined $RES
-./get_hic_data.sh K562 $RES
+for CELLTYPE in GM12878_combined K562
+do
+	./get_hic_data.sh $CELLTYPE $RES
+done
+./get_activity_data.sh $RES
 
-python compartment_relocalization_line_plot.py
+python ../multimds.py hic_data/GM12878_combined_21_100kb.bed hic_data/K562_21_100kb.bed
+python sup11.py
