@@ -5,7 +5,7 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 ## Installation
 
 Requirements:
-* python 2.7
+* python (2 or 3, though 3 is required for mayavi)
     * numpy
     * pymp
     * scikit-learn
@@ -13,10 +13,10 @@ Requirements:
     * matplotlib (optional; for reproducing figures)
     * statsmodels (optional; for reproducing figures)
     * tadlib (optional; for reproducing figures)
+    * mayavi (optional; for plotting)
 * Python dependencies can be installed using
 ``pip install -r requirements.txt``
 * The following optional dependencies can be installed manually:
-    * [mayavi](http://docs.enthought.com/mayavi/mayavi/) (for plotting)
     * [ImageMagick](https://www.imagemagick.org/script/index.php) (for creating gifs)
     * [bedtools](http://bedtools.readthedocs.io/en/latest/content/installation.html) (for reproducing figures)
     * [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) (for reproducing figures)
@@ -27,7 +27,7 @@ Requirements:
 
 ## Testing
 
-Please run test.sh (in the scripts directory) and report any issues.
+Please run test.sh (in the scripts directory) and report any issues. This script downloads and normalizes sample data for GM12878_combined and K562, allowing you to manually run any of the commands below, though the script will also test the commands automatically.  
 
 ## Usage
 
