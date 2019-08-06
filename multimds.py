@@ -226,15 +226,6 @@ def main():
 	else:
 		prefix = ""
 
-	#print("structure 1")
-	#for i in range(len(structure1.points)):
-	#	if structure1.points[i] != 0:
-	#		print(structure1.points[i].relative_index)
-	#print("structure 2")
-	#for i in range(len(structure2.points)):
-	#	if structure2.points[i] != 0:
-	#		print(structure2.points[i].relative_index)
-
 	prefix1 = os.path.splitext(os.path.basename(args.path1))[0]
 	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
 	prefix2 = os.path.splitext(os.path.basename(args.path2))[0]
@@ -249,8 +240,8 @@ def main():
 			out.write("\n")
 		out.close()
 
-	#print("Fractional compartment change: ")
-	#print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
+	print("Fractional compartment change: ")
+	print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
 
 if __name__ == "__main__":
 	main()
