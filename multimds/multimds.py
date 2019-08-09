@@ -42,7 +42,7 @@ def infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, pe
 	structure1.setCoords(coords1)
 	structure2.setCoords(coords2)
 
-def fullMDS(path1, path2, alpha, penalty, num_threads, weight):
+def full_mds(path1, path2, alpha, penalty, num_threads, weight):
 	"""MDS without partitioning"""
 	structure1 = dt.structureFromBed(path1)
 	structure2 = dt.structureFromBed(path2)
@@ -81,7 +81,7 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#transform high structure
 	highSubstructure.transform(r, t)
 
-def partitionedMDS(path1, path2, args):
+def partitioned_mds(path1, path2, args):
 	"""Partitions structure into substructures and performs MDS"""
 	centromere = args[0]
 	num_partitions = args[1]
@@ -216,10 +216,10 @@ def main():
 		if not tools.args_are_valid(params, names, intervals):
 			sys.exit(0)
 
-		structure1, structure2 = partitionedMDS(args.path1, args.path2, params)
+		structure1, structure2 = partitioned_mds(args.path1, args.path2, params)
 
 	else:
-		structure1, structure2 = fullMDS(args.path1, args.path2, args.a, args.P, args.n, args.w)
+		structure1, structure2 = full_mds(args.path1, args.path2, args.a, args.P, args.n, args.w)
 	
 	if args.o:
 		prefix = args.o
@@ -231,17 +231,17 @@ def main():
 	prefix2 = os.path.splitext(os.path.basename(args.path2))[0]
 	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
 
-	#coords1 = np.array(structure1.getCoords())
-	#coords2 = np.array(structure2.getCoords())
-	#dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-	#with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
-	#	for gen_coord, dist in zip(structure1.getGenCoords(), dists):
-	#		out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
-	#		out.write("\n")
-	#	out.close()
+	coords1 = np.array(structure1.getCoords())
+	coords2 = np.array(structure2.getCoords())
+	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
+	with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
+		for gen_coord, dist in zip(structure1.getGenCoords(), dists):
+			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
+			out.write("\n")
+		out.close()
 
-	#print("Fractional compartment change: ")
-	#print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
+	print("Fractional compartment change: ")
+	print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
 
 if __name__ == "__main__":
 	main()
