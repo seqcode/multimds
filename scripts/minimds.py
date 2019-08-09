@@ -1,4 +1,5 @@
 import sys
+sys.path.append("../multimds")
 import numpy as np
 from sklearn import manifold
 import argparse
