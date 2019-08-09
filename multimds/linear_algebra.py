@@ -39,6 +39,13 @@ def calcDistance(coord1, coord2):
 	"""Euclidean distance between coordinates"""
 	return ((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2 +  (coord1[2] - coord2[2])**2)**(1./2)
 
+
+def calculate_distances(structure1, structure2):
+	"""Pairwise Euclidean distances between structures"""
+	coords1 = np.array(structure1.getCoords())
+	coords2 = np.array(structure2.getCoords())
+	return [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
+
 def radius_of_gyration(structure):
 	coords = np.array(structure.getCoords())
 	centroid = np.mean(coords, axis=0)
