@@ -166,7 +166,9 @@ plotting.plot_structures_gif(structures, struct, colors=default_colors, radius=N
 
 You can use a custom prefix for your output files. For example
 
+```python
 struct1, struct2 = multimds.full_mds("hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed", prefix="test_")
+```
 
 will output test_GM12878_combined_21_10kb_structure.tsv, test_K562_21_10kb_structure.tsv, test_GM12878_combined_21_10kb_K562_21_10kb_relocalization.bed
 
@@ -174,7 +176,9 @@ will output test_GM12878_combined_21_10kb_structure.tsv, test_K562_21_10kb_struc
 
 Exponential decay in contact frequency with genomic separation is a hallmark of Hi-C data. To reduce noise, miniMDS corrects contact frequencies with a distance-decay prior. The default prior weight is 0.05. 
 
+```python
 struct1, struct2 = multimds.full_mds("hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed", weight=0)
+```
 
 w can be any value between 0 and 1, inclusive. 
 
@@ -226,7 +230,7 @@ The scaling factor a describes the assumed relationship between contact frequenc
 struct1, struct2 = multimds.partitioned_mds("hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed", alpha=3)
 ```
 
-#Reproducing figures
+# Reproducing figures
 Shell scripts to reproduce figures from the paper can be found in the scripts directory. 
 Requirements
     * matplotlib
