@@ -233,9 +233,9 @@ struct1, struct2 = multimds.partitioned_mds("hic_data/GM12878_combined_21_100kb.
 # Reproducing figures
 Shell scripts to reproduce figures from the paper can be found in the scripts directory. 
 Requirements
-    * matplotlib
-    * h5py
-    * seaborn 
-    * pandas 
-    * [bedtools](http://bedtools.readthedocs.io/en/latest/content/installation.html) (for reproducing figures)
+* matplotlib
+* h5py
+* seaborn 
+* pandas 
+* [bedtools](http://bedtools.readthedocs.io/en/latest/content/installation.html) (for reproducing figures)
     * [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) (for reproducing figures)
