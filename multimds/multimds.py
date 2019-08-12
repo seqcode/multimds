@@ -1,55 +1,69 @@
 import sys
 import numpy as np
 from joint_mds import Joint_MDS
-import argparse
 import pymp
 import multiprocessing as mp
 import data_tools as dt
-import array_tools as at
 import linear_algebra as la
-import tools
 import tad
 from hic_oe import get_expected
 import os
 from compartment_fraction import calculate_compartment_fraction
 
-def distmat(contactMat, structure, alpha, weight, num_threads):
+def distmat(path, structure, alpha, weight):
+	contactMat = dt.matFromBed(path, structure)
+
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
 
 	expected = get_expected(contactMat)
+	distMat = np.zeros_like(contactMat)
 	for i in range(len(contactMat)):
 		for j in range(i):
 			corrected = (1-weight)*contactMat[i,j] + weight*expected[i-j-1]
-			contactMat[i,j] = corrected
-			contactMat[j,i] = corrected
+			if corrected != 0:
+				dist = corrected**(-1./alpha)
+				distMat[i,j] = dist
+				distMat[j,i] = dist
 
-	rowsums = np.array([sum(row) for row in contactMat])
+	rowsums = np.array([sum(row) for row in distMat])
 	assert len(np.where(rowsums == 0)[0]) == 0 
-
-	distMat = at.contactToDist(contactMat, alpha)
 
 	distMat = distMat/np.mean(distMat)	#normalize
 	
 	return distMat
 
-def infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads, weight):
+def infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight):
 	"""Infers 3D coordinates for one structure"""
-	distMat1 = distmat(contactMat1, structure1, alpha, weight, num_threads)	
-	distMat2 = distmat(contactMat2, structure2, alpha, weight, num_threads)
+	dt.make_compatible((structure1, structure2))
+	distMat1 = distmat(path1, structure1, alpha, weight)	
+	distMat2 = distmat(path2, structure2, alpha, weight)
 
 	coords1, coords2 = Joint_MDS(p=penalty, n_components=3, metric=True, random_state1=np.random.RandomState(), random_state2=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat1, distMat2)
 
 	structure1.setCoords(coords1)
 	structure2.setCoords(coords2)
 
-def full_mds(path1, path2, alpha, penalty, num_threads, weight):
+def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, prefix=""):
 	"""MDS without partitioning"""
 	structure1 = dt.structureFromBed(path1)
 	structure2 = dt.structureFromBed(path2)
-	dt.make_compatible((structure1, structure2))
-	contactMat1 = dt.matFromBed(path1, structure1)
-	contactMat2 = dt.matFromBed(path2, structure2)
-	infer_structures(contactMat1, structure1, contactMat2, structure2, alpha, penalty, num_threads, weight)
+	infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight)
+
+	prefix1 = os.path.splitext(os.path.basename(path1))[0]
+	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
+	prefix2 = os.path.splitext(os.path.basename(path2))[0]
+	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
+
+	dists = la.calculate_distances(structure1, structure2)
+	with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
+		for gen_coord, dist in zip(structure1.getGenCoords(), dists):
+			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
+			out.write("\n")
+		out.close()
+
+	print("Fractional compartment change: ")
+	print(calculate_compartment_fraction(structure1, structure2, path1, path2))
+
 	return structure1, structure2
 
 def create_low_res_structure(path, res_ratio):
@@ -81,17 +95,29 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#transform high structure
 	highSubstructure.transform(r, t)
 
-def partitioned_mds(path1, path2, args):
-	"""Partitions structure into substructures and performs MDS"""
-	centromere = args[0]
-	num_partitions = args[1]
-	maxmemory = args[2]
-	num_threads = args[3]
-	alpha = args[4]
-	res_ratio = args[5]
-	penalty = args[6]
-	weight = args[7]
+def initialize_substructures(lowstructure, lowpartitions, path):
+	#low substructures
+	tad.substructuresFromAbsoluteTads(lowstructure, lowpartitions)
 
+	#create high-res chrom
+	size, res = dt.basicParamsFromBed(path)
+	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure1.chrom.name, size)
+
+	#initialize high-res substructures
+	high_substructures = []
+	low_gen_coords = lowstructure.getGenCoords()
+	offset = 0 #initialize
+	for partition in lowpartitions:
+		start_gen_coord = low_gen_coords[partition[0]]
+		end_gen_coord = low_gen_coords[partition[1]]
+		high_substructure = dt.structureFromBed(path, highChrom, start_gen_coord, end_gen_coord, offset)
+		high_substructures.append(high_substructure)
+		offset += (len(high_substructure.points) - 1)	#update
+
+	return high_substructures
+
+def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, maxmemory=32000000, num_threads=3, alpha=4, res_ratio=10, penalty=0.05, weight=0.05):
+	"""Partitions structure into substructures and performs MDS"""
 	#create low-res structures
 	lowstructure1 = create_low_res_structure(path1, res_ratio)
 	lowstructure2 = create_low_res_structure(path2, res_ratio)
@@ -99,61 +125,20 @@ def partitioned_mds(path1, path2, args):
 
 	#get partitions
 	n = len(lowstructure1.getPoints())
-	if centromere == 0:
-		midpoint = int(n/2)
-	else:	
-		midpoint = lowstructure1.chrom.getAbsoluteIndex(centromere)
-	
-	assert num_partitions%2 == 0
+	partition_size = int(np.ceil(float(n)/num_partitions))
+	lowpartitions = []
+	#TODO: add lowpartitions
 
-	partition_size1 = int(np.ceil(float(midpoint)/(num_partitions/2)))
-	partition_size2 = int(np.ceil(float(n-midpoint)/(num_partitions/2)))
+	high_substructures1 = initialize_substructures(lowstructure1, lowpartitions, path1)
+	high_substructures2 = initialize_substructures(lowstructure2, lowpartitions, path2)
 
-	lowpartitions = []	#low substructures, defined on absolute indices not relative indices
-
-	for i in range(int(num_partitions/2)):
-		lowpartitions.append((i*partition_size1, min(((i+1)*partition_size1), midpoint)))
-
-	for i in range(int(num_partitions/2)):
-		lowpartitions.append((midpoint + i*partition_size2, min((midpoint + (i+1)*partition_size2), n-1)))
-
-	lowpartitions = np.array(lowpartitions)
-
-	low_contactMat1 = dt.matFromBed(path1, lowstructure1)
-	low_contactMat2 = dt.matFromBed(path2, lowstructure2)
-
-	tad.substructuresFromAbsoluteTads(lowstructure1, lowpartitions)
-	tad.substructuresFromAbsoluteTads(lowstructure2, lowpartitions)
-
-	#create high-res chroms
-	size1, res1 = dt.basicParamsFromBed(path1)
-	highChrom1 = dt.ChromParameters(lowstructure1.chrom.minPos, lowstructure1.chrom.maxPos, res1, lowstructure1.chrom.name, size1)
-	size2, res2 = dt.basicParamsFromBed(path2)
-	highChrom2 = dt.ChromParameters(lowstructure2.chrom.minPos, lowstructure2.chrom.maxPos, res2, lowstructure2.chrom.name, size2)
-
-	#initialize high-res substructures
-	high_substructures1 = []
-	high_substructures2 = []
-	low_gen_coords = lowstructure1.getGenCoords()
-	offset1 = 0 #initialize
-	offset2 = 0
-	for partition in lowpartitions:
-		start_gen_coord = low_gen_coords[partition[0]]
-		end_gen_coord = low_gen_coords[partition[1]]
-		high_substructure1 = dt.structureFromBed(path1, highChrom1, start_gen_coord, end_gen_coord, offset1)
-		high_substructure2 = dt.structureFromBed(path2, highChrom2, start_gen_coord, end_gen_coord, offset2)
-		high_substructures1.append(high_substructure1)
-		high_substructures2.append(high_substructure2)
-		offset1 += (len(high_substructure1.points) - 1)	#update
-		offset2 += (len(high_substructure2.points) - 1)	#update
-	
 	for high_substructure1, high_substructure2 in zip(high_substructures1, high_substructures2):
 		dt.make_points_compatible((high_substructure1, high_substructure2))
 
 	highstructure1 = dt.Structure([], high_substructures1, highChrom1, 0)
 	highstructure2 = dt.Structure([], high_substructures2, highChrom2, 0)
 
-	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads, weight)
+	infer_structures(path1, lowstructure1, path2, lowstructure2, alpha, penalty, num_threads, weight)
 	print("Low-resolution MDS complete")
 
 	highSubstructures1 = pymp.shared.list(highstructure1.structures)
@@ -165,19 +150,11 @@ def partitioned_mds(path1, path2, args):
 	num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
 	with pymp.Parallel(num_threads) as p:
 		for substructurenum in p.range(numSubstructures):
-			highSubstructure1 = highSubstructures1[substructurenum]
-			highSubstructure2 = highSubstructures2[substructurenum]
-			trueLow1 = lowSubstructures1[substructurenum]
-			trueLow2 = lowSubstructures2[substructurenum]
-
 			#joint MDS
-			structure_contactMat1 = dt.matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
-			structure_contactMat2 = dt.matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
+			infer_structures(path1, highSubstructures1[substructurenum], path2, highSubstructures2[substructurenum], 2.5, penalty, num_threads, weight)
 
-			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads, weight)
-
-			transform(trueLow1, highSubstructure1, res_ratio)
-			transform(trueLow2, highSubstructure2, res_ratio)
+			transform(lowSubstructures1[substructurenum], highSubstructure1, res_ratio)
+			transform(lowSubstructures2[substructurenum], highSubstructure2, res_ratio)
 	
 			highSubstructures1[substructurenum] = highSubstructure1
 			highSubstructures2[substructurenum] = highSubstructure2
@@ -191,57 +168,3 @@ def partitioned_mds(path1, path2, args):
 	highstructure2.set_rel_indices()
 
 	return highstructure1, highstructure2
-
-def main():
-	parser = argparse.ArgumentParser(description="Jointly reconstruct 3D coordinates from two normalized intrachromosomal Hi-C BED files.")
-	parser.add_argument("path1", help="path to first intrachromosomal Hi-C BED file")
-	parser.add_argument("path2", help="path to second intrachromosomal Hi-C BED file")
-	parser.add_argument("--partitioned", action="store_true", help="use partitioned MDS (default: full MDS)")
-	parser.add_argument("-l", type=int, help="low resolution/high resolution", default=10)
-	parser.add_argument("-o", help="output file prefix")
-	parser.add_argument("-r", default=32000000, help="maximum RAM to use (in kb)")
-	parser.add_argument("-n", type=int, default=3, help="number of threads")
-	parser.add_argument("-a", type=float, default=4, help="alpha factor for converting contact frequencies to physical distances")
-	parser.add_argument("-P", type=float, default=0.05, help="joint MDS penalty")
-	parser.add_argument("-m", type=int, default=0, help="midpoint (usually centromere) for partitioning")
-	parser.add_argument("-N", type=int, default=2, help="number of partitions")
-	parser.add_argument("-w", type=float, default=0.05, help="weight of distance decay prior")
-	args = parser.parse_args()
-
-	if args.partitioned:
-		#TODO: cleanup
-		params = (args.m, args.N, args.r, args.n, args.a, args.l, args.P, args.w)
-		names = ("Midpoint", "Number of partitions", "Maximum memory", "Number of threads", "Alpha", "Resolution ratio", "Penalty", "Weight")
-		intervals = ((None, None), (1, None), (0, None), (0, None), (1, None), (1, None), (0, None), (0, 1))
-		if not tools.args_are_valid(params, names, intervals):
-			sys.exit(0)
-
-		structure1, structure2 = partitioned_mds(args.path1, args.path2, params)
-
-	else:
-		structure1, structure2 = full_mds(args.path1, args.path2, args.a, args.P, args.n, args.w)
-	
-	if args.o:
-		prefix = args.o
-	else:
-		prefix = ""
-
-	prefix1 = os.path.splitext(os.path.basename(args.path1))[0]
-	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
-	prefix2 = os.path.splitext(os.path.basename(args.path2))[0]
-	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
-
-	coords1 = np.array(structure1.getCoords())
-	coords2 = np.array(structure2.getCoords())
-	dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
-	with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
-		for gen_coord, dist in zip(structure1.getGenCoords(), dists):
-			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
-			out.write("\n")
-		out.close()
-
-	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(structure1, structure2, args.path1, args.path2))
-
-if __name__ == "__main__":
-	main()

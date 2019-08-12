@@ -39,39 +39,17 @@ def calcDistance(coord1, coord2):
 	"""Euclidean distance between coordinates"""
 	return ((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2 +  (coord1[2] - coord2[2])**2)**(1./2)
 
-
 def calculate_distances(structure1, structure2):
 	"""Pairwise Euclidean distances between structures"""
 	coords1 = np.array(structure1.getCoords())
 	coords2 = np.array(structure2.getCoords())
-	return [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
+	return [calcDistance(coord1, coord2) for coord1, coord2 in zip(coords1, coords2)]
 
 def radius_of_gyration(structure):
 	coords = np.array(structure.getCoords())
 	centroid = np.mean(coords, axis=0)
 	dist_sum = sum([calcDistance(coord, centroid) for coord in coords])
 	return dist_sum/len(coords)
-
-def cmds(distMat):
-	"""Modified from http://www.nervouscomputer.com/hfs/cmdscale-in-python/"""
-	# Number of points                                                                        
-	n = len(distMat)
-
-	# Centering matrix                                                                        
-	h = np.eye(n) - np.ones((n, n))/n
-
-	# YY^T                                                                                    
-	b = -h.dot(distMat**2).dot(h)/2
-
-	# Diagonalize                                                                             
-	evals, evecs = np.linalg.eigh(b)
-
-	# Sort by eigenvalue in descending order                                                  
-	idx = np.argsort(evals)[::-1]
-	evals = evals[idx]
-	evecs = evecs[:,idx]
-
-	return np.array([evecs[:,0]*evals[0]**(1./2), evecs[:,1]*evals[1]**(1./2), evecs[:,2]*evals[2]**(1./2)]).T
 
 def change_coordinate_system(n, coords):
 	"""Rotate 3-D coords such that vector n aligns to z-axis""" 

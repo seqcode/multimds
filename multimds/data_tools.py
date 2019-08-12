@@ -2,7 +2,7 @@ import sys
 import numpy as np
 from tools import Tracker
 import linear_algebra as la
-import array_tools as at
+#import array_tools as at
 
 class ChromParameters(object):
 	"""Basic information on chromosome, inferred from input file"""
