@@ -33,8 +33,7 @@ def distmat(path, structure, alpha, weight):
 	return distMat
 
 def infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight):
-	"""Infers 3D coordinates for one structure"""
-	make_compatible((structure1, structure2))
+	"""Infers 3D coordinates for two structures"""
 	distMat1 = distmat(path1, structure1, alpha, weight)	
 	distMat2 = distmat(path2, structure2, alpha, weight)
 
@@ -47,6 +46,7 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 	"""MDS without partitioning"""
 	structure1 = structureFromBed(path1)
 	structure2 = structureFromBed(path2)
+	make_compatible((structure1, structure2))
 	infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight)
 
 	prefix1 = os.path.splitext(os.path.basename(path1))[0]
@@ -171,7 +171,7 @@ def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, max
 	highSubstructures2 = highstructure2.structures
 	lowSubstructures1 = lowstructure1.structures
 	lowSubstructures2 = lowstructure2.structures
-
+	
 	numSubstructures = len(highstructure1.structures)
 	#num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
 	#with pymp.Parallel(num_threads) as p:
@@ -186,7 +186,6 @@ def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, max
 		#structure_contactMat1 = matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
 		#structure_contactMat2 = matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
 
-		infer_structures(path1, trueLow1, path2, trueLow2, 2.5, penalty, num_threads, weight)
 		infer_structures(path1, highSubstructure1, path2, highSubstructure2, 2.5, penalty, num_threads, weight)
 
 		transform(trueLow1, highSubstructure1, res_ratio)
