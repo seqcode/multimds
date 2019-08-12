@@ -1,8 +1,9 @@
 import sys
 import numpy as np
-from tools import Tracker
-import linear_algebra as la
+from .tools import Tracker
+from .linear_algebra import *
 #import array_tools as at
+from .tad import *
 
 class ChromParameters(object):
 	"""Basic information on chromosome, inferred from input file"""
@@ -141,7 +142,7 @@ class Structure(object):
 
 	def rescale(self):
 		"""Rescale radius of gyration of structure to 1"""
-		rg = la.radius_of_gyration(self)
+		rg = radius_of_gyration(self)
 		for i, point in enumerate(self.points):
 			if point != 0:
 				x, y, z = point.pos
@@ -378,29 +379,29 @@ def normalized_dist_mat(path, structure):
 	return dists/np.mean(dists)	#normalize
 
 def create_low_res_structure(path, res_ratio):
-	low_chrom = dt.chromFromBed(path)
+	low_chrom = chromFromBed(path)
 	low_chrom.res *= res_ratio
 	low_chrom.minPos = int(np.floor(float(low_chrom.minPos)/low_chrom.res)) * low_chrom.res	#round
 	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
-	return dt.structureFromBed(path, low_chrom)
+	return structureFromBed(path, low_chrom)
 
 def create_high_res_structure(path, lowstructure):
-	size, res = dt.basicParamsFromBed(path)
-	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
-	return dt.Structure([], [], highChrom, 0)
+	size, res = basicParamsFromBed(path)
+	highChrom = ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
+	return Structure([], [], highChrom, 0)
 	
 def transform(trueLow, highSubstructure, res_ratio):
 	#approximate as low resolution
-	inferredLow = dt.highToLow(highSubstructure, res_ratio)
+	inferredLow = highToLow(highSubstructure, res_ratio)
 
-	scaling_factor = la.radius_of_gyration(trueLow)/la.radius_of_gyration(inferredLow)
+	scaling_factor = radius_of_gyration(trueLow)/radius_of_gyration(inferredLow)
 	for i, point in enumerate(inferredLow.points):
 		if point != 0:
 			x, y, z = point.pos
 			inferredLow.points[i].pos = (x*scaling_factor, y*scaling_factor, z*scaling_factor)
 	
 	#recover the transformation for inferred from true low structure
-	r, t = la.getTransformation(inferredLow, trueLow)
+	r, t = getTransformation(inferredLow, trueLow)
 	t /= scaling_factor
 
 	#transform high structure
@@ -408,11 +409,11 @@ def transform(trueLow, highSubstructure, res_ratio):
 
 def initialize_substructures(lowstructure, lowpartitions, path):
 	#low substructures
-	tad.substructuresFromAbsoluteTads(lowstructure, lowpartitions)
+	substructuresFromAbsoluteTads(lowstructure, lowpartitions)
 
 	#create high-res chrom
-	size, res = dt.basicParamsFromBed(path)
-	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure1.chrom.name, size)
+	size, res = basicParamsFromBed(path)
+	highChrom = ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
 
 	#initialize high-res substructures
 	high_substructures = []
@@ -421,7 +422,7 @@ def initialize_substructures(lowstructure, lowpartitions, path):
 	for partition in lowpartitions:
 		start_gen_coord = low_gen_coords[partition[0]]
 		end_gen_coord = low_gen_coords[partition[1]]
-		high_substructure = dt.structureFromBed(path, highChrom, start_gen_coord, end_gen_coord, offset)
+		high_substructure = structureFromBed(path, highChrom, start_gen_coord, end_gen_coord, offset)
 		high_substructures.append(high_substructure)
 		offset += (len(high_substructure.points) - 1)	#update
 

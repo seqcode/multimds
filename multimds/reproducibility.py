@@ -1,8 +1,8 @@
-from .data_tools import *
 import numpy as np
 from .linear_algebra import *
 from matplotlib import pyplot as plt
 from scipy import stats as st
+from .multimds import full_mds
 import os
 
 def plot_reproducibility(path1, path2):
@@ -18,10 +18,7 @@ def plot_reproducibility(path1, path2):
 	for p in ps:
 		all_changes = []
 		for i in range(n):
-			os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
-
-			structure1 = structure_from_file("{}_structure.tsv".format(os.path.basename(prefix1)))
-			structure2 = structure_from_file("{}_structure.tsv".format(os.path.basename(prefix2)))
+			structure1, structure2 = full_mds(path1, path2, penalty=p)
 			
 			if p == 0:
 				r, t = getTransformation(structure1, structure2)

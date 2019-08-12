@@ -1,6 +1,6 @@
 from mayavi import mlab
 import numpy as np
-import linear_algebra as la
+from .linear_algebra import *
 import os
 import sys
 
@@ -101,7 +101,7 @@ def calculateRadius(structures):
 		coords = structure.getCoords()
 		n = len(coords)
 		for i in range(1, n):
-			totDist += la.calcDistance(coords[i-1], coords[i])
+			totDist += calcDistance(coords[i-1], coords[i])
 		avgDist = totDist/(n-1)		#average distance between neighboring loci
 		physicalDist = kl * (structure.chrom.res/bpPerKL)**(1./2)		#physical distance between neighboring loci (nm)
 		conversionFactors[j] = avgDist/physicalDist
