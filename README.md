@@ -6,7 +6,7 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 
 or
 
-``conda install multimds``
+``conda install -c lr65358 multimds``
 
 If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
