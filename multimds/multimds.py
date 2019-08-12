@@ -66,56 +66,6 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 
 	return structure1, structure2
 
-def create_low_res_structure(path, res_ratio):
-	low_chrom = dt.chromFromBed(path)
-	low_chrom.res *= res_ratio
-	low_chrom.minPos = int(np.floor(float(low_chrom.minPos)/low_chrom.res)) * low_chrom.res	#round
-	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
-	return dt.structureFromBed(path, low_chrom)
-
-def create_high_res_structure(path, lowstructure):
-	size, res = dt.basicParamsFromBed(path)
-	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
-	return dt.Structure([], [], highChrom, 0)
-	
-def transform(trueLow, highSubstructure, res_ratio):
-	#approximate as low resolution
-	inferredLow = dt.highToLow(highSubstructure, res_ratio)
-
-	scaling_factor = la.radius_of_gyration(trueLow)/la.radius_of_gyration(inferredLow)
-	for i, point in enumerate(inferredLow.points):
-		if point != 0:
-			x, y, z = point.pos
-			inferredLow.points[i].pos = (x*scaling_factor, y*scaling_factor, z*scaling_factor)
-	
-	#recover the transformation for inferred from true low structure
-	r, t = la.getTransformation(inferredLow, trueLow)
-	t /= scaling_factor
-
-	#transform high structure
-	highSubstructure.transform(r, t)
-
-def initialize_substructures(lowstructure, lowpartitions, path):
-	#low substructures
-	tad.substructuresFromAbsoluteTads(lowstructure, lowpartitions)
-
-	#create high-res chrom
-	size, res = dt.basicParamsFromBed(path)
-	highChrom = dt.ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure1.chrom.name, size)
-
-	#initialize high-res substructures
-	high_substructures = []
-	low_gen_coords = lowstructure.getGenCoords()
-	offset = 0 #initialize
-	for partition in lowpartitions:
-		start_gen_coord = low_gen_coords[partition[0]]
-		end_gen_coord = low_gen_coords[partition[1]]
-		high_substructure = dt.structureFromBed(path, highChrom, start_gen_coord, end_gen_coord, offset)
-		high_substructures.append(high_substructure)
-		offset += (len(high_substructure.points) - 1)	#update
-
-	return high_substructures
-
 def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, maxmemory=32000000, num_threads=3, alpha=4, res_ratio=10, penalty=0.05, weight=0.05):
 	"""Partitions structure into substructures and performs MDS"""
 	#create low-res structures
@@ -126,8 +76,7 @@ def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, max
 	#get partitions
 	n = len(lowstructure1.getPoints())
 	partition_size = int(np.ceil(float(n)/num_partitions))
-	lowpartitions = []
-	#TODO: add lowpartitions
+	lowpartitions = [(i*partition_size, (i+1)*partition_size) for i in range(n)]
 
 	high_substructures1 = initialize_substructures(lowstructure1, lowpartitions, path1)
 	high_substructures2 = initialize_substructures(lowstructure2, lowpartitions, path2)
@@ -163,8 +112,5 @@ def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, max
 		
 	highstructure1.setstructures(highSubstructures1)
 	highstructure2.setstructures(highSubstructures2)
-
-	highstructure1.set_rel_indices()
-	highstructure2.set_rel_indices()
 
 	return highstructure1, highstructure2
