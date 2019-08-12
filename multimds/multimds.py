@@ -82,14 +82,14 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#approximate as low resolution
 	inferredLow = highToLow(highSubstructure, res_ratio)
 
-	scaling_factor = la.radius_of_gyration(trueLow)/la.radius_of_gyration(inferredLow)
+	scaling_factor = radius_of_gyration(trueLow)/radius_of_gyration(inferredLow)
 	for i, point in enumerate(inferredLow.points):
 		if point != 0:
 			x, y, z = point.pos
 			inferredLow.points[i].pos = (x*scaling_factor, y*scaling_factor, z*scaling_factor)
 	
 	#recover the transformation for inferred from true low structure
-	r, t = la.getTransformation(inferredLow, trueLow)
+	r, t = getTransformation(inferredLow, trueLow)
 	t /= scaling_factor
 
 	#transform high structure
@@ -97,19 +97,11 @@ def transform(trueLow, highSubstructure, res_ratio):
 
 def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, maxmemory=32000000, num_threads=3, alpha=4, res_ratio=10, penalty=0.05, weight=0.05):
 	"""Partitions structure into substructures and performs MDS"""
-	#centromere = args[0]
-	#num_partitions = args[1]
-	#maxmemory = args[2]
-	#num_threads = args[3]
-	#alpha = args[4]
-	#res_ratio = args[5]
-	#penalty = args[6]
-	#weight = args[7]
 
 	#create low-res structures
 	lowstructure1 = create_low_res_structure(path1, res_ratio)
 	lowstructure2 = create_low_res_structure(path2, res_ratio)
-	#make_compatible((lowstructure1, lowstructure2))
+	make_compatible((lowstructure1, lowstructure2))
 
 	#get partitions
 	n = len(lowstructure1.getPoints())
@@ -167,36 +159,43 @@ def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, max
 	highstructure1 = Structure([], high_substructures1, highChrom1, 0)
 	highstructure2 = Structure([], high_substructures2, highChrom2, 0)
 
-	infer_structures(low_contactMat1, lowstructure1, low_contactMat2, lowstructure2, alpha, penalty, num_threads, weight)
+	infer_structures(path1, lowstructure1, path2, lowstructure2, alpha, penalty, num_threads, weight)
 	print("Low-resolution MDS complete")
 
-	highSubstructures1 = pymp.shared.list(highstructure1.structures)
-	highSubstructures2 = pymp.shared.list(highstructure2.structures)
-	lowSubstructures1 = pymp.shared.list(lowstructure1.structures)
-	lowSubstructures2 = pymp.shared.list(lowstructure2.structures)
+	#highSubstructures1 = pymp.shared.list(highstructure1.structures)
+	#highSubstructures2 = pymp.shared.list(highstructure2.structures)
+	#lowSubstructures1 = pymp.shared.list(lowstructure1.structures)
+	#lowSubstructures2 = pymp.shared.list(lowstructure2.structures)
+
+	highSubstructures1 = highstructure1.structures
+	highSubstructures2 = highstructure2.structures
+	lowSubstructures1 = lowstructure1.structures
+	lowSubstructures2 = lowstructure2.structures
 
 	numSubstructures = len(highstructure1.structures)
-	num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
-	with pymp.Parallel(num_threads) as p:
-		for substructurenum in p.range(numSubstructures):
-			highSubstructure1 = highSubstructures1[substructurenum]
-			highSubstructure2 = highSubstructures2[substructurenum]
-			trueLow1 = lowSubstructures1[substructurenum]
-			trueLow2 = lowSubstructures2[substructurenum]
+	#num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
+	#with pymp.Parallel(num_threads) as p:
+	#	for substructurenum in p.range(numSubstructures):
+	for substructurenum in range(numSubstructures):
+		highSubstructure1 = highSubstructures1[substructurenum]
+		highSubstructure2 = highSubstructures2[substructurenum]
+		trueLow1 = lowSubstructures1[substructurenum]
+		trueLow2 = lowSubstructures2[substructurenum]
 
-			#joint MDS
-			structure_contactMat1 = matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
-			structure_contactMat2 = matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
+		#joint MDS
+		#structure_contactMat1 = matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
+		#structure_contactMat2 = matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
 
-			infer_structures(structure_contactMat1, highSubstructure1, structure_contactMat2, highSubstructure2, 2.5, penalty, num_threads, weight)
+		infer_structures(path1, trueLow1, path2, trueLow2, 2.5, penalty, num_threads, weight)
+		infer_structures(path1, highSubstructure1, path2, highSubstructure2, 2.5, penalty, num_threads, weight)
 
-			transform(trueLow1, highSubstructure1, res_ratio)
-			transform(trueLow2, highSubstructure2, res_ratio)
-	
-			highSubstructures1[substructurenum] = highSubstructure1
-			highSubstructures2[substructurenum] = highSubstructure2
+		transform(trueLow1, highSubstructure1, res_ratio)
+		transform(trueLow2, highSubstructure2, res_ratio)
 
-			print("MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures))
+		highSubstructures1[substructurenum] = highSubstructure1
+		highSubstructures2[substructurenum] = highSubstructure2
+
+		print("MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures))
 		
 	highstructure1.setstructures(highSubstructures1)
 	highstructure2.setstructures(highSubstructures2)

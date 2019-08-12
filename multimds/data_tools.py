@@ -39,13 +39,13 @@ class ChromParameters(object):
 class Structure(object):
 	"""Intrachromosomal structure of points or substructures in 3-D space"""
 	def __init__(self, points, structures, chrom, offset):
+		self.offset = offset	#absolute indexing offset (for substructures only)
 		self.points = points
 		if len(structures) == 0 or structures is None:
 			self.structures = []
 		else:
 			self.setstructures(structures)
 		self.chrom = chrom	#chromosome parameters
-		self.offset = offset	#absolute indexing offset (for substructures only)
 
 	def getCoords(self):
 		return [point.pos for point in self.getPoints()]
@@ -182,8 +182,8 @@ def structureFromBed(path, chrom=None, start=None, end=None, offset=0):
 				abs_index1 = structure.chrom.getAbsoluteIndex(pos1)
 				abs_index2 = structure.chrom.getAbsoluteIndex(pos2)
 				if abs_index1 != abs_index2:	#non-self-interacting
-					structure.points[abs_index1] = Point((0,0,0), structure.chrom, abs_index1, 0)
-					structure.points[abs_index2] = Point((0,0,0), structure.chrom, abs_index2, 0)
+					structure.points[int((pos1 - start)/chrom.res)] = Point((0,0,0), structure.chrom, abs_index1, 0)
+					structure.points[int((pos2 - start)/chrom.res)] = Point((0,0,0), structure.chrom, abs_index2, 0)
 			tracker.increment()
 		listFile.close()
 

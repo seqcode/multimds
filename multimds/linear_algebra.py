@@ -10,8 +10,8 @@ def getTransformation(structure1, structure2):
 	a = []	#will hold 3D coords
 	b = []	
 	for num in intersection:
-		a.append(structure1.points[num-structure1.offset].pos)
-		b.append(structure2.points[num-structure2.offset].pos)
+		a.append(structure1.points[int(num-structure1.offset)].pos)
+		b.append(structure2.points[int(num-structure2.offset)].pos)
 
 	a = np.mat(a)
 	b = np.mat(b)
