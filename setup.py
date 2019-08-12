@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="multimds",
-    version="0.0.1",
+    version="0.0.2",
     author="Lila Rieber",
-    author_email="lr65358@example.com",
+    author_email="lr65358@gmail.com",
     description="Structural inference and alignment of Hi-C datasets",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -18,4 +18,14 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=[
+          'scipy',
+          'numpy',
+          'pymp-pypi',
+          'mayavi',
+          'scikit-learn',
+          'h5py',
+          'pandas',
+          'seaborn'
+    ]
 )
