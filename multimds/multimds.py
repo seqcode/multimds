@@ -42,46 +42,33 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 
 	return structure1, structure2
 
-def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, maxmemory=32000000, num_threads=3, alpha=4, res_ratio=10, penalty=0.05, weight=0.05):
+def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=32000000, num_threads=3, alpha=4, res_ratio=10, penalty=0.05, weight=0.05):
 	"""Partitions structure into substructures and performs MDS"""
+	#create high-res chroms
+	highChrom1 = chromFromBed(path1)
+	highChrom2 = chromFromBed(path2)
+
 	#create low-res structures
-	lowstructure1 = create_low_res_structure(path1, res_ratio)
-	lowstructure2 = create_low_res_structure(path2, res_ratio)
+	lowChrom1 = create_low_res_chrom(highChrom1, res_ratio)
+	lowChrom2 = create_low_res_chrom(highChrom2, res_ratio)
+	lowstructure1 = structureFromBed(path1, lowChrom1)
+	lowstructure2 = structureFromBed(path2, lowChrom2)
 	make_compatible((lowstructure1, lowstructure2))
 
 	#get partitions
 	n = len(lowstructure1.getPoints())
-	if centromere == 0:
-		midpoint = int(n/2)
-	else:	
-		midpoint = lowstructure1.chrom.getAbsoluteIndex(centromere)
-	
-	assert num_partitions%2 == 0
-
-	partition_size1 = int(np.ceil(float(midpoint)/(num_partitions/2)))
-	partition_size2 = int(np.ceil(float(n-midpoint)/(num_partitions/2)))
-
-	lowpartitions = []	#low substructures, defined on absolute indices not relative indices
-
-	for i in range(int(num_partitions/2)):
-		lowpartitions.append((i*partition_size1, min(((i+1)*partition_size1), midpoint)))
-
-	for i in range(int(num_partitions/2)):
-		lowpartitions.append((midpoint + i*partition_size2, min((midpoint + (i+1)*partition_size2), n-1)))
-
-	lowpartitions = np.array(lowpartitions)
-
-	low_contactMat1 = matFromBed(path1, lowstructure1)
-	low_contactMat2 = matFromBed(path2, lowstructure2)
+	partition_size = int(np.ceil(float(n)/num_partitions))
+	lowpartitions = np.array([(i*partition_size, min(((i+1)*partition_size), n-1)) for i in range(num_partitions)])	#low substructures, defined on absolute indices not relative indices
 
 	substructuresFromAbsoluteTads(lowstructure1, lowpartitions)
 	substructuresFromAbsoluteTads(lowstructure2, lowpartitions)
 
 	#create high-res chroms
-	size1, res1 = basicParamsFromBed(path1)
-	highChrom1 = ChromParameters(lowstructure1.chrom.minPos, lowstructure1.chrom.maxPos, res1, lowstructure1.chrom.name, size1)
-	size2, res2 = basicParamsFromBed(path2)
-	highChrom2 = ChromParameters(lowstructure2.chrom.minPos, lowstructure2.chrom.maxPos, res2, lowstructure2.chrom.name, size2)
+	#res1 = res_from_bed(path1)
+	#res2 = res_from_bed(path2)
+	#assert res1 == res2
+	#highChrom1 = ChromParameters(lowstructure1.chrom.minPos, lowstructure1.chrom.maxPos, res1, lowstructure1.chrom.name, lowstructure1.chrom.size)
+	#highChrom2 = ChromParameters(lowstructure2.chrom.minPos, lowstructure2.chrom.maxPos, res2, lowstructure2.chrom.name, lowstructure2.chrom.size)
 
 	#initialize high-res substructures
 	high_substructures1 = []
