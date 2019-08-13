@@ -71,13 +71,6 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 	substructuresFromAbsoluteTads(lowstructure1, lowpartitions)
 	substructuresFromAbsoluteTads(lowstructure2, lowpartitions)
 
-	#create high-res chroms
-	#res1 = res_from_bed(path1)
-	#res2 = res_from_bed(path2)
-	#assert res1 == res2
-	#highChrom1 = ChromParameters(lowstructure1.chrom.minPos, lowstructure1.chrom.maxPos, res1, lowstructure1.chrom.name, lowstructure1.chrom.size)
-	#highChrom2 = ChromParameters(lowstructure2.chrom.minPos, lowstructure2.chrom.maxPos, res2, lowstructure2.chrom.name, lowstructure2.chrom.size)
-
 	#initialize high-res substructures
 	high_substructures1 = []
 	high_substructures2 = []
@@ -87,8 +80,8 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 	for partition in lowpartitions:
 		start_gen_coord = low_gen_coords[partition[0]]
 		end_gen_coord = low_gen_coords[partition[1]]
-		high_substructure1 = structureFromBed(path1, size1, highChrom1, start_gen_coord, end_gen_coord, offset1)
-		high_substructure2 = structureFromBed(path2, size2, highChrom2, start_gen_coord, end_gen_coord, offset2)
+		high_substructure1 = structureFromBed(path1, size1, highChrom, start_gen_coord, end_gen_coord, offset1)
+		high_substructure2 = structureFromBed(path2, size2, highChrom, start_gen_coord, end_gen_coord, offset2)
 		high_substructures1.append(high_substructure1)
 		high_substructures2.append(high_substructure2)
 		offset1 += (len(high_substructure1.points) - 1)	#update
@@ -114,14 +107,12 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 		for substructurenum in p.range(numSubstructures):
 			highSubstructure1 = highSubstructures1[substructurenum]
 			highSubstructure2 = highSubstructures2[substructurenum]
-			trueLow1 = lowSubstructures1[substructurenum]
-			trueLow2 = lowSubstructures2[substructurenum]
 
 			#joint MDS
 			infer_structures(path1, highSubstructure1, path2, highSubstructure2, 2.5, penalty, num_threads, weight, size1, size2)
 
-			transform(trueLow1, highSubstructure1, res_ratio)
-			transform(trueLow2, highSubstructure2, res_ratio)
+			transform(lowSubstructures1[substructurenum], highSubstructure1, res_ratio)
+			transform(lowSubstructures2[substructurenum], highSubstructure2, res_ratio)
 
 			highSubstructures1[substructurenum] = highSubstructure1
 			highSubstructures2[substructurenum] = highSubstructure2
@@ -134,19 +125,19 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 	highstructure1.set_rel_indices()
 	highstructure2.set_rel_indices()
 
-	#prefix1 = os.path.splitext(os.path.basename(path1))[0]
-	#structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
-	#prefix2 = os.path.splitext(os.path.basename(path2))[0]
-	#structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
+	prefix1 = os.path.splitext(os.path.basename(path1))[0]
+	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
+	prefix2 = os.path.splitext(os.path.basename(path2))[0]
+	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
 
-	#dists = calculate_distances(structure1, structure2)
-	#with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
-	#	for gen_coord, dist in zip(structure1.getGenCoords(), dists):
-	#		out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
-	#		out.write("\n")
-	#	out.close()
+	dists = calculate_distances(structure1, structure2)
+	with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
+		for gen_coord, dist in zip(structure1.getGenCoords(), dists):
+			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
+			out.write("\n")
+		out.close()
 
-	#print("Fractional compartment change: ")
-	#print(calculate_compartment_fraction(structure1, structure2, path1, path2))	
+	print("Fractional compartment change: ")
+	print(calculate_compartment_fraction(structure1, structure2, path1, path2))	
 
 	return highstructure1, highstructure2
