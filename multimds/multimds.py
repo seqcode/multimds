@@ -4,33 +4,10 @@ import pymp
 import multiprocessing as mp
 import os
 from .joint_mds import Joint_MDS
-from .hic_oe import get_expected
 from .compartment_analysis import calculate_compartment_fraction
 from .data_tools import *
 from .linear_algebra import *
 from .tad import *
-
-def distmat(path, structure, alpha, weight):
-	contactMat = matFromBed(path, structure)
-
-	assert len(structure.nonzero_abs_indices()) == len(contactMat)
-
-	expected = get_expected(contactMat)
-	distMat = np.zeros_like(contactMat)
-	for i in range(len(contactMat)):
-		for j in range(i):
-			corrected = (1-weight)*contactMat[i,j] + weight*expected[i-j-1]
-			if corrected != 0:
-				dist = corrected**(-1./alpha)
-				distMat[i,j] = dist
-				distMat[j,i] = dist
-
-	rowsums = np.array([sum(row) for row in distMat])
-	assert len(np.where(rowsums == 0)[0]) == 0 
-
-	distMat = distMat/np.mean(distMat)	#normalize
-	
-	return distMat
 
 def infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight):
 	"""Infers 3D coordinates for one structure"""
@@ -64,35 +41,6 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 	print(calculate_compartment_fraction(structure1, structure2, path1, path2))
 
 	return structure1, structure2
-
-def create_low_res_structure(path, res_ratio):
-	low_chrom = chromFromBed(path)
-	low_chrom.res *= res_ratio
-	low_chrom.minPos = int(np.floor(float(low_chrom.minPos)/low_chrom.res)) * low_chrom.res	#round
-	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
-	return structureFromBed(path, low_chrom)
-
-def create_high_res_structure(path, lowstructure):
-	size, res = basicParamsFromBed(path)
-	highChrom = ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
-	return Structure([], [], highChrom, 0)
-	
-def transform(trueLow, highSubstructure, res_ratio):
-	#approximate as low resolution
-	inferredLow = highToLow(highSubstructure, res_ratio)
-
-	scaling_factor = radius_of_gyration(trueLow)/radius_of_gyration(inferredLow)
-	for i, point in enumerate(inferredLow.points):
-		if point != 0:
-			x, y, z = point.pos
-			inferredLow.points[i].pos = (x*scaling_factor, y*scaling_factor, z*scaling_factor)
-	
-	#recover the transformation for inferred from true low structure
-	r, t = getTransformation(inferredLow, trueLow)
-	t /= scaling_factor
-
-	#transform high structure
-	highSubstructure.transform(r, t)
 
 def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, maxmemory=32000000, num_threads=3, alpha=4, res_ratio=10, penalty=0.05, weight=0.05):
 	"""Partitions structure into substructures and performs MDS"""
@@ -160,38 +108,30 @@ def partitioned_mds(path1, path2, prefix="", centromere=0, num_partitions=4, max
 	infer_structures(path1, lowstructure1, path2, lowstructure2, alpha, penalty, num_threads, weight)
 	print("Low-resolution MDS complete")
 
-	#highSubstructures1 = pymp.shared.list(highstructure1.structures)
-	#highSubstructures2 = pymp.shared.list(highstructure2.structures)
-	#lowSubstructures1 = pymp.shared.list(lowstructure1.structures)
-	#lowSubstructures2 = pymp.shared.list(lowstructure2.structures)
-	highSubstructures1 = highstructure1.structures
-	highSubstructures2 = highstructure2.structures
-	lowSubstructures1 = lowstructure1.structures
-	lowSubstructures2 = lowstructure2.structures
+	highSubstructures1 = pymp.shared.list(highstructure1.structures)
+	highSubstructures2 = pymp.shared.list(highstructure2.structures)
+	lowSubstructures1 = pymp.shared.list(lowstructure1.structures)
+	lowSubstructures2 = pymp.shared.list(lowstructure2.structures)
 
 	numSubstructures = len(highstructure1.structures)
 	num_threads = min((num_threads, mp.cpu_count(), numSubstructures))	#don't exceed number of requested threads, available threads, or structures
-	#with pymp.Parallel(num_threads) as p:
-	#	for substructurenum in p.range(numSubstructures):
-	for substructurenum in range(numSubstructures):
-		highSubstructure1 = highSubstructures1[substructurenum]
-		highSubstructure2 = highSubstructures2[substructurenum]
-		trueLow1 = lowSubstructures1[substructurenum]
-		trueLow2 = lowSubstructures2[substructurenum]
+	with pymp.Parallel(num_threads) as p:
+		for substructurenum in p.range(numSubstructures):
+			highSubstructure1 = highSubstructures1[substructurenum]
+			highSubstructure2 = highSubstructures2[substructurenum]
+			trueLow1 = lowSubstructures1[substructurenum]
+			trueLow2 = lowSubstructures2[substructurenum]
 
-		#joint MDS
-		structure_contactMat1 = matFromBed(path1, highSubstructure1)	#contact matrix for this structure only
-		structure_contactMat2 = matFromBed(path2, highSubstructure2)	#contact matrix for this structure only
+			#joint MDS
+			infer_structures(path1, highSubstructure1, path2, highSubstructure2, 2.5, penalty, num_threads, weight)
 
-		infer_structures(path1, highSubstructure1, path2, highSubstructure2, 2.5, penalty, num_threads, weight)
+			transform(trueLow1, highSubstructure1, res_ratio)
+			transform(trueLow2, highSubstructure2, res_ratio)
 
-		transform(trueLow1, highSubstructure1, res_ratio)
-		transform(trueLow2, highSubstructure2, res_ratio)
+			highSubstructures1[substructurenum] = highSubstructure1
+			highSubstructures2[substructurenum] = highSubstructure2
 
-		highSubstructures1[substructurenum] = highSubstructure1
-		highSubstructures2[substructurenum] = highSubstructure2
-
-		print("MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures))
+			print("MDS performed on structure {} of {}".format(substructurenum + 1, numSubstructures))
 		
 	highstructure1.setstructures(highSubstructures1)
 	highstructure2.setstructures(highSubstructures2)

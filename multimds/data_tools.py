@@ -4,6 +4,7 @@ from .tools import Tracker
 from .linear_algebra import *
 #import array_tools as at
 from .tad import *
+from .hic_oe import get_expected
 
 class ChromParameters(object):
 	"""Basic information on chromosome, inferred from input file"""
@@ -39,13 +40,13 @@ class ChromParameters(object):
 class Structure(object):
 	"""Intrachromosomal structure of points or substructures in 3-D space"""
 	def __init__(self, points, structures, chrom, offset):
-		self.offset = offset	#absolute indexing offset (for substructures only)
 		self.points = points
 		if len(structures) == 0 or structures is None:
 			self.structures = []
 		else:
 			self.setstructures(structures)
 		self.chrom = chrom	#chromosome parameters
+		self.offset = offset	#absolute indexing offset (for substructures only)
 
 	def getCoords(self):
 		return [point.pos for point in self.getPoints()]
@@ -100,7 +101,6 @@ class Structure(object):
 			for point in structure.points:
 				if point != 0:
 					self.points[point.absolute_index] = point
-		self.set_rel_indices()
 
 	def createSubstructure(self, points, offset):
 		"""Creates substructure containing points"""
@@ -245,15 +245,9 @@ def matFromBed(path, structure=None):
 			index1 = structure.get_rel_index(loc1)
 			index2 = structure.get_rel_index(loc2)
 			if index1 is not None and index2 is not None:
-				if index1 > index2:
-					row = index1
-					col = index2
-				else:
-					row = index2
-					col = index1
 				val = float(line[6])
-				mat[row, col] += val
-				mat[col, row] += val
+				mat[index1, index2] += val
+				mat[index2, index1] += val
 		infile.close()
 
 	rowsums = np.array([sum(row) for row in mat])
@@ -372,12 +366,6 @@ def make_points_compatible(structures):
 			new_points[abs_index - structure.offset] = Point(pos, structure.chrom, abs_index, i)
 		structure.points = new_points
 
-def normalized_dist_mat(path, structure):
-	"""Standard processing for creating distance matrix"""
-	contacts = matFromBed(path, structure)
-	dists = at.contactToDist(contacts, 4)
-	return dists/np.mean(dists)	#normalize
-
 def create_low_res_structure(path, res_ratio):
 	low_chrom = chromFromBed(path)
 	low_chrom.res *= res_ratio
@@ -407,23 +395,24 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#transform high structure
 	highSubstructure.transform(r, t)
 
-def initialize_substructures(lowstructure, lowpartitions, path):
-	#low substructures
-	substructuresFromAbsoluteTads(lowstructure, lowpartitions)
+def distmat(path, structure, alpha, weight):
+	contactMat = matFromBed(path, structure)
 
-	#create high-res chrom
-	size, res = basicParamsFromBed(path)
-	highChrom = ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
+	assert len(structure.nonzero_abs_indices()) == len(contactMat)
 
-	#initialize high-res substructures
-	high_substructures = []
-	low_gen_coords = lowstructure.getGenCoords()
-	offset = 0 #initialize
-	for partition in lowpartitions:
-		start_gen_coord = low_gen_coords[partition[0]]
-		end_gen_coord = low_gen_coords[partition[1]]
-		high_substructure = structureFromBed(path, highChrom, start_gen_coord, end_gen_coord, offset)
-		high_substructures.append(high_substructure)
-		offset += (len(high_substructure.points) - 1)	#update
+	expected = get_expected(contactMat)
+	distMat = np.zeros_like(contactMat)
+	for i in range(len(contactMat)):
+		for j in range(i):
+			corrected = (1-weight)*contactMat[i,j] + weight*expected[i-j-1]
+			if corrected != 0:
+				dist = corrected**(-1./alpha)
+				distMat[i,j] = dist
+				distMat[j,i] = dist
 
-	return high_substructures
+	rowsums = np.array([sum(row) for row in distMat])
+	assert len(np.where(rowsums == 0)[0]) == 0 
+
+	distMat = distMat/np.mean(distMat)	#normalize
+	
+	return distMat
