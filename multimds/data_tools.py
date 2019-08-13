@@ -105,7 +105,7 @@ class Structure(object):
 	def createSubstructure(self, points, offset):
 		"""Creates substructure containing points"""
 		substructure = Structure(points, [], self.chrom, offset)
-		substructure.set_rel_indices()
+		#substructure.set_rel_indices()
 		self.structures.append(substructure)
 
 	def transform(self, r, t):
