@@ -20,8 +20,10 @@ structure2 = dt.structureFromBed(path2, None, None)
 dt.make_compatible((structure1, structure2))
 
 #get distance matrices
-dists1 = dt.normalized_dist_mat(path1, structure1)
-dists2 = dt.normalized_dist_mat(path2, structure2)
+size1 = dt.size_from_bed(path1)
+size2 = dt.size_from_bed(path2)
+dists1 = dt.distmat(path1, structure1, size1)
+dists2 = dt.distmat(path2, structure2, size2)
 
 #MDS
 coords1 = MDS(n_components=3, random_state=np.random.RandomState(), dissimilarity="precomputed", n_jobs=-1).fit_transform(dists1)

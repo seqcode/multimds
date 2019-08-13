@@ -29,6 +29,9 @@ prefix2 = "K562"
 path1 = "hic_data/{}_{}_{}kb.bed".format(prefix1, chrom, res_kb)
 path2 = "hic_data/{}_{}_{}kb.bed".format(prefix2, chrom, res_kb)
 
+size1 = dt.size_from_bed(path1)
+size2 = dt.size_from_bed(path2)
+
 ps = np.arange(0, 0.6, 0.1)
 errors = np.zeros_like(ps)
 
@@ -37,8 +40,8 @@ for i, p in enumerate(ps):
 	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
 	structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
 
-	dists1 = dt.normalized_dist_mat(path1, structure1)
-	dists2 = dt.normalized_dist_mat(path2, structure2)
+	dists1 = dt.distmat(path1, structure1, size1)
+	dists2 = dt.distmat(path2, structure2, size2)
 
 	errors[i] = np.mean((error(dists1, structure1.getCoords()), error(dists1, structure1.getCoords())))
 
