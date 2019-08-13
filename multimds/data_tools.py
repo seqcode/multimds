@@ -8,12 +8,11 @@ from .hic_oe import get_expected
 
 class ChromParameters(object):
 	"""Basic information on chromosome, inferred from input file"""
-	def __init__(self, minPos, maxPos, res, name, size):
+	def __init__(self, minPos, maxPos, res, name):
 		self.minPos = minPos	#minimum genomic coordinate
 		self.maxPos = maxPos	#maximum genomic coordinate
 		self.res = res		#resolution (bp)
 		self.name = name	#e.g. "chr22"
-		self.size = size	#number of lines in file
 
 	def getLength(self):
 		"""Number of possible loci"""
@@ -35,7 +34,7 @@ class ChromParameters(object):
 		lowRes = self.res * resRatio
 		lowMinPos = (self.minPos/lowRes)*lowRes		#approximate at low resolution
 		lowMaxPos = (self.maxPos/lowRes)*lowRes
-		return ChromParameters(lowMinPos, lowMaxPos, lowRes, self.name, self.size)
+		return ChromParameters(lowMinPos, lowMaxPos, lowRes, self.name)
 
 class Structure(object):
 	"""Intrachromosomal structure of points or substructures in 3-D space"""
@@ -156,7 +155,7 @@ class Point(object):
 		self.absolute_index = absolute_index	#index relative to all points in structure (including null/zero points)
 		self.relative_index = relative_index	#index relative to only non-zero points
 
-def structureFromBed(path, chrom=None, start=None, end=None, offset=0):
+def structureFromBed(path, size, chrom=None, start=None, end=None, offset=0):
 	"""Initializes structure from intrachromosomal BED file."""
 	if chrom is None:
 		chrom = chromFromBed(path)
@@ -170,7 +169,7 @@ def structureFromBed(path, chrom=None, start=None, end=None, offset=0):
 	structure = Structure([], [], chrom, offset)
 	
 	structure.points = np.zeros(int((end - start)/chrom.res) + 1, dtype=object)	#true if locus should be added
-	tracker = Tracker("Identifying loci", structure.chrom.size)
+	tracker = Tracker("Identifying loci", size)
 
 	#add loci
 	with open(path) as listFile:
@@ -191,46 +190,37 @@ def structureFromBed(path, chrom=None, start=None, end=None, offset=0):
 	
 	return structure
 
-def chromFromBed(path):
+def chromFromBed(path, minPos=None, maxPos=None):
 	"""Initialize ChromParams from intrachromosomal file in BED format"""
-	minPos = sys.float_info.max
-	maxPos = 0
+	overall_minPos = sys.float_info.max
+	overall_maxPos = 0
 	print("Scanning {}".format(path))
 	with open(path) as infile:
 		for i, line in enumerate(infile):
 			line = line.strip().split()
-			pos1 = int(line[1])
-			pos2 = int(line[4])
-			if pos1 < minPos:
-				minPos = pos1
-			elif pos1 > maxPos:
-				maxPos = pos1
-			if pos2 < minPos:
-				minPos = pos2
-			elif pos2 > maxPos:
-				maxPos = pos2
+			if minPos is None or maxPos is None:
+				pos1 = int(line[1])
+				pos2 = int(line[4])
+				if minPos is None:
+					curr_minPos = min((pos1, pos2))
+					if curr_minPos < overall_minPos:
+						overall_minPos = curr_minPos
+				if maxPos is None:
+					curr_maxPos = max((pos1, pos2))
+					if curr_maxPos > overall_maxPos:
+						overall_maxPos = curr_maxPos
 			if i == 0:
 				name = line[0]
 				res = (int(line[2]) - pos1)	
 		infile.close()
-	minPos = int(np.floor(float(minPos)/res)) * res	#round
-	maxPos = int(np.ceil(float(maxPos)/res)) * res
-	return ChromParameters(minPos, maxPos, res, name, i)
+	minPos = int(np.floor(float(overall_minPos)/res)) * res	#round
+	maxPos = int(np.ceil(float(overall_maxPos)/res)) * res
+	return ChromParameters(minPos, maxPos, res, name)
 
-def basicParamsFromBed(path):
-	print("Scanning {}".format(path))
-	with open(path) as infile:
-		for i, line in enumerate(infile):
-			if i == 0:
-				line = line.strip().split()
-				res = (int(line[2]) - int(line[1]))
-		infile.close()
-	return i, res
-
-def matFromBed(path, structure=None):	
+def matFromBed(path, size, structure=None):	
 	"""Converts BED file to matrix. Only includes loci in structure."""
 	if structure is None:
-		structure = structureFromBed(path, None, None)
+		structure = structureFromBed(path, size)
 
 	abs_indices = structure.nonzero_abs_indices()
 
@@ -330,7 +320,7 @@ def make_compatible(structures):
 	consensus = np.sort(consensus)
 	
 	for structure in structures:
-		new_chrom = ChromParameters(consensus[0], consensus[-1] + structure.chrom.res, structure.chrom.res, structure.chrom.name, structure.chrom.size)
+		new_chrom = ChromParameters(consensus[0], consensus[-1] + structure.chrom.res, structure.chrom.res, structure.chrom.name)
 		new_points = np.zeros(new_chrom.getLength(), dtype=object)
 		for i, gen_coord in enumerate(consensus):
 			old_abs_index = structure.chrom.getAbsoluteIndex(gen_coord)
@@ -339,6 +329,17 @@ def make_compatible(structures):
 			new_points[new_abs_index - structure.offset] = Point(pos, new_chrom, new_abs_index, i)
 		structure.points = new_points
 		structure.chrom = new_chrom
+
+def consensus_chrom(chroms):
+	"""Enforce that chromosomes have same range"""
+	consensus_res = chroms[0].res
+	consensus_name = chroms[0].name
+	for chrom in chroms:
+		assert chrom.res == consensus_res
+		assert chrom.name == consensus_name
+	minPos = max([chrom.minPos for chrom in chroms])
+	maxPos = min([chrom.maxPos for chrom in chroms])
+	return ChromParameters(minPos, maxPos, consensus_res, consensus_name)
 
 def make_points_compatible(structures):
 	"""Enforce that points be shared by all structures. Don't change ChromParameters."""
@@ -371,7 +372,10 @@ def create_low_res_structure(path, res_ratio):
 	low_chrom.res *= res_ratio
 	low_chrom.minPos = int(np.floor(float(low_chrom.minPos)/low_chrom.res)) * low_chrom.res	#round
 	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
-	return structureFromBed(path, low_chrom)
+	return structureFromBed(path, size, low_chrom)
+
+def create_low_res_chrom(chrom, res_ratio):
+	return ChromParameters(int(np.floor(float(chrom.minPos)/chrom.res)) * chrom.res, int(np.ceil(float(chrom.maxPos)/chrom.res)) * chrom.res, chrom.res*res_ratio, chrom.name)
 
 def create_high_res_structure(path, lowstructure):
 	size, res = basicParamsFromBed(path)
@@ -395,8 +399,8 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#transform high structure
 	highSubstructure.transform(r, t)
 
-def distmat(path, structure, alpha, weight):
-	contactMat = matFromBed(path, structure)
+def distmat(path, structure, alpha, weight, size):
+	contactMat = matFromBed(path, size, structure)
 
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
 
@@ -416,3 +420,9 @@ def distmat(path, structure, alpha, weight):
 	distMat = distMat/np.mean(distMat)	#normalize
 	
 	return distMat
+
+def size_from_bed(path):
+	with open(path) as in_file:
+		for i, line in enumerate(in_file):
+			pass
+	return i
