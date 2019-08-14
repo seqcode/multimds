@@ -68,9 +68,7 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 	n = len(lowstructure1.getPoints())
 	assert num_partitions < n/2
 	partition_size = int(n/num_partitions)
-	print(partition_size)
 	lowpartitions = np.array([(i*partition_size, min(((i+1)*partition_size), n-1)) for i in range(num_partitions)])	#low substructures, defined on absolute indices not relative indices
-	print(lowpartitions)
 
 	substructuresFromAbsoluteTads(lowstructure1, lowpartitions)
 	substructuresFromAbsoluteTads(lowstructure2, lowpartitions)
