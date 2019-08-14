@@ -367,21 +367,6 @@ def make_points_compatible(structures):
 			new_points[abs_index - structure.offset] = Point(pos, structure.chrom, abs_index, i)
 		structure.points = new_points
 
-def create_low_res_structure(path, res_ratio):
-	low_chrom = chromFromBed(path)
-	low_chrom.res *= res_ratio
-	low_chrom.minPos = int(np.floor(float(low_chrom.minPos)/low_chrom.res)) * low_chrom.res	#round
-	low_chrom.maxPos = int(np.ceil(float(low_chrom.maxPos)/low_chrom.res)) * low_chrom.res
-	return structureFromBed(path, size, low_chrom)
-
-def create_low_res_chrom(chrom, res_ratio):
-	return ChromParameters(int(np.floor(float(chrom.minPos)/chrom.res)) * chrom.res, int(np.ceil(float(chrom.maxPos)/chrom.res)) * chrom.res, chrom.res*res_ratio, chrom.name)
-
-def create_high_res_structure(path, lowstructure):
-	size, res = basicParamsFromBed(path)
-	highChrom = ChromParameters(lowstructure.chrom.minPos, lowstructure.chrom.maxPos, res, lowstructure.chrom.name, size)
-	return Structure([], [], highChrom, 0)
-	
 def transform(trueLow, highSubstructure, res_ratio):
 	#approximate as low resolution
 	inferredLow = highToLow(highSubstructure, res_ratio)
@@ -399,7 +384,7 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#transform high structure
 	highSubstructure.transform(r, t)
 
-def distmat(path, structure, alpha, weight, size):
+def distmat(path, structure, size, alpha=4, weight=0.05):
 	contactMat = matFromBed(path, size, structure)
 
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
