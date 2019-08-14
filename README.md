@@ -49,7 +49,7 @@ The relocalization of each locus is written to a BED file, with the format [PREF
 For example the output of
 
 ```python
-multimds.full_mds("GM12878_combined_21_100kb.bed", "K562_21_100kb.bed")
+multimds.full_mds("hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed")
 ```
 
 is GM12878_combined_21_100kb_K562_21_100kb_relocalization.bed
@@ -80,14 +80,17 @@ Example - chr21 at 10-kb resolution:
 The difference penalty controls how similar the output structures will be. Higher values mean that differences are penalized more by the algorithm. By default it is set to 0.05, but it is recommended that this be changed. 
 
 ```python
-multimds.full_mds("GM12878_combined_21_100kb.bed", "K562_21_100kb.bed", penalty=0.02)
+struct1, struct2 = multimds.full_mds("hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed", penalty=0.02)
 ```
 
 The minimum penalty that can achieve reproducibility is recommended. The script reproducibility.py (in the scripts directory) plots reproducibility at different values of this parameter. Choose the parameter at which the increase in reproducibility levels off.
 
 For example run
 
-``python reproducibility.py GM12878_combined_21_100kb.bed K562_21_100kb.bed``
+```python
+from multimds import reproducibility
+reproducibility.plot_reproducibility("hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed")
+```
 
 Output:
 
@@ -98,18 +101,18 @@ In this example a penalty of 0.05 appears best.
 
 # Plotting
 
-Read a structure:
+Load a structure:
 
 ```python
-import data_tools
+from multimds import data_tools
 structure = data_tools.structure_from_file("GM12878_combined_21_100kb_structure.tsv")
 ```
 
 Create an interactive 3D plot in Mayavi. (Mayavi allows you to rotate the image and save a view.)
 
 ```python
-import plotting
-plotting.plot_structure_interactive(structure, color=(0,0.5,0.7), radius=0.01, enrichments=my_enrichments)
+from multimds import plotting
+plotting.plot_structure_interactive(structure, color=(0,0.5,0.7), radius=0.01, enrichments=range(len(structure.getPoints())))
 ```
 
 If _radius_ is not selected, the to-scale radius of heterochromatin is used. 
@@ -151,7 +154,7 @@ plotting.plot_structures_interactive(structures, cut=True)
 A plot can be saved as a gif:
 
 ```python
-plotting.plot_structure_gif(structure, struct, color=(1,0,0), radius=None, increment=10)
+plotting.plot_structure_gif(structure, "struct", increment=10)
 ```
 
 will create struct.gif
@@ -161,7 +164,7 @@ A smaller value of _increment_ will lead to a smoother gif. Increments must be a
 Multiple structures can also be plotted in a single gif:
 
 ```python
-plotting.plot_structures_gif(structures, struct, colors=default_colors, radius=None, increment=10)
+plotting.plot_structures_gif(structures, "struct", colors=default_colors, radius=None, increment=10)
 ```
 
 # Options
