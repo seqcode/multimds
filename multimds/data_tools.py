@@ -278,7 +278,7 @@ def structure_from_file(path):
 		name = infile.readline().strip()
 		res = int(infile.readline().strip())
 		minPos = int(infile.readline().strip())
-		chrom = ChromParameters(minPos, None, res, name, None)
+		chrom = ChromParameters(minPos, None, res, name)
 		structure = Structure([], [], chrom, 0)
 		index = 0
 		while hasMore:
