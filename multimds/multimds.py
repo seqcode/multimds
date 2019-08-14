@@ -11,11 +11,11 @@ from .tad import *
 
 def infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight, size1, size2):
 	"""Infers 3D coordinates for one structure"""
-	distMat1 = distmat(path1, structure1, alpha, weight, size1)	
-	distMat2 = distmat(path2, structure2, alpha, weight, size2)
+	distMat1 = distmat(path1, structure1, size1, alpha, weight)	
+	distMat2 = distmat(path2, structure2, size2, alpha, weight)
 
 	coords1, coords2 = Joint_MDS(p=penalty, n_components=3, metric=True, random_state1=np.random.RandomState(), random_state2=np.random.RandomState(), verbose=0, dissimilarity="precomputed", n_jobs=num_threads).fit_transform(distMat1, distMat2)
-
+	
 	structure1.setCoords(coords1)
 	structure2.setCoords(coords2)
 
@@ -27,7 +27,8 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 
 	structure1 = structureFromBed(path1, size1)
 	structure2 = structureFromBed(path2, size2)
-	infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight)
+	make_compatible((structure1, structure2))
+	infer_structures(path1, structure1, path2, structure2, alpha, penalty, num_threads, weight, size1, size2)
 
 	prefix1 = os.path.splitext(os.path.basename(path1))[0]
 	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
@@ -42,7 +43,7 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 		out.close()
 
 	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(structure1, structure2, path1, path2))
+	print(calculate_compartment_fraction(structure1, structure2, path1, path2, size1, size2))
 
 	return structure1, structure2
 
@@ -56,7 +57,7 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 	highChrom1 = chromFromBed(path1)
 	highChrom2 = chromFromBed(path2)
 	highChrom = consensus_chrom((highChrom1, highChrom2))
-	lowChrom = create_low_res_chrom(highChrom, res_ratio)
+	lowChrom = highChrom.reduceRes(res_ratio)
 
 	#create low-res structures
 	lowstructure1 = structureFromBed(path1, size1, lowChrom)
