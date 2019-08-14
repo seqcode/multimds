@@ -27,7 +27,9 @@ def oe(mat):
 			s = i - j
 			expected = avgs[s - 1]
 			if expected != 0:	
-				oe_mat[i,j] = observed/expected
+				val = observed/expected
+				oe_mat[i,j] = val
+				oe_mat[j,i] = val
 
 	return oe_mat
 
