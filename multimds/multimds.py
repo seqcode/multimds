@@ -66,8 +66,11 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 
 	#get partitions
 	n = len(lowstructure1.getPoints())
-	partition_size = int(np.ceil(float(n)/num_partitions))
+	assert num_partitions < n/2
+	partition_size = int(n/num_partitions)
+	print(partition_size)
 	lowpartitions = np.array([(i*partition_size, min(((i+1)*partition_size), n-1)) for i in range(num_partitions)])	#low substructures, defined on absolute indices not relative indices
+	print(lowpartitions)
 
 	substructuresFromAbsoluteTads(lowstructure1, lowpartitions)
 	substructuresFromAbsoluteTads(lowstructure2, lowpartitions)
@@ -127,18 +130,18 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 	highstructure2.set_rel_indices()
 
 	prefix1 = os.path.splitext(os.path.basename(path1))[0]
-	structure1.write("{}{}_structure.tsv".format(prefix, prefix1))
+	highstructure1.write("{}{}_structure.tsv".format(prefix, prefix1))
 	prefix2 = os.path.splitext(os.path.basename(path2))[0]
-	structure2.write("{}{}_structure.tsv".format(prefix, prefix2))
+	highstructure2.write("{}{}_structure.tsv".format(prefix, prefix2))
 
-	dists = calculate_distances(structure1, structure2)
+	dists = calculate_distances(highstructure1, highstructure2)
 	with open("{}{}_{}_relocalization.bed".format(prefix, prefix1, prefix2), "w") as out:
-		for gen_coord, dist in zip(structure1.getGenCoords(), dists):
-			out.write("\t".join((structure1.chrom.name, str(gen_coord), str(gen_coord + structure1.chrom.res), str(dist))))
+		for gen_coord, dist in zip(highstructure1.getGenCoords(), dists):
+			out.write("\t".join((highstructure1.chrom.name, str(gen_coord), str(gen_coord + highstructure1.chrom.res), str(dist))))
 			out.write("\n")
 		out.close()
 
 	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(structure1, structure2, path1, path2))	
+	print(calculate_compartment_fraction(highstructure1, highstructure2, path1, path2, size1, size2))	
 
 	return highstructure1, highstructure2
