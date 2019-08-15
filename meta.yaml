@@ -12,7 +12,7 @@ requirements:
     - setuptools
     - scipy
     - numpy
-    - pymp-pypi
+#    - pymp-pypi
     - mayavi
     - scikit-learn
     - h5py
