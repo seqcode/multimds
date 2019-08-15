@@ -25,7 +25,7 @@ setuptools.setup(
 #          'mayavi',
 #          'scikit-learn',
 #          'h5py',
-#          'pandas',
+          'pandas',
 #          'seaborn'
     ]
 )
