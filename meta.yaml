@@ -10,14 +10,14 @@ requirements:
   build:
     - python
     - setuptools
-#    - scipy
-#    - numpy
-#    - pymp-pypi
-#    - mayavi
-#    - scikit-learn
-#    - h5py
-#    - pandas
-#    - seaborn
+    - scipy
+    - numpy
+    - pymp-pypi
+    - mayavi
+    - scikit-learn
+    - h5py
+    - pandas
+    - seaborn
 
   run:
     - python

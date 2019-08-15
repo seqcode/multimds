@@ -18,14 +18,14 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-#    install_requires=[
-#          'scipy',
-#          'numpy',
-#          'pymp-pypi',
-#          'mayavi',
-#          'scikit-learn',
-#          'h5py',
-#          'pandas',
-#          'seaborn'
-#    ]
+    install_requires=[
+          'scipy',
+          'numpy',
+          'pymp-pypi',
+          'mayavi',
+          'scikit-learn',
+          'h5py',
+          'pandas',
+          'seaborn'
+    ]
 )
