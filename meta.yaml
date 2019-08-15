@@ -1,6 +1,6 @@
 package:
   name: multimds
-  version: "0.0.1"
+  version: "0.0.3"
 
 source:
 #  git_rev: v0.6.7
@@ -10,6 +10,14 @@ requirements:
   build:
     - python
     - setuptools
+#    - scipy
+#    - numpy
+#    - pymp-pypi
+#    - mayavi
+#    - scikit-learn
+#    - h5py
+#    - pandas
+#    - seaborn
 
   run:
     - python
