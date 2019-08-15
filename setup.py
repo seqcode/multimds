@@ -26,6 +26,6 @@ setuptools.setup(
 #          'scikit-learn',
 #          'h5py',
           'pandas',
-#          'seaborn'
+          'seaborn'
     ]
 )
