@@ -22,7 +22,7 @@ setuptools.setup(
           'scipy',
           'numpy',
  #         'pymp-pypi',
-#          'mayavi',
+          'mayavi',
           'scikit-learn',
           'h5py',
           'pandas',
