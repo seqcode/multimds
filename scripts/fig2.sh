@@ -11,11 +11,15 @@ do
 
 	for ITERATION in `seq 10`
 	do
-		python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_13_32kb.bed hic_data/galactose_${STRAIN}_13_32kb.bed
-		python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_2_32kb.bed hic_data/galactose_${STRAIN}_2_32kb.bed
-		python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_4_32kb.bed hic_data/galactose_${STRAIN}_4_32kb.bed 
-		python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_16_32kb.bed hic_data/galactose_${STRAIN}_16_32kb.bed
-		python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_12-downstream_32kb.bed hic_data/galactose_${STRAIN}_12-downstream_32kb.bed
+		for CHROM in 13 2 4 16 12-downstream
+		do
+			python fig2_multimds.py $ITERATION $CHROM $STRAIN
+		done
+		#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_13_32kb.bed hic_data/galactose_${STRAIN}_13_32kb.bed
+		#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_2_32kb.bed hic_data/galactose_${STRAIN}_2_32kb.bed
+		#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_4_32kb.bed hic_data/galactose_${STRAIN}_4_32kb.bed 
+		#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_16_32kb.bed hic_data/galactose_${STRAIN}_16_32kb.bed
+		#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_${STRAIN}_12-downstream_32kb.bed hic_data/galactose_${STRAIN}_12-downstream_32kb.bed
 	done
 
 	python plot_relocalization.py Has1-Tda1 13 852000 $STRAIN ""
@@ -33,8 +37,10 @@ done
 
 for ITERATION in `seq 10`
 do
-	python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_Scer_12-upstream_32kb.bed hic_data/galactose_Scer_12-upstream_32kb.bed
-	python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_Suva_15_32kb.bed hic_data/galactose_Suva_15_32kb.bed
+	#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_Scer_12-upstream_32kb.bed hic_data/galactose_Scer_12-upstream_32kb.bed
+	python fig2_multimds.py $ITERATION 12-upstream Scer
+	#python ../multimds.py -P 0.1 -w 0 -o ${ITERATION}_ hic_data/ctrl_Suva_15_32kb.bed hic_data/galactose_Suva_15_32kb.bed
+	python fig2_multimds.py $ITERATION 15 Suva
 done
 
 python plot_relocalization.py Gal2 12-upstream 290212 Scer ""
