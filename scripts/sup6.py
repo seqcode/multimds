@@ -1,16 +1,17 @@
 import sys
+from multimds import data_tools as dt
 sys.path.append("..")
-import data_tools as dt
-import plotting as plot
+import heatmap as hm
 
-struct1 = dt.structure_from_file("ctrl_Scer_12_32kb_structure.tsv")
-struct2 = dt.structure_from_file("galactose_Scer_12_32kb_structure.tsv")
-plot.plot_structures_interactive((struct1, struct2), out_path="sup6a.png")
+num = sys.argv[1]
 
-struct1 = dt.structure_from_file("ctrl_Scer_12-upstream_32kb_structure.tsv")
-struct2 = dt.structure_from_file("galactose_Scer_12-upstream_32kb_structure.tsv")
-plot.plot_structures_interactive((struct1, struct2), out_path="sup6b_upstream.png")
+path = "sim{}_chr21_100kb.bed".format(num)
+size = dt.size_from_bed(path)
+struct = dt.structureFromBed(path, size)
+mat = dt.matFromBed(path, size, struct)
 
-struct1 = dt.structure_from_file("ctrl_Scer_12-downstream_32kb_structure.tsv")
-struct2 = dt.structure_from_file("galactose_Scer_12-downstream_32kb_structure.tsv")
-plot.plot_structures_interactive((struct1, struct2), out_path="sup6b_downstream.png")
+#tads = np.loadtxt("sim{}_tads.tsv".format(num))
+#tad_indices = [(struct.get_rel_index(start), struct.get_rel_index(end)) for start,end in tads]
+
+#hm.heatMapFromMat(mat, maxvalue=50, tads=tad_indices, outpath="sup6_{}".format(num))
+hm.heatMapFromMat(mat, maxvalue=10)
