@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 from scipy import stats as st
 import numpy as np
 
-marks = ("H3K27ac", "H3K4me1", "H3K4me3", "H3K9ac", "H3K36me3", "H2AZ", "H3K4me2", "H3K79me2", "H3K27me3", "EZH2", "enhancer", "TSS", "transcription", "polycomb")
+marks = ("H3K27ac", "H3K4me1", "H3K4me3", "H3K9ac", "H3K36me3", "H2AZ", "H3K4me2", "H3K79me2", "H3K27me3", "EZH2", "enhancer", "transcription", "polycomb")
 datasets = []
 for celltype in ("GM12878", "K562"):
 	for mark in marks:
@@ -12,8 +12,8 @@ overrepresentation = np.zeros_like(datasets, dtype=float)
 ps = np.zeros_like(datasets, dtype=float)
 
 for i, dataset in enumerate(datasets):
-	peaks_coverage = np.loadtxt("peaks_filtered_{}_coverage.bed".format(dataset), usecols=8)
-	background_coverage = np.loadtxt("same_compartment_background_filtered_{}_coverage.bed".format(dataset), usecols=8)
+	peaks_coverage = np.loadtxt("peaks_a_comp_filtered_independent_{}_coverage.bed".format(dataset), usecols=8)
+	background_coverage = np.loadtxt("A_background_independent_filtered_{}_coverage.bed".format(dataset), usecols=8)
 	
 	t, p = st.ttest_ind(peaks_coverage, background_coverage)
 	ps[i] = p
@@ -61,5 +61,5 @@ for x, p in zip(xs, ps):
 plt.xticks(xs, datasets, rotation=90)
 plt.tick_params(direction="out", top=False, right=False, bottom=False, length=12, width=3, labelsize=9)
 
-plt.savefig("fig9")
+plt.savefig("sup18_a_comp")
 plt.show()

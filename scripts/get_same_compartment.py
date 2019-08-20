@@ -30,9 +30,9 @@ for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 
 	gen_coords = structure1.getGenCoords()
 
-	with open("A_compartment_{}kb.bed".format(res_kb), "a") as out:
+	with open("same_compartment_{}kb.bed".format(res_kb), "a") as out:
 		for gen_coord, compartment1, compartment2 in zip(gen_coords, compartments1, compartments2):
-			if compartment1 > 0 and compartment2 > 0 and np.abs(compartment1 - compartment2) < 0.2:
+			if np.abs(compartment1 - compartment2) < 0.2:
 				for i in range(int(100/res_kb)):
 					out.write("\t".join((structure1.chrom.name, str(gen_coord + i*res), str(gen_coord + (i+1)*res), str(compartment1), str(compartment2))))
 					out.write("\n")

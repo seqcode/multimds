@@ -1,31 +1,69 @@
+import sys
+sys.path.append("..")
+import data_tools as dt
+import compartment_analysis as ca
 from matplotlib import pyplot as plt
+import os
+from sklearn import svm
 import numpy as np
 
-gene_names = ("Hxt1", "Has1", "Tda1", "Gal1", "Gal7", "Gal10", "Gal3", "Gal4", "Gal2")
-sgds = np.array(["YHR094C", "YMR290C", "YMR291W", "YBR020W", "YBR018C", "YBR019C", "YDR009W", "YPL248C", "YLR081W"])
-logfcs = np.zeros((len(sgds), 1))
+all_species = ("Mouse", "Human", "Yeast")
+all_res_kb = (100, 100, 32)
+boxes = [[] for species in all_species]
 
-with open("rnaseq_counts.tsv") as infile:
-	for line in infile:
-		line = line.strip().split()
-		if line[0] in sgds:
-			index = np.where(sgds == line[0])[0][0]
-			fc = np.mean([float(line[i]) for i in range(4,7)])/np.mean([float(line[i]) for i in range(1,4)])
-			logfcs[index][0] = np.log(fc)
-	infile.close()
+for i, (species, res_kb) in enumerate(zip(all_species, all_res_kb)):
+	with open("{}_list.txt".format(species)) as infile:
+		for line in infile:
+			prefix = line.strip()
+			for chrom in range(1, 23):
+				path = "hic_data/{}_{}_{}kb.bed".format(prefix, chrom, res_kb)
 
-#no need to do anything fancy when defining our figure
-fig, ax = plt.subplots()
-plt.subplot2grid((10,10), (0,0), 10, 5, frameon=False)
+				if os.path.isfile(path):
+					os.system("python ../minimds.py {}".format(path))
+					structure = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(prefix, chrom, res_kb))
+					mat = dt.matFromBed(path, structure)	
+					comps = ca.get_compartments(mat)
+					coords = structure.getCoords()
+					clf = svm.LinearSVR()
+					clf.fit(coords, comps)
+					boxes[i].append(clf.score(coords, comps))
 
-plt.pcolor(logfcs, cmap=plt.cm.coolwarm, vmin=-8, vmax=8)
+		infile.close()
+
+#start with a frameless plot (extra room on the left)
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+
+#label axes
+plt.ylabel("SVR R^2", fontsize=10)
+
+#define offsets
+ys = boxes
+n = len(ys)
+width = 0.075
+
+xmin = 0	#boxplot indexing starts at 1
+xmax = n*width*2
+x_range = xmax - xmin
+x_start = xmin - x_range/10.	#larger offset for boxplot
+x_end = xmax + x_range/10.
+
+ymin = min([min(y) for y in ys])
+ymax = max([max(y) for y in ys])
+y_range = ymax - ymin
+y_start = ymin - y_range/25.
+y_end = ymax + y_range/25.
+
+#plot data
+plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*width*2, width*2), widths=[width for i in range(n)], labels=all_species, medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
+
+#define axes with offsets
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+
+#plot axes (black with line width of 4)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-indices = np.arange(len(logfcs)) + 0.5
-labels = gene_names
-plt.yticks(indices, labels)
-plt.xticks(indices, [])
-plt.tick_params(top=False, right=False, left=False, bottom=False, labelsize=12)		#don't want any ticks showing
-cbaxes = fig.add_axes([0.3, 0.1, 0.02, 0.4]) 
-plt.colorbar(cax=cbaxes)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
+
 plt.savefig("sup9b")

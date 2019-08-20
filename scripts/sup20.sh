@@ -5,5 +5,4 @@ do
 	./get_hic_data.sh $CELLTYPE 100000
 done
 
-python sup9a.py
-python sup9b.py
+python sup20.py

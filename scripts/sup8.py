@@ -1,98 +1,44 @@
-from matplotlib import pyplot as plt
 import sys
+sys.path.append("..")
+import data_tools as dt
+import compartment_analysis as ca
 import numpy as np
+from sklearn import svm
+import linear_algebra as la
+from mayavi import mlab
 
-gene = sys.argv[1]
+struct = dt.structure_from_file("hic_data/GM12878_combined_21_100kb_structure.tsv")
 
-plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+new_start = struct.chrom.getAbsoluteIndex(15000000)
+struct.subsamplePoints(new_start, len(struct.points)-3)
 
-max_num_tags = 0
+#compartments
+contacts = dt.matFromBed("hic_data/GM12878_combined_21_100kb.bed", struct)
 
-first = True
-with open ("ctrl_{}_Nup60.bed".format(gene)) as infile:
-	for line in infile:
-		line = line.strip().split()
-		start = float(line[1])/1000
-		end = float(line[2])/1000
-		num_tags = int(line[3])
-		if num_tags > max_num_tags:
-			max_num_tags = num_tags
-		if first:
-			plt.plot([start,end], [num_tags,num_tags], c="c", label="glucose")
-			first = False
-		else:
-			plt.plot([start,end], [num_tags,num_tags], c="c")
-	infile.close()
+compartments = np.array(ca.get_compartments(contacts, 1))
 
-first = True 
+#SVR
+coords = struct.getCoords()
+clf = svm.LinearSVR()
+clf.fit(coords, compartments)
+coef = clf.coef_
 
-with open ("galactose_{}_Nup60.bed".format(gene)) as infile:
-	for line in infile:
-		line = line.strip().split()
-		start = float(line[1])/1000
-		end = float(line[2])/1000
-		num_tags = int(line[3])
-		if num_tags > max_num_tags:
-			max_num_tags = num_tags
-		if first:
-			plt.plot([start,end], [num_tags,num_tags], c="g", label="galactose")
-			first = False
-		else:
-			plt.plot([start,end], [num_tags,num_tags], c="g")
-	infile.close()
+transformed_coords = np.array(la.change_coordinate_system(coef, coords))
+xs = transformed_coords[:,0]
+min_x = min(xs)
+max_x = max(xs)
+x_range = max_x - min_x
+ys = transformed_coords[:,1]
+min_y = min(ys)
+max_y = max(ys)
+y_range = max_y - min_y
+zs = transformed_coords[:,2]
+min_z = min(zs)
+max_z = max(zs)
 
-plt.xlabel("Genomic coordinate (kb)", fontsize=12)
-plt.ylabel("Tag count", fontsize=12)
-
-#define offsets
-gene_loc = np.loadtxt("{}.bed".format(gene), dtype=object)
-gene_start = float(gene_loc[1])/1000
-gene_end = float(gene_loc[2])/1000
-xmin = gene_start
-xmax = gene_end
-x_range = xmax - xmin
-x_start = xmin - x_range/25.
-x_end = xmax + x_range/25.
-
-ymin = 0
-ymax = max_num_tags
-y_range = ymax - ymin
-y_start = ymin - y_range/25.
-y_end = ymax + y_range/5.
-
-#define axes with offsets
-plt.axis([x_start, x_end, y_start, y_end], frameon=False)
-
-#plot axes (black with line width of 4)
-plt.axvline(x=x_start, color="k", lw=4)
-plt.axhline(y=y_start, color="k", lw=4)
-
-#plot ticks
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
-
-peaks = np.loadtxt("{}_Nup60_peak.bed".format(gene), usecols=(1,2))
-if len(peaks) > 0:
-	if len(peaks.shape) == 1:
-		peak = peaks
-		plt.plot([peak[0]/1000, peak[1]/1000], [y_range/70., y_range/70.], c="r", label="Differential Nup60 peak")
-	else:
-		num_peaks = peaks.shape[1]
-		for i in range(num_peaks):
-			peak = peaks[i]
-			if i == 0:
-				plt.plot([peak[0]/1000, peak[1]/1000], [y_range/70., y_range/70.], c="r", label="Differential Nup60 peak")
-			else:
-				plt.plot([peak[0]/1000, peak[1]/1000], [y_range/70., y_range/70.], c="r")
-
-with open ("{}_transcription_direction.bed".format(gene)) as infile:
-	for line in infile:
-		line = line.strip().split()
-		start = float(line[1])/1000
-		end = float(line[2])/1000
-		plt.arrow(start, y_start + y_range/10., end-start, 0, facecolor="k", head_width=6, head_length=0.1)
-		plt.annotate(line[3], (np.mean((start,end)), y_start + y_range/8.), fontsize=16)
-	infile.close()
-
-plt.legend(loc=2, fontsize=8, frameon=False, shadow=False)
-
-plt.savefig("{}_Nup60".format(gene))
+mlab.figure(bgcolor=(1,1,1))
+mlab.plot3d(xs, ys, zs, compartments, colormap="bwr")
+x_coord = max_x + x_range/10
+y_coord = max_y + y_range/10
+mlab.quiver3d([0], [0], [1], extent=[0, 0, 0, 0, min_z, max_z], color=(0,0,0), line_width=8)
+mlab.savefig("sup8.png")

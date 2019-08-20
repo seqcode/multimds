@@ -1,33 +1,68 @@
+import sys
+sys.path.append("..")
+import data_tools as dt
+import compartment_analysis as ca
 from matplotlib import pyplot as plt
-import numpy as np
+from sklearn.decomposition import PCA
 import os
+import numpy as np
 
-gene_names = ("Hxt1", "Has1", "Tda1", "Gal1", "Gal7", "Gal10", "Gal3", "Gal4", "Gal2")
-logfcs = np.zeros((len(gene_names), 1))
+all_species = ("Mouse", "Human", "Yeast")
+all_res_kb = (100, 100, 32)
 
-for i, gene_name in enumerate(gene_names):
-	os.system("bedtools intersect -a ctrl_IP.bedgraph -b {}.bed > ctrl_{}_Nup60.bed".format(gene_name, gene_name))
-	os.system("bedtools intersect -a galactose_IP.bedgraph -b {}.bed > galactose_{}_Nup60.bed".format(gene_name, gene_name))
+boxes = [[] for species in all_species]
 
-	ctrl_counts = np.loadtxt("ctrl_{}_Nup60.bed".format(gene_name), usecols=range(1,4))
-	weighted_ctrl_counts = (ctrl_counts[:,1] - ctrl_counts[:,0])*ctrl_counts[:,2]	#weight by length of interval
-	galactose_counts = np.loadtxt("galactose_{}_Nup60.bed".format(gene_name), usecols=range(1,4))
-	weighted_galactose_counts = (galactose_counts[:,1] - galactose_counts[:,0])*galactose_counts[:,2]
+for i, (species, res_kb) in enumerate(zip(all_species, all_res_kb)):
+	with open("{}_list.txt".format(species)) as infile:
+		for line in infile:
+			prefix = line.strip()
+			for chrom in range(1, 23):
+				path = "hic_data/{}_{}_{}kb.bed".format(prefix, chrom, res_kb)
 
-	logfcs[i] = np.log(np.mean(weighted_galactose_counts)/np.mean(weighted_ctrl_counts))
+				if os.path.isfile(path):	
+					mat = dt.matFromBed(path)
+					oe_mat = ca.oe(mat)
+					cor_mat = ca.cor(oe_mat)
+					pca = PCA(n_components=1)
+					pca.fit(cor_mat)
+					boxes[i].append(pca.explained_variance_ratio_[0])
 
-#no need to do anything fancy when defining our figure
-fig, ax = plt.subplots()
-plt.subplot2grid((10,10), (0,0), 10, 5, frameon=False)
+		infile.close()
 
-plt.pcolor(logfcs, cmap=plt.cm.coolwarm, vmin=-1, vmax=1)
+#start with a frameless plot (extra room on the left)
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+
+#label axes
+plt.ylabel("PC1 explained variance ratio", fontsize=10)
+
+#define offsets
+ys = boxes
+n = len(ys)
+width = 0.075
+
+xmin = 0	#boxplot indexing starts at 1
+xmax = n*width*2
+x_range = xmax - xmin
+x_start = xmin - x_range/10.	#larger offset for boxplot
+x_end = xmax + x_range/10.
+
+ymin = min([min(y) for y in ys])
+ymax = max([max(y) for y in ys])
+y_range = ymax - ymin
+y_start = ymin - y_range/25.
+y_end = ymax + y_range/25.
+
+#plot data
+plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*width*2, width*2), widths=[width for i in range(n)], labels=all_species, medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
+
+#define axes with offsets
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+
+#plot axes (black with line width of 4)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-indices = np.arange(len(logfcs)) + 0.5
-labels = gene_names
-plt.yticks(indices, labels)
-plt.xticks(indices, [])
-plt.tick_params(top=False, right=False, left=False, bottom=False, labelsize=12)		#don't want any ticks showing
-cbaxes = fig.add_axes([0.3, 0.1, 0.02, 0.4]) 
-plt.colorbar(cax=cbaxes)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
+
 plt.savefig("sup9a")
