@@ -3,8 +3,8 @@ import sys
 num = sys.argv[1]
 
 i = 0	#index
-with open("sim{}.bed".format(num), "w") as out_file:
-	with open("sim{}.fastq".format(num)) as in_file:
+with open("sim{}_chr21.bed".format(num), "w") as out_file:
+	with open("sim{}_chr21.fastq".format(num)) as in_file:
 		for line in in_file:
 			if line[0] == "@":	#header lines only
 				line = line.strip().split()
