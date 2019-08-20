@@ -1,20 +1,20 @@
 import sys
-sys.path.append("..")
-import data_tools as dt
+from multimds import data_tools as dt
 import numpy as np
-import tools
+from multimds import tools
 
 path = sys.argv[1]
 res = int(sys.argv[2])
 outpath = sys.argv[3]
 
+size = dt.size_from_bed(path)
 chrom = dt.chromFromBed(path)
 chrom.res = res
 chrom.minPos = int(np.floor(float(chrom.minPos)/res)) * res	#round
 chrom.maxPos = int(np.ceil(float(chrom.maxPos)/res)) * res
 
-struct = dt.structureFromBed(path, chrom)
-mat = dt.matFromBed(path, struct)
+struct = dt.structureFromBed(path, size, chrom)
+mat = dt.matFromBed(path, size, struct)
 
 points = struct.getPoints()
 
