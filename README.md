@@ -250,3 +250,4 @@ Shell scripts to reproduce figures from the paper can be found in the scripts di
 Requirements:
 * [bedtools](http://bedtools.readthedocs.io/en/latest/content/installation.html)
 * [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+* [bigWigToWig](https://www.encodeproject.org/software/bigwigtowig/)
