@@ -4,22 +4,9 @@ PREFIX=$1
 RES=$2
 RES_KB=$(($RES/1000))
 
-#if [ ! -e $PREFIX"_filtered".bed ]
-#	then
-		if [ ! -e mappability.wig ]
-			then
-				if [ ! -e wgEncodeDukeMapabilityUniqueness35bp.bigWig ]
-					then
-						wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDukeMapabilityUniqueness35bp.bigWig
-				fi
-				./bigWigToWig wgEncodeDukeMapabilityUniqueness35bp.bigWig mappability.wig
-				rm wgEncodeDukeMapabilityUniqueness35bp.bigWig
-		fi
-
-		if [ ! -e mappability_${RES_KB}kb.bed ]
-			then
-				python wig_to_bed.py mappability.wig $RES $(cat mappability.wig | wc -l)
-		fi
+if [ ! -e $PREFIX"_filtered".bed ]
+	then
+		./get_mappability.sh
 
 		if [ ! -e mappability_${RES_KB}kb_sorted.bed ]
 			then
@@ -38,4 +25,4 @@ RES_KB=$(($RES/1000))
 			then
 				bedtools map -a $PREFIX"_sorted".bed -b mappability_${RES_KB}kb_sorted.bed -o mean -c 4 | awk '$6 >= 0.75 {print $1"\t"$2"\t"$3"\t"$4"\t"$5}' > $PREFIX"_filtered".bed	
 		fi
-#fi
+fi
