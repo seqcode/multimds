@@ -1,8 +1,7 @@
 import sys
-sys.path.append("..")
-import data_tools as dt
+from multimds import data_tools as dt
 import numpy as np
-import linear_algebra as la
+from multimds import linear_algebra as la
 from matplotlib import pyplot as plt
 from scipy import stats as st
 import os
