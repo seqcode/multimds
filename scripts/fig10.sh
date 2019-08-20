@@ -6,7 +6,7 @@ RES_KB=$(($RES/1000))
 ./get_hic_data.sh GM12878_combined $RES
 ./get_hic_data.sh K562 $RES
 ./get_activity_data.sh 100000	#lower resolution (will be used for compartment calculation)
-./relocalization_peaks_a.sh $RES
+./relocalization_peaks_a_comp.sh $RES
 
 IDS=(H3k27acStdPk H3k04me1StdPkV2 H3k04me3StdPkV2 H3k9acStdPk H3k36me3StdPk H2azStdPk H3k4me2StdPk H3k79me2StdPk H4k20me1StdPk H3k27me3StdPkV2 Ezh239875Pk H3k9me3StdPk H3k36me3StdPk CtcfStdPk)
 NAMES=(H3K27ac H3K4me1 H3K4me3 H3K9ac H3K36me3 H2AZ H3K4me2 H3K79me2 H4K20me1 H3K27me3 EZH2 H3K9me3 H3K36me3 CTCF)
