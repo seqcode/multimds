@@ -1,24 +1,58 @@
+import sys
+sys.path.append("..")
+import data_tools as dt
 import numpy as np
 from matplotlib import pyplot as plt
-import sys
+from scipy import stats as st
+import compartment_analysis as ca
+import os
 
-peak_comps = np.loadtxt("peaks_filtered.bed", usecols=(3,4))
-background_comps = np.loadtxt("same_compartment_background_filtered.bed", usecols=(3,4))
+comparisons = ("mouse_celltype", "encode", "cohesin", "lymphoblastoid", "mouse_celltype_rep", "encode_rep")
+boxes = [[] for comparison in comparisons]
+
+for i, comparison in enumerate(comparisons):
+	with open("{}_design.txt".format(comparison)) as infile:
+		for line in infile:
+			prefix1, prefix2 = line.strip().split()
+			for chrom in range(1, 23):
+				path1 = "hic_data/{}_{}_100kb.bed".format(prefix1, chrom)
+				path2 = "hic_data/{}_{}_100kb.bed".format(prefix2, chrom)
+
+				if os.path.isfile(path1) and os.path.isfile(path2):
+
+					#load structures
+					structure1 = dt.structureFromBed(path1)	
+					structure2 = dt.structureFromBed(path2)
+
+					dt.make_compatible((structure1, structure2))
+	
+					mat1 = dt.matFromBed(path1, structure1)
+					mat2 = dt.matFromBed(path2, structure2)
+
+					comps1 = ca.get_compartments(mat1)
+					comps2 = ca.get_compartments(mat2)
+
+					r, p = st.pearsonr(comps1, comps2)
+
+					boxes[i].append(np.abs(r))
+
+		infile.close()
 
 #start with a frameless plot (extra room on the left)
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
-plt.ylabel("Compartment change", fontsize=12)
+plt.ylabel("Compartment correlation", fontsize=10)
 
 #define offsets
-ys = [background_comps[:,0] - background_comps[:,1], peak_comps[:,0] - peak_comps[:,1], ]
-xs = range(len(ys))
+ys = boxes
+n = len(ys)
+width = 0.075
 
-xmin = 0
-xmax = 0.4
+xmin = 0	#boxplot indexing starts at 1
+xmax = n*width*2
 x_range = xmax - xmin
-x_start = xmin - x_range/2.	#larger offset for boxplot
+x_start = xmin - x_range/10.	#larger offset for boxplot
 x_end = xmax + x_range/10.
 
 ymin = min([min(y) for y in ys])
@@ -28,7 +62,13 @@ y_start = ymin - y_range/25.
 y_end = ymax + y_range/25.
 
 #plot data
-plt.boxplot(ys, positions=(0, 0.3), notch=True, patch_artist=True, labels=("Background", "Relocalized"), medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
+#labels = ["Mouse cell types"]
+
+#plt.boxplot(ys, labels=("Mouse cell types", "ENCODE", "Cohesin KO", "LCLs", "Mouse cell type reps", "GM12878 reps"))
+#plt.show()
+
+plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*(width*2), width*2), widths=[width for i in range(n)], labels=("Mouse cell types", "ENCODE", "Cohesin KO", "LCLs", "Mouse cell type reps", "GM12878 reps"), medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
+#plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*(width*2), width*2), widths=[0.1 for i in range(n)], labels=labels, medianprops=dict(linestyle="none"))
 
 #define axes with offsets
 plt.axis([x_start, x_end, y_start, y_end], frameon=False)
@@ -38,44 +78,7 @@ plt.axvline(x=x_start, color="k", lw=4)
 plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=1, labelsize=9)
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
 
-plt.savefig("sup17a")
-plt.close()
-
-#start with a frameless plot (extra room on the left)
-plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
-
-#label axes
-plt.ylabel("Compartment score", fontsize=12)
-
-#define offsets
-ys = [background_comps[:,0], background_comps[:,1], peak_comps[:,0], peak_comps[:,1], ]
-xs = range(len(ys))
-
-xmin = 0
-xmax = 1.5
-x_range = xmax - xmin
-x_start = xmin - x_range/5.	#larger offset for boxplot
-x_end = xmax + x_range/10.
-
-ymin = min([min(y) for y in ys])
-ymax = max([max(y) for y in ys])
-y_range = ymax - ymin
-y_start = ymin - y_range/25.
-y_end = ymax + y_range/25.
-
-#plot data
-plt.boxplot(ys, positions=(0, 0.5, 1, 1.5), notch=True, patch_artist=True, labels=("GM12878\nbackground", "K562\nbackground", "GM12878\nrelocalized", "K562\nrelocalized"), medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
-
-#define axes with offsets
-plt.axis([x_start, x_end, y_start, y_end], frameon=False)
-
-#plot axes (black with line width of 4)
-plt.axvline(x=x_start, color="k", lw=4)
-plt.axhline(y=y_start, color="k", lw=4)
-
-#plot ticks
-plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=8)
-
-plt.savefig("sup17b")
+plt.savefig("sup17")
+plt.show()
