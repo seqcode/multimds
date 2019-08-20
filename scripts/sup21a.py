@@ -2,8 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import sys
 
-peak_comps = np.loadtxt("peaks_b_comp_filtered.bed", usecols=(3,4))
-background_comps = np.loadtxt("B_background_filtered.bed", usecols=(3,4))
+peak_comps = np.loadtxt("peaks_a_comp_filtered.bed", usecols=(3,4))
+background_comps = np.loadtxt("A_background_filtered.bed", usecols=(3,4))
 
 #start with a frameless plot (extra room on the left)
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
