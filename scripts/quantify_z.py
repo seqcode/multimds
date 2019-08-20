@@ -3,11 +3,12 @@ import numpy as np
 import sys
 sys.path.append("..")
 import data_tools as dt
-import compartment_analysis as ca
+from multimds import compartment_analysis as ca
 from matplotlib import pyplot as plt
 import os
-import linear_algebra as la
+from multimds import linear_algebra as la
 from scipy import stats as st
+from multimds import multimds
 
 res_kb = 100
 chroms = range(1, int(sys.argv[1]))
@@ -29,7 +30,8 @@ with open(design_file) as infile:
 			path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
 			if os.path.isfile(path1) and os.path.isfile(path2):
-				os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
+				multimds.full_mds(path1, path2, penalty=penalty)
+				#os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
 				structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
 				structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 
