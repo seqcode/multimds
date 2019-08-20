@@ -5,6 +5,7 @@ from multimds import linear_algebra as la
 from matplotlib import pyplot as plt
 from scipy import stats as st
 import os
+from multimds import multimds
 
 path1 = sys.argv[1]
 path2 = sys.argv[2]
@@ -21,7 +22,7 @@ ps = np.arange(0, 0.1, 0.01)
 for p in ps:
 	all_changes = []
 	for i in range(n):
-		os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
+		multimds.full_mds(path1, path2, penalty=p)
 
 		structure1 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix1)))
 		structure2 = dt.structure_from_file("{}_structure.tsv".format(os.path.basename(prefix2)))
