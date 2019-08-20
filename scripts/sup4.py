@@ -1,44 +1,30 @@
-import sys
-sys.path.append("..")
-import data_tools as dt
-import compartment_analysis as ca
+import matplotlib
+matplotlib.use("Agg")
+from matplotlib import pyplot as plt
 import numpy as np
-from sklearn import svm
-import linear_algebra as la
-from mayavi import mlab
 
-struct = dt.structure_from_file("hic_data/GM12878_combined_21_100kb_structure.tsv")
+chrom_sizes = np.loadtxt("chrom_sizes.txt")
 
-new_start = struct.chrom.getAbsoluteIndex(15000000)
-struct.subsamplePoints(new_start, len(struct.points)-3)
+plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
+maxs = []
+for method in ("MultiMDS", "Independent_MDS"):
+	times = np.loadtxt("{}_times.txt".format(method))/60.
+	plt.scatter(chrom_sizes, times, label=" ".join(method.split("_")))
+	maxs.append(max(times))
 
-#compartments
-contacts = dt.matFromBed("hic_data/GM12878_combined_21_100kb.bed", struct)
+xs = chrom_sizes
+x_int_size = 500
+y_int_size = 1
+x_start = min(xs) - x_int_size/4.
+x_end = max(xs) + x_int_size/5.
+y_start = -y_int_size/5.
+y_end = max(maxs) + y_int_size/5.
 
-compartments = np.array(ca.get_compartments(contacts, 1))
-
-#SVR
-coords = struct.getCoords()
-clf = svm.LinearSVR()
-clf.fit(coords, compartments)
-coef = clf.coef_
-
-transformed_coords = np.array(la.change_coordinate_system(coef, coords))
-xs = transformed_coords[:,0]
-min_x = min(xs)
-max_x = max(xs)
-x_range = max_x - min_x
-ys = transformed_coords[:,1]
-min_y = min(ys)
-max_y = max(ys)
-y_range = max_y - min_y
-zs = transformed_coords[:,2]
-min_z = min(zs)
-max_z = max(zs)
-
-mlab.figure(bgcolor=(1,1,1))
-mlab.plot3d(xs, ys, zs, compartments, colormap="bwr")
-x_coord = max_x + x_range/10
-y_coord = max_y + y_range/10
-mlab.quiver3d([0], [0], [1], extent=[0, 0, 0, 0, min_z, max_z], color=(0,0,0), line_width=8)
-mlab.savefig("sup4.png")
+plt.xlabel("Number of bins", fontsize=14)
+plt.ylabel("Computational time (minutes)", fontsize=14)
+plt.axis([x_start, x_end, y_start, y_end], frameon=False)
+plt.axvline(x=x_start, color="k", lw=4)
+plt.axhline(y=y_start, color="k", lw=6)
+plt.legend()
+plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=10)
+plt.savefig("sup4")
