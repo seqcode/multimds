@@ -9,7 +9,7 @@ res_kb = res/1000
 loc = 47400000
 
 for celltype in ("K562", "HMEC", "HUVEC", "IMR90"):
-	path = "/data/drive1/hic_data/{}_21_{}kb.bed".format(celltype, res_kb)
+	path = "hic_data/{}_21_{}kb.bed".format(celltype, res_kb)
 	struct = dt.structureFromBed(path)
 	mat = dt.matFromBed(path, struct)
 	gen_coords = struct.getGenCoords()
