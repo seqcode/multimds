@@ -29,19 +29,15 @@ do
 	done
 done
 
-echo "GM12878_primary GM12878_replicate" > encode_rep_design.txt
+python quantify_z_independent.py 23 encode_design.txt 0.025
 
 #mouse cell types
 RES=100000
 
 ./process_hpc7.sh $RES
 ./process_g1e.sh WT $RES
-./process_g1e.sh KO $RES
-./process_ctcf-wt.sh
 ./process_cohesin-wt.sh
-./process_cohesin-ko.sh
-
-echo "hepatocyte-cohesin-KO hepatocyte-WT" > cohesin_design.txt
+./process_ctcf-wt.sh
 
 if [ -e mouse_celltype_design.txt ]
 	then
@@ -68,12 +64,10 @@ done
 
 echo "WT-G1E hepatocyte-WT" >> mouse_celltype_design.txt
 
-echo "mESC-WT-rep1 mESC-WT-rep2" > mouse_celltype_rep_design.txt
-echo "HPC7-rep1 HPC7-rep2" >> mouse_celltype_rep_design.txt
-
+python quantify_z_independent.py 20 mouse_celltype_design.txt 0.035
 
 #LCL
-./process_lymphoblastoid.sh
+./get_lymphoblastoid.sh
 
 if [ -e lymphoblastoid_design.txt ]
 	then
@@ -93,4 +87,9 @@ do
 
 done
 
-python sup16.py
+python quantify_z_independent.py 20 lymphoblastoid_design.txt 0.03
+
+#cohesin
+./process_cohesin-ko.sh
+echo "hepatocyte-cohesin-KO hepatocyte-WT" > cohesin_design.txt
+python quantify_z_independent.py 20 cohesin_design.txt 0.04
