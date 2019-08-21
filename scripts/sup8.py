@@ -1,10 +1,8 @@
-import sys
-sys.path.append("..")
-import data_tools as dt
-import compartment_analysis as ca
+from multimds import data_tools as dt
+from multimds import compartment_analysis as ca
 import numpy as np
 from sklearn import svm
-import linear_algebra as la
+from multimds import linear_algebra as la
 from mayavi import mlab
 
 struct = dt.structure_from_file("hic_data/GM12878_combined_21_100kb_structure.tsv")
