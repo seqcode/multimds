@@ -1,10 +1,9 @@
 import sys
 sys.path.append("..")
-import data_tools as dt
+from multmds import data_tools as dt
 import numpy as np
-import linear_algebra as la
+from multimds import linear_algebra as la
 from matplotlib import pyplot as plt
-import os
 
 def error(dists, coords):
 	assert len(dists) == len(coords)
