@@ -38,7 +38,8 @@ def infer_structure(contactMat, structure, alpha, num_threads, weight, classical
 
 def fullMDS(path, classical, alpha, num_threads, weight):
 	"""MDS without partitioning"""
-	structure = dt.structureFromBed(path)
+	size = dt.size_from_bed(path)
+	structure = dt.structureFromBed(path, size)
 	contactMat = dt.matFromBed(path, structure)
 	infer_structure(contactMat, structure, alpha, num_threads, weight, classical)
 	return structure
