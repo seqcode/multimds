@@ -1,17 +1,15 @@
-import sys
-sys.path.append("../multimds")
 import numpy as np
 from sklearn import manifold
 import argparse
 import pymp
 import multiprocessing as mp
-import data_tools as dt
-import array_tools as at
-import tad
-import linear_algebra as la
-import tools
+from multimds import data_tools as dt
+from multimds import array_tools as at
+from multimds import tad
+from multimds import linear_algebra as la
+from multimds import tools
 from matplotlib import pyplot as plt
-from hic_oe import get_expected
+from multimds.hic_oe import get_expected
 
 def infer_structure(contactMat, structure, alpha, num_threads, weight, classical=False):
 	"""Infers 3D coordinates for one structure"""
