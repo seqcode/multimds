@@ -1,10 +1,11 @@
 import sys
 sys.path.append("..")
-import linear_algebra as la
-import data_tools as dt
+from multimds import linear_algebra as la
+from multimds import data_tools as dt
 from matplotlib import pyplot as plt
 import os
 import numpy as np
+from ultimds import multimds as mm
 
 def rmsd(struct1, struct2):
 	coords1 = struct1.getCoords()
@@ -30,9 +31,10 @@ for i in range(num_iterations):
 	struct1.transform(r,t)
 	independent_rmsds[i] = rmsd(struct1, struct2)
 	
-	os.system("python ../multimds.py -P 0.02 hic_data/GM12878_combined_21_100kb.bed hic_data/copy-GM12878_combined_21_100kb.bed")
-	struct1 = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")
-	struct2 = dt.structure_from_file("copy-GM12878_combined_21_100kb_structure.tsv")
+	#os.system("python ../multimds.py -P 0.02 hic_data/GM12878_combined_21_100kb.bed hic_data/copy-GM12878_combined_21_100kb.bed")
+	struct1, struct2 = mm.full_mds("hic_data/GM12878_combined_21_100kb.bed", "hic_data/copy-GM12878_combined_21_100kb.bed", penalty=0.02)
+	#struct1 = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")
+	#struct2 = dt.structure_from_file("copy-GM12878_combined_21_100kb_structure.tsv")
 	multimds_rmsds[i] = rmsd(struct1, struct2)
 
 ys = [independent_rmsds, multimds_rmsds]
