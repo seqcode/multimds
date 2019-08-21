@@ -20,7 +20,7 @@ def infer_structure(contactMat, structure, alpha, num_threads, weight, classical
 		for j in range(i):
 			corrected = (1-weight)*contactMat[i,j] + weight*expected[i-j-1]
 			contactMat[i,j] = corrected
-			contactMat[j,i] = corected
+			contactMat[j,i] = corrected
 
 	rowsums = np.array([sum(row) for row in contactMat])
 	assert len(np.where(rowsums == 0)[0]) == 0 
@@ -40,7 +40,7 @@ def fullMDS(path, classical, alpha, num_threads, weight):
 	"""MDS without partitioning"""
 	size = dt.size_from_bed(path)
 	structure = dt.structureFromBed(path, size)
-	contactMat = dt.matFromBed(path, structure)
+	contactMat = dt.matFromBed(path, size, structure)
 	infer_structure(contactMat, structure, alpha, num_threads, weight, classical)
 	return structure
 	
