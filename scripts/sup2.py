@@ -4,6 +4,7 @@ from multmds import data_tools as dt
 import numpy as np
 from multimds import linear_algebra as la
 from matplotlib import pyplot as plt
+from multimds import multimds as mm
 
 def error(dists, coords):
 	assert len(dists) == len(coords)
@@ -35,9 +36,10 @@ ps = np.arange(0, 0.6, 0.1)
 errors = np.zeros_like(ps)
 
 for i, p in enumerate(ps):
-	os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
-	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
-	structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
+	#os.system("python ../multimds.py -P {} {} {}".format(p, path1, path2))
+	structure1, structure2 = mm.full_mds(path1, path2, penalty=p)
+	#structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix1, chrom, res_kb))
+	#structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(prefix2, chrom, res_kb))
 
 	dists1 = dt.distmat(path1, structure1, size1)
 	dists2 = dt.distmat(path2, structure2, size2)
