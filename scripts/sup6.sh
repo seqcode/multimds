@@ -2,5 +2,5 @@ set -e
 
 ./simulate_tads.sh
 	
-python make_heatmap.py 1
-python make_heatmap.py 2
+python sup6.py 1
+python sup6.py 2
