@@ -1,11 +1,8 @@
-import os
-import sys
-sys.path.append("..")
-import data_tools as dt
-import linear_algebra as la
+from multimds import data_tools as dt
+from multimds import linear_algebra as la
 from sklearn import svm
 import numpy as np
-import compartment_analysis as ca
+from multimds import compartment_analysis as ca
 from scipy import stats as st
 from matplotlib import pyplot as plt
 
@@ -23,9 +20,10 @@ for i, chrom in enumerate(chroms):
 	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
 	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-	os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
-	structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
-	structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+	#os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
+	#structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
+	#structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+	structure1, structure2 = mm.multimds(path1, path2, penalty=penalty)
                              
 	#compartments
 	contacts1 = dt.matFromBed(path1, structure1)
