@@ -1,17 +1,15 @@
-import sys
-sys.path.append("..")
-import data_tools as dt
+from multimds import data_tools as dt
 import numpy as np
-import compartment_analysis as ca
+from multimds import compartment_analysis as ca
 from sklearn import svm
-import linear_algebra as la
+from multimds import linear_algebra as la
 from mayavi import mlab
+from multimds import multimds as mm
 
 path1 = "hic_data/GM12878_combined_21_100kb.bed"
 path2 = "hic_data/K562_21_100kb.bed"
 
-struct1 = dt.structure_from_file("GM12878_combined_21_100kb_structure.tsv")	
-struct2 = dt.structure_from_file("K562_21_100kb_structure.tsv")
+struct1, struct2 = mm.full_mds(path1, path2)
 
 contacts1 = dt.matFromBed(path1, struct1)
 enrichments1 = np.loadtxt("binding_data/GM12878_21_100kb_active_coverage.bed", usecols=6)
