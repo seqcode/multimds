@@ -5,6 +5,7 @@ import numpy as np
 from multimds import compartment_analysis as ca
 from scipy import stats as st
 from matplotlib import pyplot as plt
+from multimds import multimds as mm
 
 res_kb = 100
 cell_type1 = "GM12878_combined"
