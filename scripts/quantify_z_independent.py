@@ -1,12 +1,11 @@
 from sklearn import svm
 import numpy as np
 import sys
-sys.path.append("..")
-import data_tools as dt
-import compartment_analysis as ca
+from multimds import data_tools as dt
+from multimds import compartment_analysis as ca
 from matplotlib import pyplot as plt
 import os
-import linear_algebra as la
+from multimds import linear_algebra as la
 from scipy import stats as st
 
 res_kb = 100
