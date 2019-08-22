@@ -1,23 +1,16 @@
-import matplotlib
-matplotlib.use("Agg")
-import sys
-sys.path.append("..")
-import compartment_analysis as ca
-import data_tools as dt
+from multimds import compartment_analysis as ca
+from multimds import data_tools as dt
 from scipy import stats as st
 from matplotlib import pyplot as plt
 import numpy as np
-import linear_algebra as la
+from multimds import linear_algebra as la
 from scipy import signal as sg
-import os
+from multimds import multimds as mm
 
-chrom = 19
-res_kb = 100
+path1 = "hic_data/GM12878_combined_19_100kb.bed"
+path2 = "hic_data/K562_19_100kb.bed"
 
-os.system("python ../multimds.py -o test_ hic_data/GM12878_combined_{}_{}kb.bed hic_data/K562_{}_{}kb.bed".format(chrom, res_kb, chrom, res_kb))
-
-struct1 = dt.structure_from_file("test_GM12878_combined_{}_{}kb_structure.tsv".format(chrom, res_kb))	
-struct2 = dt.structure_from_file("test_K562_{}_{}kb_structure.tsv".format(chrom, res_kb))
+struct1, struct2 = mm.full_mds(path1, path2, prefix="test_")
 
 mat1 = dt.matFromBed("hic_data/GM12878_combined_{}_{}kb.bed".format(chrom, res_kb), struct1)
 comps1 = ca.get_compartments(mat1)
