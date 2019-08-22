@@ -1,7 +1,6 @@
 import sys
-sys.path.append("..")
-import compartment_analysis as ca
-import data_tools as dt
+from multimds import compartment_analysis as ca
+from import data_tools as dt
 import numpy as np
 
 res = int(sys.argv[1])
