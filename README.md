@@ -3,7 +3,7 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 # Installation
 
 ```bash
-pip install --user multimds
+pip install --user multimds git+https://github.com/seqcode/multimds
 ```
 
 or
