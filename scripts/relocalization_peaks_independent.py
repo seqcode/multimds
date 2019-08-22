@@ -1,9 +1,8 @@
 import numpy as np
 import sys
-sys.path.append("..")
-import data_tools as dt
-import compartment_analysis as ca
-import linear_algebra as la
+from multimds import data_tools as dt
+from multimds import compartment_analysis as ca
+from multimds import linear_algebra as la
 from scipy import signal as sg
 
 def format_celltype(cell_type):
