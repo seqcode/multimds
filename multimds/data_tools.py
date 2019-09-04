@@ -155,7 +155,7 @@ class Point(object):
 		self.absolute_index = absolute_index	#index relative to all points in structure (including null/zero points)
 		self.relative_index = relative_index	#index relative to only non-zero points
 
-def structureFromBed(path, size, chrom=None, start=None, end=None, offset=0):
+def structureFromBed(path, size=None, chrom=None, start=None, end=None, offset=0):
 	"""Initializes structure from intrachromosomal BED file."""
 	if chrom is None:
 		chrom = chromFromBed(path)
@@ -167,9 +167,10 @@ def structureFromBed(path, size, chrom=None, start=None, end=None, offset=0):
 		end = chrom.maxPos
 
 	structure = Structure([], [], chrom, offset)
-	
 	structure.points = np.zeros(int((end - start)/chrom.res) + 1, dtype=object)	#true if locus should be added
-	tracker = Tracker("Identifying loci", size)
+
+	if size is not None:
+		tracker = Tracker("Identifying loci", size)
 
 	#add loci
 	with open(path) as listFile:
@@ -183,7 +184,8 @@ def structureFromBed(path, size, chrom=None, start=None, end=None, offset=0):
 				if abs_index1 != abs_index2:	#non-self-interacting
 					structure.points[int((pos1 - start)/chrom.res)] = Point((0,0,0), structure.chrom, abs_index1, 0)
 					structure.points[int((pos2 - start)/chrom.res)] = Point((0,0,0), structure.chrom, abs_index2, 0)
-			tracker.increment()
+			if size is not None:
+				tracker.increment()
 		listFile.close()
 
 	structure.set_rel_indices()
@@ -217,7 +219,7 @@ def chromFromBed(path, minPos=None, maxPos=None):
 	maxPos = int(np.ceil(float(overall_maxPos)/res)) * res
 	return ChromParameters(minPos, maxPos, res, name)
 
-def matFromBed(path, size, structure=None):	
+def matFromBed(path, size=None, structure=None):	
 	"""Converts BED file to matrix. Only includes loci in structure."""
 	if structure is None:
 		structure = structureFromBed(path, size)
@@ -226,6 +228,9 @@ def matFromBed(path, size, structure=None):
 
 	numpoints = len(abs_indices)
 	mat = np.zeros((numpoints, numpoints))	
+
+	if size is not None:
+		tracker = Tracker("Filling matrix", size)
 
 	with open(path) as infile:
 		for line in infile:
@@ -238,6 +243,8 @@ def matFromBed(path, size, structure=None):
 				val = float(line[6])
 				mat[index1, index2] += val
 				mat[index2, index1] += val
+			if size is not None:
+				tracker.increment()
 		infile.close()
 
 	rowsums = np.array([sum(row) for row in mat])
@@ -384,7 +391,7 @@ def transform(trueLow, highSubstructure, res_ratio):
 	#transform high structure
 	highSubstructure.transform(r, t)
 
-def distmat(path, structure, size, alpha=4, weight=0.05):
+def distmat(path, structure, size=None, alpha=4, weight=0.05):
 	contactMat = matFromBed(path, size, structure)
 
 	assert len(structure.nonzero_abs_indices()) == len(contactMat)
