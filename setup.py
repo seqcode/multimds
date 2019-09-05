@@ -22,10 +22,10 @@ setuptools.setup(
           'scipy',
           'numpy',
 #          'pymp-pypi',
- #         'mayavi',
-#          'scikit-learn',
+          'mayavi',
+          'scikit-learn',
           'h5py',
-#          'pandas',
+          'pandas',
 #          'seaborn'
     ]
 )
