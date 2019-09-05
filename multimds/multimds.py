@@ -42,8 +42,8 @@ def full_mds(path1, path2, alpha=4, penalty=0.05, num_threads=3, weight=0.05, pr
 			out.write("\n")
 		out.close()
 
-	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(structure1, structure2, path1, path2, size1, size2))
+	#print("Fractional compartment change: ")
+	#print(calculate_compartment_fraction(structure1, structure2, path1, path2, size1, size2))
 
 	return structure1, structure2
 
@@ -139,7 +139,7 @@ def partitioned_mds(path1, path2, prefix="", num_partitions=4, maxmemory=3200000
 			out.write("\n")
 		out.close()
 
-	print("Fractional compartment change: ")
-	print(calculate_compartment_fraction(highstructure1, highstructure2, path1, path2, size1, size2))	
+	#print("Fractional compartment change: ")
+	#print(calculate_compartment_fraction(highstructure1, highstructure2, path1, path2, size1, size2))	
 
 	return highstructure1, highstructure2

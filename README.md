@@ -31,6 +31,13 @@ from multimds import plotting
 plotting.plot_structures_interactive((struct1, struct2))
 ```
 
+You can calculate the fraction of changes explained by the A/B compartment axis, which is expected to be 1/3 by chance. (This analysis is only useful for datasets which have A/B compartments, such as mammalian cells.) 
+
+```python
+from multimds import compartment_analysis
+compartment_analysis.calculate_compartment_fraction(struct1, struct2, "hic_data/GM12878_combined_21_100kb.bed", "hic_data/K562_21_100kb.bed")
+```
+
 # Input files
 
 MultiMDS uses intrachromosomal BED files as input. Data must be normalized prior to use (for example, using [HiC-Pro](http://nservant.github.io/HiC-Pro/)). 
