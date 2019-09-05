@@ -23,7 +23,7 @@ setuptools.setup(
           'numpy',
 #          'pymp-pypi',
           'mayavi',
-          'scikit-learn',
+#          'scikit-learn',
 #          'h5py',
 #          'pandas',
 #          'seaborn'
