@@ -20,11 +20,11 @@ setuptools.setup(
     ],
     install_requires=[
           'scipy',
-#          'numpy',
+          'numpy',
 #          'pymp-pypi',
-#          'mayavi',
-#          'scikit-learn',
-#          'h5py',
+          'mayavi',
+          'scikit-learn',
+          'h5py',
 #          'pandas',
 #          'seaborn'
     ]
