@@ -51,10 +51,10 @@ def load_enrichments(path, structure, column):
 	bin_nums = structure.nonzero_abs_indices() + structure.chrom.minPos/structure.chrom.res
 	return enrichments[bin_nums]
 
-def calculate_compartment_fraction(structure1, structure2, path1, path2):
+def calculate_compartment_fraction(structure1, structure2, path1, path2, size1=None, size2=None):
 	#compartments
-	contacts1 = matFromBed(path1, structure1)
-	contacts2 = matFromBed(path2, structure2)
+	contacts1 = matFromBed(path1, size1, structure1)
+	contacts2 = matFromBed(path2, size2, structure2)
 
 	compartments1 = np.array(get_compartments(contacts1))
 	compartments2 = np.array(get_compartments(contacts2))
