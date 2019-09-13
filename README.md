@@ -4,6 +4,8 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 
 Python3 required!
 
+If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
+
 ## Install with pip
 ```bash
 pip install --user multimds
@@ -20,14 +22,15 @@ First install dependency:
 pip install pymp-pypi
 ```
 
+Be sure that you use the pip provided by the conda environment. You can confirm this with
+```bash
+which pip
+```
+
 Then install using conda:
 ```bash
 conda install -c lr65358 multimds
 ```
-
-If you install through conda, be sure that you use the pip provided by the conda environment to install pymp-pypi. 
-
-If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
 # Example
 
