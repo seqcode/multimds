@@ -6,7 +6,11 @@ Python3 required!
 
 ## Install with pip
 ```bash
-pip install --user multimds git+https://github.com/seqcode/multimds
+pip install --user multimds
+```
+If you get errors related to mayavi, then install this dependency first:
+```bash
+pip install --user mayavi
 ```
 
 ## Install with conda
