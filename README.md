@@ -6,30 +6,8 @@ Python3 required!
 
 If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
-## Install with pip
 ```bash
-pip install --user multimds
-```
-If you get errors related to mayavi, then install this dependency first:
-```bash
-pip install --user mayavi
-```
-
-## Install with conda
-
-First install dependency:
-```bash
-pip install pymp-pypi
-```
-
-Be sure that you use the pip provided by the conda environment. You can confirm this with
-```bash
-which pip
-```
-
-Then install using conda:
-```bash
-conda install -c lr65358 multimds
+pip install multimds
 ```
 
 # Example
