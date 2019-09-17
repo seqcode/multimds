@@ -9,6 +9,7 @@ If you want to create gifs of your structures, you'll need to install [ImageMagi
 ```bash
 pip install multimds
 ```
+If you can't use pip, clone the repository and add its location to PYTHONPATH. 
 
 # Example
 
