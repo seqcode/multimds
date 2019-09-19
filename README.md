@@ -12,6 +12,7 @@ Install the following optional dependency for plotting figures (python 3 require
 ```bash
 pip install --user mayavi
 ```
+If you can't use pip, clone the repository and add its location to PYTHONPATH. 
 
 If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
