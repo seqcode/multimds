@@ -4,15 +4,21 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 
 Python3 required!
 
-If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
-
 ```bash
-pip install multimds
+pip install --user multimds
 ```
+
+Install the following optional dependency for plotting figures (python 3 required):
+```bash
+pip install --user mayavi
+```
+
+If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
 # Example
 
-Download and normalize sample data for GM12878 and K562 cell types:
+##Test data
+Clone the repository, and then navigate into the multimds directory. Download and normalize sample data for GM12878 and K562 cell types. Warning: this script downloads 23 Gb. 
 ``./test.sh``
 
 Open a python console and run the following commands
