@@ -18,11 +18,11 @@ If you want to create gifs of your structures, you'll need to install [ImageMagi
 
 # Example
 
-##Test data
-Clone the repository, and then navigate into the multimds directory. Download and normalize sample data for GM12878 and K562 cell types. Warning: this script downloads 23 Gb. 
+## Test data
+Clone the repository, and then navigate into multimds/scripts directory. Download and normalize sample data for GM12878 and K562 cell types. Warning: this script downloads 23 Gb. 
 ``./test.sh``
 
-Open a python console and run the following commands
+Open a python console and run the following commands (skip plotting commands unless you have mayavi)
 
 ```python
 from multimds import multimds
