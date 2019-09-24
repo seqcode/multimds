@@ -3,6 +3,7 @@ import numpy as np
 from .linear_algebra import *
 import os
 import sys
+from matplotlib import pyplot as plt
 
 #from Rippe 2001
 kl = 289	#Kuhn length (nm)
@@ -35,6 +36,13 @@ def plot_structures_interactive(structures, all_enrichments=None, colors=default
 	if out_path:
 		mlab.savefig(out_path)		
 	mlab.show()
+
+	fig, ax = plt.subplots()
+	ax.axis("off")
+	for i, color in enumerate(colors):
+		plt.text(0.5, i, "structure {}".format(i+1), color=color)
+	plt.savefig("structures_legend")
+	plt.close()
 
 def plot_structure_interactive(structure, enrichments=None, color=(1,0,0), radius=None, out_path=None, colormap="bwr"):
 	if radius is None:
@@ -72,6 +80,13 @@ def plot_structures_gif(structures, outname, all_enrichments=None, colors=defaul
 	mlab.close()
 	os.system("convert -loop 1 {}_*.png {}.gif".format(outname, outname))
 	os.system("rm {}_*.png".format(outname))
+
+	fig, ax = plt.subplots()
+	ax.axis("off")
+	for i, color in enumerate(colors):
+		plt.text(0.5, i, "structure {}".format(i+1), color=color)
+	plt.savefig("structures_legend")
+	plt.close()
 
 def plot_structure_gif(structure, outname, enrichments=None, color=(1,0,0), radius=None, increment=10, colormap="bwr"):
 	if 360%increment != 0:

@@ -149,6 +149,8 @@ structures = [data_tools.structure_from_file("GM12878_combined_{}_100kb_structur
 plotting.plot_structures_interactive(structures, colors=[(1,0,0), (0,0,1)])
 ```
 
+plot_structures_interactive and plot_structures_gif output a file "structures_legend.png" showing the colors for each structure. 
+
 _all_enrichments_ is a list of enrichments, e.g. 
 
 ```python
