@@ -95,4 +95,4 @@ with open ("{}_transcription_direction.bed".format(gene)) as infile:
 
 plt.legend(loc=2, fontsize=8, frameon=False, shadow=False)
 
-plt.savefig("{}_Nup60".format(gene))
+plt.savefig("{}_Nup60.svg".format(gene))
