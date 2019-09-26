@@ -66,5 +66,4 @@ plt.axhline(y=y_start, color="k", lw=4)
 
 #plot ticks
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=5, labelsize=12)
-plt.savefig("sup1")
-plt.show()	
+plt.savefig("sup1.svg")
