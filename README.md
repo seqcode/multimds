@@ -2,18 +2,17 @@ MultiMDS is a tool for locus-specific structural comparisons of two Hi-C dataset
 
 # Installation
 
-```bash
-pip install --user multimds git+https://github.com/seqcode/multimds
-```
-
-or
+Python3 required!
 
 ```bash
-pip install pymp-pypi
-conda install -c lr65358 multimds
+pip install --user multimds
 ```
 
-If you install through conda, be sure that you use the pip provided by the conda environment. 
+Install the following optional dependency for plotting figures (python 3 required):
+```bash
+pip install --user mayavi
+```
+If you can't use pip, clone the repository and add its location to PYTHONPATH. 
 
 If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
@@ -25,10 +24,11 @@ pip install --user git+https://github.com/Lila14/sim3C
 
 # Example
 
-Download and normalize sample data for GM12878 and K562 cell types:
+## Test data
+Clone the repository, and then navigate into multimds/scripts directory. Download and normalize sample data for GM12878 and K562 cell types. Warning: this script downloads 23 Gb. 
 ``./test.sh``
 
-Open a python console and run the following commands
+Open a python console and run the following commands (skip plotting commands unless you have mayavi)
 
 ```python
 from multimds import multimds
@@ -154,6 +154,8 @@ chroms = (1, 2)
 structures = [data_tools.structure_from_file("GM12878_combined_{}_100kb_structure.tsv".format(chrom) for chrom in chroms)]
 plotting.plot_structures_interactive(structures, colors=[(1,0,0), (0,0,1)])
 ```
+
+plot_structures_interactive and plot_structures_gif output a file "structures_legend.png" showing the colors for each structure. 
 
 _all_enrichments_ is a list of enrichments, e.g. 
 
