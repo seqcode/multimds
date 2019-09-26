@@ -23,4 +23,4 @@ for i in range(1, len(tad_boundaries)):
 	tads.append((start,end))
 
 #hm.heatMapFromMat(mat, maxvalue=50, tads=tad_indices, outpath="sup6_{}".format(num))
-hm.heatMapFromMat(mat, maxvalue=5, tads=tads, outpath="sup6_{}".format(num))
+hm.heatMapFromMat(mat, maxvalue=5, tads=tads, outpath="sup6_{}.svg".format(num))
