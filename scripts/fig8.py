@@ -53,4 +53,4 @@ for celltype in ("K562", "HMEC", "HUVEC", "IMR90"):
 	gen_coord = 46900000
 	plt.plot([gen_coord, gen_coord], [ymin, ymax], c="g", linestyle="--", zorder=2)
 
-	plt.savefig("{}_{}kb_4C".format(celltype, res_kb))
+	plt.savefig("{}_{}kb_4C.svg".format(celltype, res_kb))
