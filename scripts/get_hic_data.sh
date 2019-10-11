@@ -10,7 +10,7 @@ cd hic_data
 
 if [ ! -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal ]
 	then
-		if [ ! -e GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz ]
+		if [ ! -s GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz ]
 			then
 				curl ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/GSE63525/suppl/GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz -o GSE63525_$CELL_TYPE"_intrachromosomal_contact_matrices".tar.gz
 		fi
@@ -26,7 +26,7 @@ fi
 
 for CHROM in ${CHROMS[*]}
 do
-	if [ -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal/chr$CHROM ] && [ ! -e ${CELL_TYPE}_${CHROM}_${RES_KB}kb.bed ]
+	if [ -d $CELL_TYPE/${RES_KB}kb_resolution_intrachromosomal/chr$CHROM ] && [ ! -s ${CELL_TYPE}_${CHROM}_${RES_KB}kb.bed ]
 		then
 			echo $CHROM
 			python ../normalize.py $CELL_TYPE $RES $CHROM

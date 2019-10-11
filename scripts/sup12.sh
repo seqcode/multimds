@@ -1,24 +1,24 @@
 set -e
 
-if [ ! -e GSM2583734_galactose_IP.bedgraph ]
+if [ ! -s GSM2583734_galactose_IP.bedgraph ]
 	then
 		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583734/suppl/GSM2583734_galactose_IP.bedgraph.gz -o GSM2583734_galactose_IP.bedgraph.gz
 		gunzip GSM2583734_galactose_IP.bedgraph.gz
 fi
 
-if [ ! -e GSM2583735_galactose_input.bedgraph ]
+if [ ! -s GSM2583735_galactose_input.bedgraph ]
 	then
 		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583735/suppl/GSM2583735_galactose_input.bedgraph.gz -o GSM2583735_galactose_input.bedgraph.gz
 		gunzip GSM2583735_galactose_input.bedgraph.gz
 fi
 
-if [ ! -e GSM2583736_glucose_IP.bedgraph ]
+if [ ! -s GSM2583736_glucose_IP.bedgraph ]
 	then
 		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583736/suppl/GSM2583736_glucose_IP.bedgraph.gz -o GSM2583736_glucose_IP.bedgraph.gz
 		gunzip GSM2583736_glucose_IP.bedgraph.gz
 fi
 
-if [ ! -e GSM2583737_glucose_input.bedgraph ]
+if [ ! -s GSM2583737_glucose_input.bedgraph ]
 	then
 		curl ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2583nnn/GSM2583737/suppl/GSM2583737_glucose_input.bedgraph.gz -o GSM2583737_glucose_input.bedgraph.gz
 		gunzip GSM2583737_glucose_input.bedgraph.gz
@@ -29,7 +29,7 @@ for NUM in `seq 3 6`
 do
 	SRR=545748$NUM
  
-	if [ ! -e SRR${SRR}.sam ]
+	if [ ! -s SRR${SRR}.sam ]
 		then
 
 			#download
@@ -51,11 +51,11 @@ do
 done
 
 #call peaks independently
-if [ ! -e galactose_Nup60_peaks.broadPeak ]
+if [ ! -s galactose_Nup60_peaks.broadPeak ]
 	then
 		macs2 callpeak --broad -t SRR5457483.sam -c SRR5457484.sam -n galactose_Nup60 --nomodel
 fi
-if [ ! -e glucose_Nup60_peaks.broadPeak ]
+if [ ! -s glucose_Nup60_peaks.broadPeak ]
 	then
 		macs2 callpeak --broad -t SRR5457485.sam -c SRR5457486.sam -n glucose_Nup60 --nomodel
 fi
@@ -70,7 +70,7 @@ bedtools merge -i all_Nup60_sorted.bed > all_Nup60_merged.bed
 #convert to bam
 for NUM in 3 5
 do
-	if [ ! -e SRR545748$NUM.bam ]
+	if [ ! -s SRR545748$NUM.bam ]
 		then
 			samtools view -b SRR545748$NUM.sam > SRR545748$NUM.bam
 	fi

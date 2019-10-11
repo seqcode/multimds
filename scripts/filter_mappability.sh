@@ -4,11 +4,11 @@ PREFIX=$1
 RES=$2
 RES_KB=$(($RES/1000))
 
-if [ ! -e $PREFIX"_filtered".bed ]
+if [ ! -s $PREFIX"_filtered".bed ]
 	then
 		./get_mappability.sh
 
-		if [ ! -e mappability_${RES_KB}kb_sorted.bed ]
+		if [ ! -s mappability_${RES_KB}kb_sorted.bed ]
 			then
 				bedtools sort -i mappability_${RES_KB}kb.bed > mappability_${RES_KB}kb_sorted.bed
 		fi

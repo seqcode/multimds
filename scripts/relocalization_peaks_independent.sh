@@ -19,18 +19,18 @@ do
 	cat ${CHROM}_A_noncomp_peaks_independent_filtered.bed >> peaks_filtered_independent.bed	
 done	
 
- #negative control	
-if [ ! -e A_compartment_${RES_KB}kb.bed ]	
+#negative control	
+if [ ! -s A_compartment_${RES_KB}kb.bed ]	
 	then	
 		python get_a_compartment.py $RES	
 fi	
 
-if [ ! -e A_background.bed ]	
+if [ ! -s A_background.bed ]	
 	then	
 		bedtools subtract -a A_compartment_${RES_KB}kb.bed -b peaks_filtered.bed > A_background.bed	
 fi	
 
-if [ ! -e A_background_filtered.bed ]	
+if [ ! -s A_background_filtered.bed ]	
 	then	
 		./filter_mappability.sh A_background $RES	
 fi

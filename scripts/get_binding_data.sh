@@ -7,7 +7,7 @@ cd binding_data
 for CELL_TYPE in Gm12878 K562
 do
 
-	if [ ! -e $CELL_TYPE"_"*_100kb_active_coverage.bed ]
+	if [ ! -s $CELL_TYPE"_"*_100kb_active_coverage.bed ]
 		then
 			wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHmm/wgEncodeBroadHmm$CELL_TYPE"HMM".bed.gz
 			gunzip wgEncodeBroadHmm$CELL_TYPE"HMM".bed.gz
@@ -15,7 +15,7 @@ do
 
 		WINDOW_FILE=hg19_100kb_windows.bed
 
-		if [ ! -e $WINDOW_FILE ]
+		if [ ! -s $WINDOW_FILE ]
 			then
 				wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes
 				bedtools makewindows -g hg19.chrom.sizes -w 100000 > $WINDOW_FILE

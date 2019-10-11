@@ -20,7 +20,7 @@ do
 
 done
 
-if [ ! -e chrom_sizes.txt ]
+if [ ! -s chrom_sizes.txt ]
 	then
 		./get_chrom_sizes.sh
 fi

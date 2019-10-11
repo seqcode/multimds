@@ -16,7 +16,7 @@ do
 	ID=${IDS[$i]}
 	NAME=${NAMES[$i]}
 	FILENAME=wgEncodeBroadHistoneGm12878${ID}.broadPeak
-	if [ ! -e binding_data/$FILENAME ]
+	if [ ! -s binding_data/$FILENAME ]
 		then
 			curl http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/$FILENAME.gz -o binding_data/$FILENAME.gz
 			gunzip binding_data/$FILENAME.gz
@@ -32,7 +32,7 @@ do
 	ID=${IDS[$i]}
 	NAME=${NAMES[$i]}
 	FILENAME=wgEncodeBroadHistoneK562${ID}.broadPeak
-	if [ ! -e binding_data/$FILENAME ]
+	if [ ! -s binding_data/$FILENAME ]
 		then
 			curl http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/$FILENAME.gz -o binding_data/$FILENAME.gz
 			gunzip binding_data/$FILENAME.gz
