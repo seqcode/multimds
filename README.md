@@ -16,6 +16,12 @@ If you can't use pip, clone the repository and add its location to PYTHONPATH.
 
 If you want to create gifs of your structures, you'll need to install [ImageMagick](https://www.imagemagick.org/script/index.php). 
 
+If you want to simulate Hi-C data (for figures), you'll need to install Sim3C:
+
+```bash
+pip install --user git+https://github.com/Lila14/sim3C
+```
+
 # Example
 
 ## Test data

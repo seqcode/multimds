@@ -1,17 +1,9 @@
 import matplotlib
-from multimds import data_tools as dt
 from matplotlib import pyplot as plt
+from multimds import multimds
 from multimds import linear_algebra as la
-import os
 
-os.system("python minimds.py sim1_chr21_100kb.bed")
-os.system("python minimds.py sim2_chr21_100kb.bed")
-struct1 = dt.structure_from_file("sim1_chr21_100kb_structure.tsv")
-struct2 = dt.structure_from_file("sim2_chr21_100kb_structure.tsv")
-struct1.rescale()
-struct2.rescale()
-r,t = la.getTransformation(struct1, struct2)
-struct1.transform(r,t)
+struct1, struct2 = multimds.full_mds("sim1_chr21_100kb.bed", "sim2_chr21_100kb.bed")
 
 gen_coords = struct1.getGenCoords()
 dists = [la.calcDistance(coord1, coord2) for coord1, coord2 in zip(struct1.getCoords(), struct2.getCoords())]
@@ -46,4 +38,4 @@ plt.ylabel("Relocalization distance", fontsize=12)
 plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad=1, labelsize=10)
 
 #plt.show()
-plt.savefig("sup7b.svg")
+plt.savefig("sup7a.svg")

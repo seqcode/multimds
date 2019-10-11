@@ -66,4 +66,4 @@ plt.tick_params(direction="out", top=False, right=False, length=12, width=3, pad
 gen_coord = struct1.getGenCoords()[struct1.get_rel_index(gene_loc)]/1000
 plt.scatter([gen_coord], [0.005], c="r", s=200, marker="o", label=gene_name)
 
-plt.savefig("{}_{}".format(strain, gene_name))
+plt.savefig("{}_{}.svg".format(strain, gene_name))

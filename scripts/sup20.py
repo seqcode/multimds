@@ -68,4 +68,4 @@ plt.plot([x_start, x_end], [0.2, 0.2], color=(0.5,0.5,0.5), linestyle="--")
 
 plt.legend(frameon=False, loc=2, fontsize=16)
 
-plt.savefig("sup20")
+plt.savefig("sup20.svg")
