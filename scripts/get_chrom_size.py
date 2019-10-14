@@ -1,6 +1,5 @@
 import sys
-sys.path.append("..")
-import data_tools as dt
+from multimds import data_tools as dt
 
 res_kb = 100
 chrom = sys.argv[1]
