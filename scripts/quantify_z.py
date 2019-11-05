@@ -1,8 +1,7 @@
 from sklearn import svm
 import numpy as np
 import sys
-sys.path.append("..")
-import data_tools as dt
+from multimds import data_tools as dt
 from multimds import compartment_analysis as ca
 from matplotlib import pyplot as plt
 import os
@@ -30,12 +29,8 @@ with open(design_file) as infile:
 			path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
 			if os.path.isfile(path1) and os.path.isfile(path2):
-				multimds.full_mds(path1, path2, penalty=penalty)
-				#os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
-				structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
-				structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
+				structure1, structure2 = multimds.full_mds(path1, path2, penalty=penalty)
 
-				dt.make_compatible((structure1, structure2))
 				structure1.rescale()
 				structure2.rescale()
 				r,t = la.getTransformation(structure1, structure2)
