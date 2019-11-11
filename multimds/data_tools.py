@@ -331,7 +331,7 @@ def make_compatible(structures):
 	consensus = np.sort(consensus)
 	
 	for structure in structures:
-		new_chrom = ChromParameters(consensus[0], consensus[-1] + structure.chrom.res, structure.chrom.res, structure.chrom.name)
+		new_chrom = ChromParameters(consensus[0], consensus[-1], structure.chrom.res, structure.chrom.name)
 		new_points = np.zeros(new_chrom.getLength(), dtype=object)
 		for i, gen_coord in enumerate(consensus):
 			old_abs_index = structure.chrom.getAbsoluteIndex(gen_coord)
