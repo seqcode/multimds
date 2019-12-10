@@ -19,9 +19,9 @@ def cor(mat):
 
 	return cor_mat
 
-def get_compartments(mat, enrichments=None, active=True):
+def get_compartments(mat, struct, enrichments=None, active=True):
 	"""From Lieberman-Aiden et al (2009)"""
-	oe_mat = oe(mat)
+	oe_mat = oe(mat, struct)
 	cor_mat = cor(oe_mat)
 	pca = PCA(n_components=1)
 	pca.fit(cor_mat)
@@ -56,8 +56,8 @@ def calculate_compartment_fraction(structure1, structure2, path1, path2, size1=N
 	contacts1 = matFromBed(path1, size1, structure1)
 	contacts2 = matFromBed(path2, size2, structure2)
 
-	compartments1 = np.array(get_compartments(contacts1))
-	compartments2 = np.array(get_compartments(contacts2))
+	compartments1 = np.array(get_compartments(contacts1, structure1))
+	compartments2 = np.array(get_compartments(contacts2, structure2))
 
 	r, p = st.pearsonr(compartments1, compartments2)
 	if r < 0:

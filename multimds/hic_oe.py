@@ -1,16 +1,17 @@
 import numpy as np
 
-def oe(mat):
+def oe(mat, struct):
 	n = len(mat)
 
 	tots = np.zeros(n-1)
 	counts = np.zeros(n-1)
 
+	points = struct.getPoints()
 	for i in range(n):
 		for j in range(i):
 			observed = mat[i,j]
 			if observed != 0:
-				s = i - j
+				s = points[i].absolute_index - points[j].absolute_index
 				tots[s - 1] += observed
 				counts[s - 1] += 1
 
