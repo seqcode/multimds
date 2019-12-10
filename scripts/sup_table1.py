@@ -11,7 +11,7 @@ for i, cell_type in enumerate(cell_types):
 	path = "hic_data/{}_21_100kb.bed".format(cell_type)
 	struct = dt.structureFromBed(path)
 	mat = dt.matFromBed(path, struct)
-	comps = ca.get_compartments(mat)
+	comps = ca.get_compartments(mat, struct)
 	loc_comps[i] = np.abs(comps[struct.get_rel_index(47400000)])
 
 print loc_comps

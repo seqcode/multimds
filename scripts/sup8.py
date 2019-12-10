@@ -13,7 +13,7 @@ struct.subsamplePoints(new_start, len(struct.points)-3)
 #compartments
 contacts = dt.matFromBed("hic_data/GM12878_combined_21_100kb.bed", struct)
 
-compartments = np.array(ca.get_compartments(contacts, 1))
+compartments = np.array(ca.get_compartments(contacts, struct))
 
 #SVR
 coords = struct.getCoords()

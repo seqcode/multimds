@@ -15,13 +15,13 @@ contacts1 = dt.matFromBed(path1, struct1)
 enrichments1 = np.loadtxt("binding_data/GM12878_21_100kb_active_coverage.bed", usecols=6)
 bin_nums1 = struct1.nonzero_abs_indices() + int(struct1.chrom.minPos/struct1.chrom.res)
 enrichments1 = enrichments1[bin_nums1]
-comps1 = np.array(ca.get_compartments(contacts1, enrichments1))
+comps1 = np.array(ca.get_compartments(contacts1, struct1, enrichments1))
 
 contacts2 = dt.matFromBed(path2, struct2)
 enrichments2 = np.loadtxt("binding_data/K562_21_100kb_active_coverage.bed", usecols=6)
 bin_nums2 = struct2.nonzero_abs_indices() + int(struct2.chrom.minPos/struct2.chrom.res)
 enrichments2 = enrichments2[bin_nums2]
-comps2 = np.array(ca.get_compartments(contacts2, enrichments2))
+comps2 = np.array(ca.get_compartments(contacts2, struct2, enrichments2))
 
 coords1 = struct1.getCoords()
 coords2 = struct2.getCoords()

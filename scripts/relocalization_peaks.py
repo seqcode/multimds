@@ -1,9 +1,8 @@
 import numpy as np
 import sys
-sys.path.append("..")
-import data_tools as dt
-import compartment_analysis as ca
-import linear_algebra as la
+from multimds import data_tools as dt
+from multimds import compartment_analysis as ca
+from multimds import linear_algebra as la
 from scipy import signal as sg
 
 def format_celltype(cell_type):
@@ -52,14 +51,14 @@ contacts1 = dt.matFromBed(path1, low_struct1)
 contacts2 = dt.matFromBed(path2, low_struct2)
 
 enrichments = np.loadtxt("binding_data/{}_{}_100kb_active_coverage.bed".format(format_celltype(cell_type1), chrom), usecols=6)
-bin_nums = low_struct1.nonzero_abs_indices() + low_struct1.chrom.minPos/low_struct1.chrom.res
+bin_nums = low_struct1.nonzero_bins_whole_chrom()
 enrichments = enrichments[bin_nums]
-compartments1 = np.array(ca.get_compartments(contacts1, enrichments))
+compartments1 = np.array(ca.get_compartments(contacts1, low_struct1, enrichments))
 
 enrichments = np.loadtxt("binding_data/{}_{}_100kb_active_coverage.bed".format(format_celltype(cell_type2), chrom), usecols=6)
-bin_nums = low_struct2.nonzero_abs_indices() + low_struct2.chrom.minPos/low_struct2.chrom.res
+bin_nums = low_struct2.nonzero_bins_whole_chrom()
 enrichments = enrichments[bin_nums]
-compartments2 = np.array(ca.get_compartments(contacts2, enrichments))
+compartments2 = np.array(ca.get_compartments(contacts2, low_struct2, enrichments))
 
 gen_coords = structure1.getGenCoords()
 

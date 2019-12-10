@@ -29,8 +29,8 @@ for i, comparison in enumerate(comparisons):
 					mat1 = dt.matFromBed(path1, structure1)
 					mat2 = dt.matFromBed(path2, structure2)
 
-					comps1 = ca.get_compartments(mat1)
-					comps2 = ca.get_compartments(mat2)
+					comps1 = ca.get_compartments(mat1, structure1)
+					comps2 = ca.get_compartments(mat2, structure2)
 
 					r, p = st.pearsonr(comps1, comps2)
 
@@ -38,7 +38,6 @@ for i, comparison in enumerate(comparisons):
 
 		infile.close()
 
-#start with a frameless plot (extra room on the left)
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes
@@ -62,13 +61,7 @@ y_start = ymin - y_range/25.
 y_end = ymax + y_range/25.
 
 #plot data
-#labels = ["Mouse cell types"]
-
-#plt.boxplot(ys, labels=("Mouse cell types", "ENCODE", "Cohesin KO", "LCLs", "Mouse cell type reps", "GM12878 reps"))
-#plt.show()
-
 plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*(width*2), width*2), widths=[width for i in range(n)], labels=("Mouse cell types", "ENCODE", "Cohesin KO", "LCLs", "Mouse cell type reps", "GM12878 reps"), medianprops=dict(linestyle="none"))	#boxplot has built-in support for labels, unlike barplot
-#plt.boxplot(ys, notch=True, patch_artist=True, positions=np.arange(width, n*(width*2), width*2), widths=[0.1 for i in range(n)], labels=labels, medianprops=dict(linestyle="none"))
 
 #define axes with offsets
 plt.axis([x_start, x_end, y_start, y_end], frameon=False)

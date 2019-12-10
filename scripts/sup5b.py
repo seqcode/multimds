@@ -1,7 +1,5 @@
-import sys
-sys.path.append("..")
-import data_tools as dt
-import compartment_analysis as ca
+from multimds import data_tools as dt
+from multimds import compartment_analysis as ca
 from matplotlib import pyplot as plt
 import os
 from sklearn import svm
@@ -22,7 +20,7 @@ for i, (species, res_kb) in enumerate(zip(all_species, all_res_kb)):
 					os.system("python ../minimds.py {}".format(path))
 					structure = dt.structure_from_file("hic_data/{}_{}_{}kb_structure.tsv".format(prefix, chrom, res_kb))
 					mat = dt.matFromBed(path, structure)	
-					comps = ca.get_compartments(mat)
+					comps = ca.get_compartments(mat, structure)
 					coords = structure.getCoords()
 					clf = svm.LinearSVR()
 					clf.fit(coords, comps)
@@ -30,7 +28,6 @@ for i, (species, res_kb) in enumerate(zip(all_species, all_res_kb)):
 
 		infile.close()
 
-#start with a frameless plot (extra room on the left)
 plt.subplot2grid((10,10), (0,0), 9, 10, frameon=False)
 
 #label axes

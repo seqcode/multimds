@@ -43,8 +43,8 @@ with open(design_file) as infile:
 				contacts1 = dt.matFromBed(path1, structure=structure1)
 				contacts2 = dt.matFromBed(path2, structure=structure2)
 
-				compartments1 = np.array(ca.get_compartments(contacts1, 1))
-				compartments2 = np.array(ca.get_compartments(contacts2, 1))
+				compartments1 = np.array(ca.get_compartments(contacts1, structure1))
+				compartments2 = np.array(ca.get_compartments(contacts2, structure2))
 
 				r, p = st.pearsonr(compartments1, compartments2)
 				if r < 0:

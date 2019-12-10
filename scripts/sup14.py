@@ -21,17 +21,14 @@ for i, chrom in enumerate(chroms):
 	path1 = "hic_data/{}_{}_{}kb.bed".format(cell_type1, chrom, res_kb)
 	path2 = "hic_data/{}_{}_{}kb.bed".format(cell_type2, chrom, res_kb)
 
-	#os.system("python ../multimds.py -P {} {} {}".format(penalty, path1, path2))
-	#structure1 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type1, chrom, res_kb))
-	#structure2 = dt.structure_from_file("{}_{}_{}kb_structure.tsv".format(cell_type2, chrom, res_kb))
 	structure1, structure2 = mm.multimds(path1, path2, penalty=penalty)
                              
 	#compartments
 	contacts1 = dt.matFromBed(path1, structure1)
 	contacts2 = dt.matFromBed(path2, structure2)
 
-	compartments1 = np.array(ca.get_compartments(contacts1, 1))
-	compartments2 = np.array(ca.get_compartments(contacts2, 1))
+	compartments1 = np.array(ca.get_compartments(contacts1, structure1))
+	compartments2 = np.array(ca.get_compartments(contacts2, structure2))
 
 	r, p = st.pearsonr(compartments1, compartments2)
 	if r < 0:

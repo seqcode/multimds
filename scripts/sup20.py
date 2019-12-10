@@ -13,9 +13,9 @@ path2 = "hic_data/K562_19_100kb.bed"
 struct1, struct2 = mm.full_mds(path1, path2, prefix="test_")
 
 mat1 = dt.matFromBed("hic_data/GM12878_combined_{}_{}kb.bed".format(chrom, res_kb), struct1)
-comps1 = ca.get_compartments(mat1)
+comps1 = ca.get_compartments(mat1, struct1)
 mat2 = dt.matFromBed("hic_data/K562_{}_{}kb.bed".format(chrom, res_kb), struct2)
-comps2 = ca.get_compartments(mat2)
+comps2 = ca.get_compartments(mat2, struct2)
 
 r, p = st.pearsonr(comps1, comps2)
 if r < 0:
