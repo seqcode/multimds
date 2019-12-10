@@ -1,19 +1,19 @@
 import numpy as np
 
 def oe(mat, struct):
-	n = len(mat)
+	n = struct.chrom.getLength()
 
 	tots = np.zeros(n-1)
 	counts = np.zeros(n-1)
 
 	points = struct.getPoints()
-	for i in range(n):
+	for i in range(len(mat)):
 		for j in range(i):
 			observed = mat[i,j]
 			if observed != 0:
 				s = points[i].absolute_index - points[j].absolute_index
-				tots[s - 1] += observed
-				counts[s - 1] += 1
+				tots[s-1] += observed
+				counts[s-1] += 1
 
 	avgs = np.zeros(n-1)
 	for i, count in enumerate(counts):
@@ -22,11 +22,11 @@ def oe(mat, struct):
 
 	oe_mat = np.zeros_like(mat)
 
-	for i in range(n):
+	for i in range(len(mat)):
 		for j in range(i):
 			observed = mat[i,j]
-			s = i - j
-			expected = avgs[s - 1]
+			s = points[i].absolute_index - points[j].absolute_index
+			expected = avgs[s-1]
 			if expected != 0:	
 				val = observed/expected
 				oe_mat[i,j] = val
