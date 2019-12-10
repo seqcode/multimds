@@ -19,13 +19,13 @@ for chrom in (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 	enrichments = np.array(np.loadtxt("binding_data/GM12878_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
 	bin_nums = structure1.nonzero_abs_indices() + structure1.chrom.minPos/structure1.chrom.res
 	enrichments = enrichments[bin_nums]
-	compartments1 = np.array(ca.get_compartments(contacts, enrichments))
+	compartments1 = np.array(ca.get_compartments(contacts, structure1, enrichments))
 	
 	contacts = dt.matFromBed(path2, structure2)
 	enrichments = np.array(np.loadtxt("binding_data/K562_{}_100kb_active_coverage.bed".format(chrom), dtype=object)[:,6], dtype=float)
 	bin_nums = structure2.nonzero_abs_indices() + structure2.chrom.minPos/structure2.chrom.res
 	enrichments = enrichments[bin_nums]
-	compartments2 = np.array(ca.get_compartments(contacts, enrichments))
+	compartments2 = np.array(ca.get_compartments(contacts, structure2, enrichments))
 
 	gen_coords = structure1.getGenCoords()
 
