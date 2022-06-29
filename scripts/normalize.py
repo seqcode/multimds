@@ -27,7 +27,7 @@ def normalize(chrom1, chrom2, rawpath, krpath1, krpath2, res, outpath):
 	raw.close()
 
 def normalize_inter(hic_id, res, chrom_a, chrom_b):
-	res_kb = res/1000
+	res_kb = int(res/1000)
 	if res_kb < 1000:
 		res_string = str(res_kb) + "kb"
 	else:
@@ -49,7 +49,7 @@ def normalize_inter(hic_id, res, chrom_a, chrom_b):
 	normalize(chromstring1, chromstring2, rawpath, krpath1, krpath2, res, outpath)
 
 def normalize_intra(hic_id, res, chrom):
-	res_kb = res/1000
+	res_kb = int(res/1000)
 	if res_kb < 1000:
 		res_string = str(res_kb) + "kb"
 	else:
